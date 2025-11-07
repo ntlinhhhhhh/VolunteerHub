@@ -6,7 +6,7 @@ import { getDatabaseConfig } from 'src/infrastructure/config/database.config';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // ✅ đảm bảo có thể truy cập ở mọi module
+      isGlobal: true,
     }),
     MongooseModule.forRootAsync({
       inject: [ConfigService],

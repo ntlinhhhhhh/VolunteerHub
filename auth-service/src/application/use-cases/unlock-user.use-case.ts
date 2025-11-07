@@ -15,7 +15,7 @@ export class UnlockUserUseCase {
     }
 
     if (!user.isAccountLocked()) {
-      throw new ConflictException('account is not locked');
+      throw new ConflictException('The account is not locked');
     }
 
     await this.authRepository.unlockAccount(userId);

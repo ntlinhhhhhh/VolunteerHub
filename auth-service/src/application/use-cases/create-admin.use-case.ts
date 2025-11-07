@@ -22,7 +22,7 @@ export class CreateAdminUseCase {
 
         const existingUser = await this.authRepository.findByEmail(sanitizedEmail);
         if (existingUser) {
-            throw new ConflictException('Email đã được sử dụng');
+            throw new ConflictException('Email is exist');
         }
 
         const role = await this.roleRepository.findById(roleId);

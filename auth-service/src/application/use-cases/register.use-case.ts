@@ -4,8 +4,7 @@ import { IAuthRepository } from '../../domain/repositories/auth.repository.inter
 import { Token } from '../../domain/entities/token.entity';
 import { Auth } from '../../domain/entities/auth.entity';
 import { IRoleRepository } from 'src/domain/repositories/role.repository.interface';
-import bcrypt from 'node_modules/bcryptjs';
-import { permission } from 'process';
+import bcrypt from 'bcryptjs';
 
 @Injectable()
 export class RegisterUseCase {
@@ -18,45 +17,44 @@ export class RegisterUseCase {
   ) {}
 
   async execute(email: string, password: string): Promise<Token> {
-    // 1. validate email
+    // 1. Validate email format
     if (!Auth.isValidEmail(email)) {
-      throw new ConflictException('Invalid Email');
+      throw new ConflictException('Invalid email format');
     }
     
-    // 2. sanitize email
-    const sanitizeEmail = Auth.sanitizeEmail(email);
+    // 2. Sanitize email
+    const sanitizedEmail = Auth.sanitizeEmail(email);
 
-    // 3. check exist email
-    const existingUser = await this.authRepository.findByEmail(sanitizeEmail);
-
+    // 3. Check if email already exists
+    const existingUser = await this.authRepository.findByEmail(sanitizedEmail);
     if (existingUser) {
-      throw new ConflictException("Email is exists");
+      throw new ConflictException('Email is already in use');
     }
 
-    // 4. find role
+    // 4. Find role 'volunteer'
     const volunteerRole = await this.roleRepository.findByName('volunteer');
     if (!volunteerRole) {
-      throw new NotFoundException('Role volunteer is not exist');
+      throw new NotFoundException('Volunteer role does not exist');
     }
 
-    // 5. hass password
+    // 5. Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // create new user
+    // 6. Create new user
     const auth = await this.authRepository.create(
-      sanitizeEmail,
+      sanitizedEmail,
       passwordHash,
       volunteerRole.id
     );
 
-    // genarate JWT tokens
+    // 7. Generate JWT tokens
     const accessToken = this.jwtService.sign(
       {
         userId: auth.id,
         email: auth.email,
         roleId: auth.roleId,
         roleName: 'volunteer',
-        permission: volunteerRole.permissions
+        permissions: volunteerRole.permissions
       },
       { expiresIn: '15m' }
     );

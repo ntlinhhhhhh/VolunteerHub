@@ -3,9 +3,6 @@ import * as bcrypt from 'bcrypt';
 import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { IAuthRepository } from '../../domain/repositories/auth.repository.interface';
 import { Token } from '../../domain/entities/token.entity';
-import { IRoleRepository } from 'src/domain/repositories/role.repository.interface';
-import { NotFoundError } from 'rxjs';
-import { permission } from 'process';
 import { Auth } from 'src/domain/entities/auth.entity';
 
 @Injectable()
@@ -20,44 +17,43 @@ export class LoginUseCase {
 
   async execute(email: string, password: string): Promise<Token> {
 
-    // 1. find user by email
+    // 1. Find user by email
     const auth = await this.authRepository.findByEmail(email);
-
     if (!auth) {
-      throw new UnauthorizedException('Invalid email');
+      throw new UnauthorizedException('No account found with this email');
     }
 
-    // 2. check lock account
+    // 2. Check if account is locked
     if (auth.isAccountLocked()) {
-      throw new UnauthorizedException('Account is locked');
+      throw new UnauthorizedException('This account is currently locked');
     }
 
-    // 3. verify password
+    // 3. Verify password
     const isPasswordValid = await bcrypt.compare(password, auth?.passwordHash);
-
     if (!isPasswordValid) {
 
-      // passwprd sai --> increate attemps
+      // Incorrect password --> increment attempts
       const attempts = await this.authRepository.incrementFailedLoginAttempts(auth.id);
 
-      if (attempts >= 5) {
+      if (attempts >= this.MAX_FAILED_ATTEMPTS) {
         await this.authRepository.lockAccount(
           auth.id,
-          `locked account as ${attempts} login failed`
+          `Account locked after ${attempts} failed login attempts`
         );
         throw new UnauthorizedException(
-          `locked account as ${attempts} login failed`
+          `Account has been locked after ${attempts} unsuccessful login attempts`
         );
       }
 
       throw new UnauthorizedException(
-        `Email or password invalid.  Còn ${this.MAX_FAILED_ATTEMPTS - attempts} lần thử.`
-      )
+        `Invalid email or password. You have ${this.MAX_FAILED_ATTEMPTS - attempts} attempts left.`
+      );
     }
 
+    // 4. Update last login timestamp
     await this.authRepository.updateLastLogin(auth.id);
 
-    // 4. gen payload
+    // 5. Generate JWT payload
     const payload = {
       userId: auth.id,
       email: auth.email,
@@ -67,14 +63,11 @@ export class LoginUseCase {
       isLocked: auth.isLocked
     };
 
-console.log('JWT service:', this.jwtService);
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
     const refreshToken = this.jwtService.sign(
       { userId: auth.id, type: 'refresh' },
-      { expiresIn: '7d'}
+      { expiresIn: '7d' }
     );
-    console.log(accessToken)
-
 
     return new Token(accessToken, refreshToken, 900);
   }
