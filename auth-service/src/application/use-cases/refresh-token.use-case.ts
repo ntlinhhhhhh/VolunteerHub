@@ -13,25 +13,25 @@ export class RefreshTokenUseCase {
 
   async execute(refreshToken: string): Promise<Token> {
     try {
-      // 1. verify refresh token
+      // 1. Verify refresh token
       const payload = this.jwtService.verify(refreshToken);
 
-      // 2. check type token
+      // 2. Check token type
       if (payload.type !== 'refresh') {
-        throw new UnauthorizedException('Token invalid');
+        throw new UnauthorizedException('Invalid token type');
       }
 
-      // 3. find user by payload.id
+      // 3. Find user by ID from payload
       const auth = await this.authRepository.findById(payload.userId);
       if (!auth) {
         throw new UnauthorizedException('User not found');
       }
 
       if (auth.isAccountLocked()) {
-        throw new UnauthorizedException('Your account is locked');
+        throw new UnauthorizedException('Your account is currently locked');
       }
 
-      // gen token
+      // 4. Generate new tokens
       const accessToken = this.jwtService.sign(
         {
           userId: auth.id,
@@ -50,7 +50,7 @@ export class RefreshTokenUseCase {
 
       return new Token(accessToken, newRefreshToken, 900);
     } catch (error) {
-      throw new UnauthorizedException('Refresh token invalid or  het han');
+      throw new UnauthorizedException('Refresh token is invalid or expired');
     }
   }
 }
