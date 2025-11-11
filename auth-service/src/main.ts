@@ -20,24 +20,23 @@ async function bootstrap() {
 
     app.useGlobalFilters(new AllExceptionsFilter());
     app.enableCors({ origin: process.env.CORS_ORIGIN || '*', credentials: true });
-    app.setGlobalPrefix('api');
 
     const microserviceOptions: MicroserviceOptions = {
       transport: Transport.TCP,
       options: {
         host: process.env.TCP_HOST || '0.0.0.0',
-        port: parseInt(process.env.TCP_PORT || '3001', 10),
+        port: parseInt(process.env.TCP_PORT || '4001', 10),
       },
     };
 
     app.connectMicroservice(microserviceOptions);
     await app.startAllMicroservices();
     
-    const port = parseInt(process.env.PORT || '3000', 10);
+    const port = parseInt(process.env.PORT || '4000', 10);
     await app.listen(port);
 
     logger.log(`✅ Auth Service running on: http://localhost:${port}/api`);
-    logger.log(`✅ Microservice (TCP) running on port: ${process.env.TCP_PORT || 3001}`);
+    logger.log(`✅ Microservice (TCP) running on port: ${process.env.TCP_PORT || 4001}`);
     logger.log(`✅ MongoDB connected successfully!`);
   } catch (error) {
     logger.error('❌ Failed to start application:', error.message);
