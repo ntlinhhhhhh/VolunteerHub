@@ -7,7 +7,7 @@ import { Auth, AuthSchema } from '../schemas/auth.schema';
 async function seed() {
   try {
     await mongoose.connect(
-      process.env.MONGODB_URI || 'mongodb://localhost:27017/auth-service'
+      process.env.MONGO_URI || 'mongodb://volunteer-mongo:27017/auth-service'
     );
     console.log('📦 Connected to MongoDB');
 
@@ -32,13 +32,13 @@ async function seedAdmin(
   AuthModel: mongoose.Model<Auth>,
   RoleModel: mongoose.Model<Role>
 ) {
-  const existing = await AuthModel.findOne({ email: 'admin@example.com' });
+  const existing = await AuthModel.findOne({ email: 'tlinh@gmail.com' });
   if (existing) {
     console.log('✅ Admin already exists');
     return;
   }
 
-  const passwordHash = await bcrypt.hash('admin123', 10);
+  const passwordHash = await bcrypt.hash('tlinh123', 10);
 
   let adminRole = await RoleModel.findOne({ name: 'Admin' });
   if (!adminRole) {
@@ -53,7 +53,7 @@ async function seedAdmin(
   }
 
   await AuthModel.create({
-    email: 'admin@example.com',
+    email: 'tlinh@gmail.com',
     passwordHash,
     roleId: adminRole._id,
     isLocked: false,
@@ -61,5 +61,5 @@ async function seedAdmin(
     failedLoginAttempts: 0,
   });
 
-  console.log('✅ Admin user created (email: admin@example.com / pass: admin123)');
+  console.log('✅ Admin user created (email: admin@example.com / pass: tlinh123)');
 }

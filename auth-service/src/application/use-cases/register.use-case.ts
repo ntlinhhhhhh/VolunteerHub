@@ -33,6 +33,7 @@ export class RegisterUseCase {
 
     // 4. Find role 'volunteer'
     const volunteerRole = await this.roleRepository.findByName('volunteer');
+    console.log(volunteerRole);
     if (!volunteerRole) {
       throw new NotFoundException('Volunteer role does not exist');
     }

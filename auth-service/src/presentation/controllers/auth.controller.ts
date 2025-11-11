@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { RegisterUseCase } from '../../application/use-cases/register.use-case';
 import { LoginUseCase } from '../../application/use-cases/login.use-case';
@@ -64,7 +64,7 @@ export class AuthController {
 
     return {
       success: true,
-      message: 'Token đã được làm mới',
+      message: 'Token refresh',
       data: {
         accessToken: token.accessToken,
         refreshToken: token.refreshToken,

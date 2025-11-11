@@ -19,6 +19,7 @@ import { IAuthRepository } from './domain/repositories/auth.repository.interface
 import { IRoleRepository } from './domain/repositories/role.repository.interface';
 
 import { getJwtConfig } from './infrastructure/config/jwt.config';
+import { HealthController } from './presentation/controllers/health.controller';
 
 @Module({
   imports: [
@@ -33,7 +34,7 @@ import { getJwtConfig } from './infrastructure/config/jwt.config';
     }),
   ],
 
-  controllers: [AuthController],
+  controllers: [AuthController, HealthController],
 
   providers: [
     RegisterUseCase,
