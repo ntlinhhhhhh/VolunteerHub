@@ -1,0 +1,19 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: auth-service
+    url: http://auth-service:4000
+    routes:
+      - name: auth-route
+        paths:
+          - /auth
+        strip_path: false
+
+  - name: user-service
+    url: http://user-service:4002
+    routes:
+      - name: user-route
+        paths:
+          - /users
+        strip_path: false

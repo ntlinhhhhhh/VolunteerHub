@@ -1,0 +1,45 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
+import { UserStatus } from '../../../domain/entities/user.entity';
+
+export type UserDocument = User & Document;
+
+@Schema({ collection: 'users', timestamps: true })
+export class User {
+  @Prop({ type: String, required: true, unique: true, index: true })
+  authId: string;  // ✅ Reference đến Auth Service (không dùng ObjectId vì khác DB)
+
+  @Prop({ required: true, unique: true, lowercase: true, trim: true })
+  email: string;
+
+  @Prop({ required: true })
+  fullName: string;
+
+  @Prop({ default: null })
+  phoneNumber: string;
+
+  @Prop({ default: null })
+  avatar: string;
+
+  @Prop({ default: null })
+  address: string;
+
+  @Prop({ default: null })
+  bio: string;
+
+  @Prop({ default: null })
+  dateOfBirth: Date;
+
+  @Prop({ type: String, enum: UserStatus, default: UserStatus.ACTIVE })
+  status: UserStatus;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export const UserSchema = SchemaFactory.createForClass(User);
+
+// Indexes
+// UserSchema.index({ authId: 1 });
+// UserSchema.index({ email: 1 });
+UserSchema.index({ status: 1 });
