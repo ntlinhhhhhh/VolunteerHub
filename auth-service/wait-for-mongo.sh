@@ -1,6 +1,3 @@
-#!/bin/sh
-# wait-for-mongo.sh
-
 set -e
 
 host="$1"
