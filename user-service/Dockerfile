@@ -19,7 +19,7 @@ COPY --from=builder /app/dist ./dist
 COPY wait-for-mongo.sh .
 RUN chmod +x wait-for-mongo.sh
 
-EXPOSE 4000
+EXPOSE 4002
 
 # CMD sẽ chờ Mongo sẵn sàng trước khi chạy app
 CMD ["./wait-for-mongo.sh", "volunteer-mongo", "node", "dist/main.js"]
