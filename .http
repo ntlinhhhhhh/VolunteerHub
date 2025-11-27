@@ -1,0 +1,64 @@
+
+
+### register
+POST http://localhost:4000/auth/register
+Content-Type: application/json
+
+{
+    "email": "121343@gmail.com",
+    "fullname": "Nguyen Thuy Linh",
+    "password": "123456"
+}
+
+###
+GET http://localhost:4000/health
+
+### login
+POST http://localhost:4000/auth/login
+Content-Type: application/json
+
+{
+    "email": "121343@gmail.com",
+    "password": "123456"
+}
+
+###
+POST http://localhost:4000/auth/register
+Content-Type: application/json
+
+{
+    "email": "kkk@gmail.com",
+    "password": "123456"
+}
+
+
+###
+GET http://localhost:4000/redis/test
+
+###
+GET http://localhost:8001/services
+Accept: application/json
+
+###
+POST http://localhost:8000/auth/register
+Content-Type: application/json
+
+{
+    "email": "1212134334@gmail.com",
+    "fullname": "Nguyen Thuy Linh",
+    "password": "123456"
+}
+
+###
+POST http://localhost:8000/auth/login
+Content-Type: application/json
+
+{
+    "email": "nguyenthuylinh1134@gmail.com",
+    "password": "123456"
+}
+
+### Get my profile
+GET http://localhost:4002/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTI4Njk4Yzk4NWM5ZTAzZmYzYjBlYjEiLCJlbWFpbCI6IjExMkBnbWFpbC5jb20iLCJyb2xlSWQiOiI2OTI1YTE1N2VhYjdiODgxYzlhNzRjYTAiLCJyb2xlTmFtZSI6InZvbHVudGVlciIsInBlcm1pc3Npb25zIjpbImV2ZW50OnJlYWQiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicG9zdDpyZWFkIiwicG9zdDpjcmVhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZTpvd24iLCJjb21tZW50OmNyZWF0ZSIsImRhc2hib2FyZDp2aWV3Il0sImlhdCI6MTc2NDI1NjE0MCwiZXhwIjoxNzY0MjU3MDQwfQ.CwLXbPadKZdvhGu3_QnWkL9xBUWFOCnP2RXHnb1OQlk
+Accept: application/json
