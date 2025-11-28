@@ -44,7 +44,7 @@ POST http://localhost:8000/auth/register
 Content-Type: application/json
 
 {
-    "email": "1212134334@gmail.com",
+    "email": "duonghoang@gmail.com",
     "fullname": "Nguyen Thuy Linh",
     "password": "123456"
 }
@@ -54,11 +54,20 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "nguyenthuylinh1134@gmail.com",
+    "email": "duonghoang@gmail.com",
+    "password": "123456"
+}
+
+### login
+POST http://localhost:8000/auth/login
+Content-Type: application/json
+
+{
+    "email": "duonghoang@gmail.com",
     "password": "123456"
 }
 
 ### Get my profile
 GET http://localhost:4002/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTI4Njk4Yzk4NWM5ZTAzZmYzYjBlYjEiLCJlbWFpbCI6IjExMkBnbWFpbC5jb20iLCJyb2xlSWQiOiI2OTI1YTE1N2VhYjdiODgxYzlhNzRjYTAiLCJyb2xlTmFtZSI6InZvbHVudGVlciIsInBlcm1pc3Npb25zIjpbImV2ZW50OnJlYWQiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicG9zdDpyZWFkIiwicG9zdDpjcmVhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZTpvd24iLCJjb21tZW50OmNyZWF0ZSIsImRhc2hib2FyZDp2aWV3Il0sImlhdCI6MTc2NDI1NjE0MCwiZXhwIjoxNzY0MjU3MDQwfQ.CwLXbPadKZdvhGu3_QnWkL9xBUWFOCnP2RXHnb1OQlk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTI4OTczZTQ3MjMxNmY4M2ZlYTM0YjkiLCJlbWFpbCI6IjEyMTM0M0BnbWFpbC5jb20iLCJyb2xlSWQiOiI2OTI4OTZmYTM4NjhhMDAxZGM5OGM1ZmEiLCJyb2xlTmFtZSI6InZvbHVudGVlciIsInBlcm1pc3Npb24iOlsiZXZlbnQ6cmVhZCIsInJlZ2lzdHJhdGlvbjpjcmVhdGUiLCJyZWdpc3RyYXRpb246cmVhZCIsInJlZ2lzdHJhdGlvbjpjYW5jZWwiLCJwb3N0OnJlYWQiLCJwb3N0OmNyZWF0ZSIsInBvc3Q6dXBkYXRlOm93biIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiZGFzaGJvYXJkOnZpZXciXSwiaXNMb2NrZWQiOmZhbHNlLCJpYXQiOjE3NjQyNjgxNzcsImV4cCI6MTc2NDI2OTA3N30.6ps4NWcyqmTAUi5pOiZGsbcqzMW5Avib2tfcdxn8BWg
 Accept: application/json
