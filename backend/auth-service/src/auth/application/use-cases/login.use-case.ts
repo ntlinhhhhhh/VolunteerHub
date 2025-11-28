@@ -74,8 +74,7 @@ export class LoginUseCase {
       { expiresIn: '7d' }
     );
 
-    
-
+    await this.cache.set(`refresh:${auth.id}`, refreshToken, 7 * 24 * 60 * 60);
     return new Token(accessToken, refreshToken, 900);
   }
 }
