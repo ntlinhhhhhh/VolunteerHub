@@ -7,7 +7,7 @@ export type UserDocument = User & Document;
 @Schema({ collection: 'users', timestamps: true })
 export class User {
   @Prop({ type: String, required: true, unique: true, index: true })
-  authId: string;  // ✅ Reference đến Auth Service (không dùng ObjectId vì khác DB)
+  authId: string;  // -> auth-service
 
   @Prop({ required: true, unique: true, lowercase: true, trim: true })
   email: string;
@@ -39,7 +39,4 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-// Indexes
-// UserSchema.index({ authId: 1 });
-// UserSchema.index({ email: 1 });
 UserSchema.index({ status: 1 });

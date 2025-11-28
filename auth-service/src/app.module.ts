@@ -19,6 +19,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { getJwtConfig } from 'auth/infrastructure/config/jwt.config';
 import { AuthRepository } from 'auth/infrastructure/repositories/auth.repository';
 import { RoleRepository } from 'auth/infrastructure/repositories/role.repository';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-store';
 
 @Module({
   imports: [
@@ -34,6 +36,17 @@ import { RoleRepository } from 'auth/infrastructure/repositories/role.repository
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: getJwtConfig,
+    }),
+        CacheModule.registerAsync({
+      useFactory: async () => ({
+        store: await redisStore({
+          socket: {
+            host: 'redis',   // tên container redis
+            port: 6379,
+          },
+          ttl: 0,
+        }),
+      }),
     }),
     DatabaseModule,
     InfrastructureModule,
