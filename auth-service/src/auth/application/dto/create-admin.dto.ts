@@ -5,9 +5,9 @@ export class CreateAdminDto {
     email: string;
 
     @IsString()
-    @MinLength(6, { message: "Mật khẩu phải có ít nhất 6 ký tự" })
+    @MinLength(6, { message: "Password must be at least 6 characters long" })
     pasword: string;
 
-    @IsMongoId({ message: "Role ID không hợp lệ"})
+    @IsMongoId({ message: "Invalid roleId"})
     roleId: string;
 }

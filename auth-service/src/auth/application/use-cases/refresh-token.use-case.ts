@@ -15,6 +15,7 @@ export class RefreshTokenUseCase {
     try {
       // 1. Verify refresh token
       const payload = this.jwtService.verify(refreshToken);
+      // const stored = await this.cache.get(`refresh:${payload.sub}`);
 
       // 2. Check token type
       if (payload.type !== 'refresh') {

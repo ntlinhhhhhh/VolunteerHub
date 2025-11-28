@@ -7,8 +7,8 @@ export enum UserStatus {
 export class User {
   constructor(
     public readonly id: string,
-    public readonly authId: string,        // ✅ Link với Auth Service
-    public readonly email: string,         // ✅ Duplicate từ Auth (để query nhanh)
+    public readonly authId: string,
+    public readonly email: string,
     public readonly fullName: string,
     public readonly phoneNumber: string | null,
     public readonly avatar: string | null,
@@ -20,7 +20,6 @@ export class User {
     public readonly updatedAt: Date
   ) {}
 
-  // Business logic
   isActive(): boolean {
     return this.status === UserStatus.ACTIVE;
   }
@@ -50,7 +49,6 @@ export class User {
     return age !== null && age >= 18;
   }
 
-  // Sanitize for API response
   toSafeObject() {
     return {
       id: this.id,

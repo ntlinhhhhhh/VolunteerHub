@@ -22,7 +22,16 @@ export class UserController {
   @Get('me')
   async getMyProfile(@Request() req) {
     // req.user.userId lấy từ JWT token
-    const user = await this.getUserProfileUseCase.execute(req.user.userId);
+    let user;
+    try {
+      user = await this.getUserProfileUseCase.execute(req.user.userId);
+      if (user == null) {
+        console.log("user is null");
+      }
+    } catch(e) {
+      console.log(e)
+    }
+
     return {
       success: true,
       data: user.toSafeObject(),

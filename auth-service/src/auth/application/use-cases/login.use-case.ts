@@ -3,14 +3,20 @@ import * as bcrypt from 'bcrypt';
 import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { IAuthRepository } from '../../domain/repositories/auth.repository.interface';
 import { Token } from '../../domain/entities/token.entity';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import * as cacheManager from 'cache-manager';
 
 @Injectable()
 export class LoginUseCase {
   private readonly MAX_FAILED_ATTEMPTS = 5;
 
   constructor(
+    @Inject(CACHE_MANAGER)
+    private readonly cache: cacheManager.Cache,
+
     @Inject(IAuthRepository)
     private readonly authRepository: IAuthRepository,
+
     private readonly jwtService: JwtService
   ) {}
 
@@ -67,6 +73,8 @@ export class LoginUseCase {
       { userId: auth.id, type: 'refresh' },
       { expiresIn: '7d' }
     );
+
+    
 
     return new Token(accessToken, refreshToken, 900);
   }
