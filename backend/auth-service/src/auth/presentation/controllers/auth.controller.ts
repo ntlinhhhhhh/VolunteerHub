@@ -74,7 +74,7 @@ export class AuthController {
     const token = await this.refreshTokenUseCase.execute(
       refreshTokenDto.refreshToken
     );
-
+    console.log("hehe");
     return {
       success: true,
       message: 'Token refresh',

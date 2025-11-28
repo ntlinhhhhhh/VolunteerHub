@@ -2,27 +2,28 @@ import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Token } from '../../domain/entities/token.entity';
 import { IAuthRepository } from '../../domain/repositories/auth.repository.interface';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 
 @Injectable()
 export class RefreshTokenUseCase {
   constructor(
     private readonly jwtService: JwtService,
     @Inject(IAuthRepository)
-    private readonly authRepository: IAuthRepository
+    private readonly authRepository: IAuthRepository,
+    @Inject(CACHE_MANAGER)
+    private readonly cache: Cache
   ) {}
 
   async execute(refreshToken: string): Promise<Token> {
     try {
-      // 1. Verify refresh token
       const payload = this.jwtService.verify(refreshToken);
-      // const stored = await this.cache.get(`refresh:${payload.sub}`);
 
-      // 2. Check token type
+      const stored = await this.cache.get(`refresh:${payload.sub}`);
       if (payload.type !== 'refresh') {
         throw new UnauthorizedException('Invalid token type');
       }
 
-      // 3. Find user by ID from payload
       const auth = await this.authRepository.findById(payload.userId);
       if (!auth) {
         throw new UnauthorizedException('User not found');
@@ -32,7 +33,6 @@ export class RefreshTokenUseCase {
         throw new UnauthorizedException('Your account is currently locked');
       }
 
-      // 4. Generate new tokens
       const accessToken = this.jwtService.sign(
         {
           userId: auth.id,
@@ -49,6 +49,7 @@ export class RefreshTokenUseCase {
         { expiresIn: '7d' }
       );
 
+      await this.cache.set(`refresh:${payload.sub}`, newRefreshToken, 7 * 24 * 60 * 60);
       return new Token(accessToken, newRefreshToken, 900);
     } catch (error) {
       throw new UnauthorizedException('Refresh token is invalid or expired');

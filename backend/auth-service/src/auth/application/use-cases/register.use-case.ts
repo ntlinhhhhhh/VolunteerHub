@@ -6,6 +6,7 @@ import { Auth } from '../../domain/entities/auth.entity';
 import bcrypt from 'bcryptjs';
 import { IRoleRepository } from 'auth/domain/repositories/role.repository.interface';
 import { AuthToken } from 'auth/domain/entities/authtoken.entity';
+import type { Cache } from 'cache-manager';
 
 @Injectable()
 export class RegisterUseCase {
@@ -14,6 +15,7 @@ export class RegisterUseCase {
     private readonly authRepository: IAuthRepository,
     @Inject(IRoleRepository)
     private readonly roleRepository: IRoleRepository,
+
     private readonly jwtService: JwtService
   ) {}
 
@@ -48,6 +50,7 @@ export class RegisterUseCase {
       passwordHash,
       volunteerRole.id
     );
+
 
     // 7. Generate JWT tokens
     const accessToken = this.jwtService.sign(
