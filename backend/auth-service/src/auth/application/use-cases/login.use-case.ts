@@ -22,22 +22,18 @@ export class LoginUseCase {
 
   async execute(email: string, password: string): Promise<Token> {
 
-    // 1. Find user by email
     const auth = await this.authRepository.findByEmail(email);
     if (!auth) {
       throw new UnauthorizedException('No account found with this email');
     }
 
-    // 2. Check if account is locked
     if (auth.isAccountLocked()) {
       throw new UnauthorizedException('This account is currently locked');
     }
 
-    // 3. Verify password
     const isPasswordValid = await bcrypt.compare(password, auth?.passwordHash);
     if (!isPasswordValid) {
 
-      // Incorrect password --> increment attempts
       const attempts = await this.authRepository.incrementFailedLoginAttempts(auth.id);
 
       if (attempts >= this.MAX_FAILED_ATTEMPTS) {
@@ -55,10 +51,8 @@ export class LoginUseCase {
       );
     }
 
-    // 4. Update last login timestamp
     await this.authRepository.updateLastLogin(auth.id);
 
-    // 5. Generate JWT payload
     const payload = {
       userId: auth.id,
       email: auth.email,
@@ -69,9 +63,14 @@ export class LoginUseCase {
     };
 
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+
     const refreshToken = this.jwtService.sign(
-      { userId: auth.id, type: 'refresh' },
-      { expiresIn: '7d' }
+        { email: auth.email, type: 'refresh' },
+        {
+            secret: process.env.JWT_REFRESH_SECRET,
+            expiresIn: '7d',
+            subject: auth.id.toString()
+        }
     );
 
     await this.cache.set(`refresh:${auth.id}`, refreshToken, 7 * 24 * 60 * 60);

@@ -1,34 +1,34 @@
 import {
-  ExceptionFilter,
-  Catch,
-  ArgumentsHost,
-  HttpException,
-  HttpStatus,
+    ExceptionFilter,
+    Catch,
+    ArgumentsHost,
+    HttpException,
+    HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  catch(exception: unknown, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
+    catch(exception: unknown, host: ArgumentsHost) {
+        const ctx = host.switchToHttp();
+        const response = ctx.getResponse<Response>();
 
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Đã xảy ra lỗi không xác định';
+        let status = HttpStatus.INTERNAL_SERVER_ERROR;
+        let message = 'Đã xảy ra lỗi không xác định';
 
-    if (exception instanceof HttpException) {
-      status = exception.getStatus();
-      const exceptionResponse = exception.getResponse();
-      message = typeof exceptionResponse === 'string' 
-        ? exceptionResponse 
-        : (exceptionResponse as any).message || message;
+        if (exception instanceof HttpException) {
+            status = exception.getStatus();
+            const exceptionResponse = exception.getResponse();
+            message = typeof exceptionResponse === 'string'
+                ? exceptionResponse
+                : (exceptionResponse as any).message || message;
+        }
+
+        response.status(status).json({
+            success: false,
+            statusCode: status,
+            message: Array.isArray(message) ? message[0] : message,
+            timestamp: new Date().toISOString(),
+        });
     }
-
-    response.status(status).json({
-      success: false,
-      statusCode: status,
-      message: Array.isArray(message) ? message[0] : message,
-      timestamp: new Date().toISOString(),
-    });
-  }
 }

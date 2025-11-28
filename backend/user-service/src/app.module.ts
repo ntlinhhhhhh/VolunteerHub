@@ -11,21 +11,21 @@ import { UserRepository } from 'user/infrastructure/repositories/user.repository
 import { UserController } from 'user/presentation/controllers/user.controller';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
-    MongooseModule.forRoot(
-      process.env.MONGO_URI || '//volunteer-mongo:27017/user-service'
-    ),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-  ],
-  controllers: [UserController],
-  providers: [
-    CreateUserUseCase,
-    GetUserProfileUseCase,
-    UpdateUserProfileUseCase,
-    { provide: IUserRepository, useClass: UserRepository },
-    UserRepository,
-  ],
-  exports: [IUserRepository],
+    imports: [
+        ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+        MongooseModule.forRoot(
+            process.env.MONGO_URI || '//volunteer-mongo:27017/user-service'
+        ),
+        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    ],
+    controllers: [UserController],
+    providers: [
+        CreateUserUseCase,
+        GetUserProfileUseCase,
+        UpdateUserProfileUseCase,
+        { provide: IUserRepository, useClass: UserRepository },
+        UserRepository,
+    ],
+    exports: [IUserRepository],
 })
-export class AppModule {}
+export class AppModule { }
