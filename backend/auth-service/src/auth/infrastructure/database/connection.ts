@@ -4,14 +4,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getDatabaseConfig } from '../config/database.config';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    MongooseModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: getDatabaseConfig,
-    }),
-  ],
+    imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+        }),
+        MongooseModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: getDatabaseConfig,
+        }),
+    ],
 })
-export class DatabaseModule {}
+export class DatabaseModule { }

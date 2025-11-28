@@ -10,65 +10,61 @@ import type { Cache } from 'cache-manager';
 
 @Injectable()
 export class RegisterUseCase {
-  constructor(
-    @Inject(IAuthRepository)
-    private readonly authRepository: IAuthRepository,
-    @Inject(IRoleRepository)
-    private readonly roleRepository: IRoleRepository,
+    constructor(
+        @Inject(IAuthRepository)
+        private readonly authRepository: IAuthRepository,
+        @Inject(IRoleRepository)
+        private readonly roleRepository: IRoleRepository,
 
-    private readonly jwtService: JwtService
-  ) {}
+        private readonly jwtService: JwtService
+    ) { }
 
-  async execute(email: string, password: string): Promise<AuthToken> {
-    // 1. Validate email format
-    if (!Auth.isValidEmail(email)) {
-      throw new ConflictException('Invalid email format');
+    async execute(email: string, password: string): Promise<AuthToken> {
+        if (!Auth.isValidEmail(email)) {
+            throw new ConflictException('Invalid email format');
+        }
+
+        const sanitizedEmail = Auth.sanitizeEmail(email);
+
+        const existingUser = await this.authRepository.findByEmail(sanitizedEmail);
+        if (existingUser) {
+            throw new ConflictException('Email is already in use');
+        }
+
+        const volunteerRole = await this.roleRepository.findByName('volunteer');
+        console.log(volunteerRole);
+        if (!volunteerRole) {
+            throw new NotFoundException('Volunteer role does not exist');
+        }
+
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        const auth = await this.authRepository.create(
+            sanitizedEmail,
+            passwordHash,
+            volunteerRole.id
+        );
+
+        const accessToken = this.jwtService.sign(
+            {
+                userId: auth.id,
+                email: auth.email,
+                roleId: auth.roleId,
+                roleName: 'volunteer',
+                permissions: volunteerRole.permissions
+            },
+            { expiresIn: '15m' }
+        );
+
+        const refreshToken = this.jwtService.sign(
+            { email: auth.email, type: 'refresh' },
+            {
+                secret: process.env.JWT_REFRESH_SECRET,
+                expiresIn: '7d',
+                subject: auth.id.toString()
+            }
+        );
+
+        return new AuthToken(accessToken, refreshToken, 900, auth.id);
     }
-    
-    // 2. Sanitize email
-    const sanitizedEmail = Auth.sanitizeEmail(email);
-
-    // 3. Check if email already exists
-    const existingUser = await this.authRepository.findByEmail(sanitizedEmail);
-    if (existingUser) {
-      throw new ConflictException('Email is already in use');
-    }
-
-    // 4. Find role 'volunteer'
-    const volunteerRole = await this.roleRepository.findByName('volunteer');
-    console.log(volunteerRole);
-    if (!volunteerRole) {
-      throw new NotFoundException('Volunteer role does not exist');
-    }
-
-    // 5. Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // 6. Create new user
-    const auth = await this.authRepository.create(
-      sanitizedEmail,
-      passwordHash,
-      volunteerRole.id
-    );
-
-
-    // 7. Generate JWT tokens
-    const accessToken = this.jwtService.sign(
-      {
-        userId: auth.id,
-        email: auth.email,
-        roleId: auth.roleId,
-        roleName: 'volunteer',
-        permissions: volunteerRole.permissions
-      },
-      { expiresIn: '15m' }
-    );
-
-    const refreshToken = this.jwtService.sign(
-      { userId: auth.id, type: 'refresh' },
-      { expiresIn: '7d' }
-    );
-
-    return new AuthToken(accessToken, refreshToken, 900, auth.id);
-  }
 }

@@ -8,21 +8,21 @@ import { IAuthRepository } from '../domain/repositories/auth.repository.interfac
 import { IRoleRepository } from '../domain/repositories/role.repository.interface';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      { name: Auth.name, schema: AuthSchema },
-      { name: Role.name, schema: RoleSchema },
-    ]),
-  ],
-  providers: [
-    AuthRepository,
-    RoleRepository,
-    { provide: IAuthRepository, useExisting: AuthRepository },
-    { provide: IRoleRepository, useExisting: RoleRepository },
-  ],
-  exports: [
-    IAuthRepository,
-    IRoleRepository,
-  ],
+    imports: [
+        MongooseModule.forFeature([
+            { name: Auth.name, schema: AuthSchema },
+            { name: Role.name, schema: RoleSchema },
+        ]),
+    ],
+    providers: [
+        AuthRepository,
+        RoleRepository,
+        { provide: IAuthRepository, useExisting: AuthRepository },
+        { provide: IRoleRepository, useExisting: RoleRepository },
+    ],
+    exports: [
+        IAuthRepository,
+        IRoleRepository,
+    ],
 })
-export class InfrastructureModule {}
+export class InfrastructureModule { }

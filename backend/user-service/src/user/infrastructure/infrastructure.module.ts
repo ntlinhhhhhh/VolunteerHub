@@ -5,17 +5,17 @@ import { UserRepository } from './repositories/user.repository';
 import { IUserRepository } from 'user/domain/repositories/user.repository.interface';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      { name: User.name, schema: UserSchema },
-    ]),
-  ],
-  providers: [
-    UserRepository,
-    { provide: IUserRepository, useExisting: UserRepository },
-  ],
-  exports: [
-    IUserRepository,
-  ],
+    imports: [
+        MongooseModule.forFeature([
+            { name: User.name, schema: UserSchema },
+        ]),
+    ],
+    providers: [
+        UserRepository,
+        { provide: IUserRepository, useExisting: UserRepository },
+    ],
+    exports: [
+        IUserRepository,
+    ],
 })
-export class InfrastructureModule {}
+export class InfrastructureModule { }

@@ -21,61 +21,65 @@ import { AuthRepository } from 'auth/infrastructure/repositories/auth.repository
 import { RoleRepository } from 'auth/infrastructure/repositories/role.repository';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
+import { LogOutUseCase } from 'auth/application/use-cases/logout.use-case';
+import { createClient } from 'redis';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
-    MongooseModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: getDatabaseConfig,
-    }),
-    MongooseModule.forFeature([
-      { name: Auth.name, schema: AuthSchema },
-      { name: Role.name, schema: RoleSchema },
-    ]),
-    JwtModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: getJwtConfig,
-    }),
-        CacheModule.registerAsync({
-      useFactory: async () => ({
-        store: await redisStore({
-          socket: {
-            host: 'redis',   // tên container redis
-            port: 6379,
-          },
-          ttl: 0,
+    imports: [
+        ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+        MongooseModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: getDatabaseConfig,
         }),
-      }),
-    }),
-    DatabaseModule,
-    InfrastructureModule,
-  ],
-  controllers: [AuthController, HealthController],
-  providers: [
-    AuthRepository,
-    RoleRepository,
-    { provide: 'IAuthRepository', useExisting: AuthRepository },
-    { provide: 'IRoleRepository', useExisting: RoleRepository },
-    DatabaseService,
-    RegisterUseCase,
-    LoginUseCase,
-    RefreshTokenUseCase,
-    ValidateTokenUseCase,
-    {
-      provide: 'USER_SERVICE',
-      useFactory: () => ClientProxyFactory.create({
-        transport: Transport.REDIS,
-        options: { host: 'redis', port: 6379 },
-      }),
-    },
-  ],
-  exports: [
-    RegisterUseCase,
-    LoginUseCase,
-    RefreshTokenUseCase,
-    ValidateTokenUseCase,
-    'USER_SERVICE',
-  ],
+        MongooseModule.forFeature([
+            { name: Auth.name, schema: AuthSchema },
+            { name: Role.name, schema: RoleSchema },
+        ]),
+        JwtModule.registerAsync({
+            inject: [ConfigService],
+            useFactory: getJwtConfig,
+        }),
+        CacheModule.registerAsync({
+            useFactory: async () => ({
+                store: await redisStore({
+                    socket: {
+                        host: 'redis',   // tên container redis
+                        port: 6379,
+                    },
+                    ttl: 0,
+                }),
+            }),
+        }),
+        DatabaseModule,
+        InfrastructureModule,
+    ],
+    controllers: [AuthController, HealthController],
+    providers: [
+        AuthRepository,
+        RoleRepository,
+        { provide: 'IAuthRepository', useExisting: AuthRepository },
+        { provide: 'IRoleRepository', useExisting: RoleRepository },
+        DatabaseService,
+        RegisterUseCase,
+        LoginUseCase,
+        RefreshTokenUseCase,
+        ValidateTokenUseCase,
+        LogOutUseCase,
+        {
+            provide: 'USER_SERVICE',
+            useFactory: () => ClientProxyFactory.create({
+                transport: Transport.REDIS,
+                options: { host: 'redis', port: 6379 },
+            }),
+        },
+    ],
+    exports: [
+        RegisterUseCase,
+        LoginUseCase,
+        RefreshTokenUseCase,
+        ValidateTokenUseCase,
+        LogOutUseCase,
+        'USER_SERVICE',
+    ],
 })
-export class AppModule {}
+export class AppModule { }
