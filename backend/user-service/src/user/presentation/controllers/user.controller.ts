@@ -42,7 +42,7 @@ export class UserController {
         };
     }
 
-    
+
     @Get(':id')
     async getUserById(@Param('id') id: string) {
         const user = await this.getUserProfileUseCase.execute(id);
@@ -52,15 +52,12 @@ export class UserController {
         };
     }
 
-    /**
-     * TCP MESSAGE: user.create
-     * Auth Service gọi để tạo user profile sau khi register
-     */
     @MessagePattern('user.create')
     async createUser(@Payload() data: CreateUserDto) {
         const user = await this.createUserUseCase.execute(
             data.authId,
             data.email,
+            data.username,
             data.fullName
         );
         return {
@@ -69,10 +66,6 @@ export class UserController {
         };
     }
 
-    /**
-     * TCP MESSAGE: user.findByAuthId
-     * Tìm user profile theo authId
-     */
     @MessagePattern('user.findByAuthId')
     async findByAuthId(@Payload() data: { authId: string }) {
         const user = await this.getUserProfileUseCase.executeByAuthId(data.authId);

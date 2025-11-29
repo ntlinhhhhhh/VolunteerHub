@@ -9,7 +9,7 @@ export class CreateUserUseCase {
         private readonly userRepository: IUserRepository
     ) { }
 
-    async execute(authId: string, email: string, fullName: string): Promise<User> {
+    async execute(authId: string, email: string, username: string, fullName: string): Promise<User> {
         // Check user đã tồn tại chưa
         const existing = await this.userRepository.findByAuthId(authId);
         if (existing) {
@@ -20,6 +20,7 @@ export class CreateUserUseCase {
         return await this.userRepository.create({
             authId,
             email,
+            username,
             fullName,
         });
     }

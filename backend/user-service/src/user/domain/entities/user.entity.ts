@@ -9,6 +9,7 @@ export class User {
         public readonly id: string,
         public readonly authId: string,
         public readonly email: string,
+        public readonly username: string,
         public readonly fullName: string,
         public readonly phoneNumber: string | null,
         public readonly avatar: string | null,
@@ -53,6 +54,7 @@ export class User {
         return {
             id: this.id,
             email: this.email,
+            username: this.username,
             fullName: this.fullName,
             phoneNumber: this.phoneNumber,
             avatar: this.avatar,

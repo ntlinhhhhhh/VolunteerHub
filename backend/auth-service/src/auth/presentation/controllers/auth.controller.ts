@@ -38,12 +38,15 @@ export class AuthController {
             registerDto.password
         );
 
+        console.log(registerDto.username);
+
         try {
             const result = await firstValueFrom(
                 this.userClient.send('user.create', {
                     authId: token.authId,
                     email: registerDto.email,
-                    fullName: registerDto.fullname
+                    username: registerDto.username,
+                    fullName: registerDto.fullName
                 }));
         } catch (err) {
             console.error('Error calling user service:', err);

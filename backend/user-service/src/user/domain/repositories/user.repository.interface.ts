@@ -5,11 +5,14 @@ export interface IUserRepository {
 
     findByAuthId(authId: string): Promise<User | null>;
 
+    findByUsername(username: string): Promise<User | null>;
+
     findByEmail(email: string): Promise<User | null>;
 
     create(data: {
         authId: string;
         email: string;
+        username: string;
         fullName: string;
     }): Promise<User>;
 
