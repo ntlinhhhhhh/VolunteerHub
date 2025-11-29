@@ -12,7 +12,7 @@ export class GetUserProfileUseCase {
     async execute(userId: string): Promise<User> {
         const user = await this.userRepository.findById(userId);
         if (!user) {
-            throw new NotFoundException('User không tồn tại');
+            throw new NotFoundException('User not found');
         }
         return user;
     }
@@ -20,7 +20,7 @@ export class GetUserProfileUseCase {
     async executeByAuthId(authId: string): Promise<User> {
         const user = await this.userRepository.findByAuthId(authId);
         if (!user) {
-            throw new NotFoundException('User không tồn tại');
+            throw new NotFoundException('User not found');
         }
         return user;
     }

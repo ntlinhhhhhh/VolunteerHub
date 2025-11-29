@@ -6,6 +6,8 @@ import { GetUserProfileUseCase } from '../../application/use-cases/get-user-prof
 import { UpdateUserProfileUseCase } from '../../application/use-cases/update-user-profile.use-case';
 import { CreateUserDto } from '../../application/dto/create-user.dto';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
+import { JwtPayload } from 'jsonwebtoken';
+import { JwtAuthGuard } from 'user/guards/jwt-auth.guard';
 
 @Controller('users')
 export class UserController {
@@ -15,33 +17,18 @@ export class UserController {
         private readonly updateUserProfileUseCase: UpdateUserProfileUseCase
     ) { }
 
-    /**
-     * GET /users/me
-     * Lấy profile của user hiện tại (từ JWT token)
-     */
+    @UseGuards(JwtAuthGuard)
     @Get('me')
     async getMyProfile(@Request() req) {
-        // req.user.userId lấy từ JWT token
-        let user;
-        try {
-            user = await this.getUserProfileUseCase.execute(req.user.userId);
-            if (user == null) {
-                console.log("user is null");
-            }
-        } catch (e) {
-            console.log(e)
-        }
-
+        console.log(req.user);
+        const user = await this.getUserProfileUseCase.executeByAuthId(req.user.userId);
         return {
             success: true,
-            data: user.toSafeObject(),
+            data: user?.toSafeObject() || null,
         };
     }
 
-    /**
-     * PUT /users/me
-     * Update profile của user hiện tại
-     */
+    @UseGuards(JwtAuthGuard)
     @Put('me')
     async updateMyProfile(@Request() req, @Body() updateDto: UpdateUserDto) {
         const user = await this.updateUserProfileUseCase.execute(
@@ -50,15 +37,12 @@ export class UserController {
         );
         return {
             success: true,
-            message: 'Cập nhật profile thành công',
+            message: 'Update profile successfull',
             data: user.toSafeObject(),
         };
     }
 
-    /**
-     * GET /users/:id
-     * Lấy profile của user khác (public)
-     */
+    
     @Get(':id')
     async getUserById(@Param('id') id: string) {
         const user = await this.getUserProfileUseCase.execute(id);

@@ -9,12 +9,12 @@ export class UpdateUserProfileUseCase {
         private readonly userRepository: IUserRepository
     ) { }
 
-    async execute(userId: string, data: Partial<User>): Promise<User> {
-        const user = await this.userRepository.findById(userId);
+    async execute(authId: string, data: Partial<User>): Promise<User> {
+        const user = await this.userRepository.findByAuthId(authId);
         if (!user) {
-            throw new NotFoundException('User không tồn tại');
+            throw new NotFoundException('user not found');
         }
 
-        return await this.userRepository.update(userId, data);
+        return await this.userRepository.update(user.id, data);
     }
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Get, Inject } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get, Inject, UseGuards } from '@nestjs/common';
 import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import { RegisterUseCase } from '../../application/use-cases/register.use-case';
 import { LoginUseCase } from '../../application/use-cases/login.use-case';
@@ -10,6 +10,14 @@ import { RefreshTokenDto } from '../../application/dto/refresh-token.dto';
 import { firstValueFrom } from 'rxjs';
 import { LogoutDto } from 'auth/application/dto/logout.dto';
 import { LogOutUseCase } from 'auth/application/use-cases/logout.use-case';
+
+interface JwtPayload {
+  userId: string;
+  email: string;
+  roleId: string;
+  roleName: string;
+  permissions: string[];
+}
 
 @Controller('auth')
 export class AuthController {
@@ -71,6 +79,25 @@ export class AuthController {
         };
     }
 
+    @Post('admin/login')
+    @HttpCode(HttpStatus.OK)
+    async adminLogin(@Body() loginDto: LoginDto) {
+        const token = await this.loginUseCase.execute(
+            loginDto.email,
+            loginDto.password
+        );
+
+        return {
+            success: true,
+            message: 'login succesful',
+            data: {
+                accessToken: token.accessToken,
+                refreshToken: token.refreshToken,
+                expiresIn: token.expiresIn,
+            }
+        };
+    }
+
     @Post('refresh')
     @HttpCode(HttpStatus.OK)
     async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
@@ -99,6 +126,12 @@ export class AuthController {
             message: result.message,
         };
     }
+
+    // @Get('me')
+    // getProfile(@Request() req: ExpressRequest & { user: JwtPayload }) {
+    // return req.user;
+    // }
+
 
     @MessagePattern('auth.validate')
     async validateToken(@Payload() data: { token: string }) {
