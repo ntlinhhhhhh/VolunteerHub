@@ -8,6 +8,10 @@ export class CreateUserDto {
     email: string;
 
     @IsString()
+    @MinLength(2, { message: 'Username must be at least 6 characters long' })
+    username: string;
+
+    @IsString()
     @MinLength(2, { message: 'FullName must be at least 6 characters long' })
     fullName: string;
 }

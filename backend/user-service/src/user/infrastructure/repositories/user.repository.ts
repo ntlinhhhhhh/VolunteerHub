@@ -17,6 +17,7 @@ export class UserRepository implements IUserRepository {
             (doc._id as any).toString(),
             doc.authId,
             doc.email,
+            doc.username,
             doc.fullName,
             doc.phoneNumber,
             doc.avatar,
@@ -40,6 +41,12 @@ export class UserRepository implements IUserRepository {
         return doc ? this.toEntity(doc) : null;
     }
 
+    async findByUsername(username: string): Promise<UserEntity | null> {
+        const doc = await this.userModel.findOne({ username }).exec();
+        console.log("findByUsername");
+        return doc ? this.toEntity(doc) : null;
+    }
+
     async findByEmail(email: string): Promise<UserEntity | null> {
         const doc = await this.userModel.findOne({ email: email.toLowerCase() }).exec();
         return doc ? this.toEntity(doc) : null;
@@ -48,11 +55,13 @@ export class UserRepository implements IUserRepository {
     async create(data: {
         authId: string;
         email: string;
+        username: string,
         fullName: string;
     }): Promise<UserEntity> {
         const doc = new this.userModel({
             authId: data.authId,
             email: data.email.toLowerCase(),
+            username: data.username,
             fullName: data.fullName,
             status: UserStatus.ACTIVE,
         });
