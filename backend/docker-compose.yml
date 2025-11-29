@@ -58,6 +58,10 @@ services:
       - mongo
       - redis
     restart: unless-stopped
+    environment:
+      - JWT_ACCESS_SECRET=your_super_secret_key
+      - JWT_REFRESH_SECRET=your_refresh_secret_key
+      - MONGO_URI=mongodb://volunteer-mongo:27017/user-service
 
   # Kong Gateway (DB-less mode)
   kong:
@@ -80,6 +84,7 @@ services:
       KONG_ADMIN_ERROR_LOG: /dev/stderr
       KONG_ADMIN_LISTEN: "0.0.0.0:8001"
       KONG_PROXY_LISTEN: "0.0.0.0:8000"
+      
     volumes:
       - ./kong/kong.yml:/usr/local/kong/declarative/kong.yml
     restart: unless-stopped
