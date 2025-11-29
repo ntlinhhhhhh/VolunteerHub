@@ -49,17 +49,13 @@ Content-Type: application/json
     "password": "123456"
 }
 
-### Get my profile
-GET http://localhost:4002/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTI4OTczZTQ3MjMxNmY4M2ZlYTM0YjkiLCJlbWFpbCI6IjEyMTM0M0BnbWFpbC5jb20iLCJyb2xlSWQiOiI2OTI4OTZmYTM4NjhhMDAxZGM5OGM1ZmEiLCJyb2xlTmFtZSI6InZvbHVudGVlciIsInBlcm1pc3Npb24iOlsiZXZlbnQ6cmVhZCIsInJlZ2lzdHJhdGlvbjpjcmVhdGUiLCJyZWdpc3RyYXRpb246cmVhZCIsInJlZ2lzdHJhdGlvbjpjYW5jZWwiLCJwb3N0OnJlYWQiLCJwb3N0OmNyZWF0ZSIsInBvc3Q6dXBkYXRlOm93biIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiZGFzaGJvYXJkOnZpZXciXSwiaXNMb2NrZWQiOmZhbHNlLCJpYXQiOjE3NjQyNjgxNzcsImV4cCI6MTc2NDI2OTA3N30.6ps4NWcyqmTAUi5pOiZGsbcqzMW5Avib2tfcdxn8BWg
-Accept: application/json
 
 ###
 POST http://localhost:8000/auth/register
 Content-Type: application/json
 
 {
-    "email": "duonghoang@gmail.com",
+    "email": "duonghoang1@gmail.com",
     "fullname": "Nguyen Thuy Linh",
     "password": "123456"
 }
@@ -71,6 +67,15 @@ Content-Type: application/json
 {
     "email": "duonghoang@gmail.com",
     "password": "123456"
+}
+
+### login-admin
+POST http://localhost:8000/auth/admin/login
+Content-Type: application/json
+
+{
+    "email": "tlinh@gmail.com",
+    "password": "tlinh123"
 }
 
 
@@ -91,3 +96,24 @@ Accept: application/json
 {
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTI5MTgzZjNiMzMzNzA2ZTYxMDRiZmYiLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTc2NDM1MDEyNSwiZXhwIjoxNzY0OTU0OTI1fQ.TLfa1BJ0KuUHHm1jm6z-mNbAWH-8Qgl6nOQIso5tScs"
 }
+
+
+### Get my profile
+GET http://localhost:8000/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJhN2Q3MmEyOTRmNTBmZDMzNjlhN2UiLCJlbWFpbCI6ImR1b25naG9hbmdAZ21haWwuY29tIiwicm9sZUlkIjoiNjkyYTdkNjM0MWFkMDUxZmZhMWZjMGRjIiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9uIjpbImV2ZW50OnJlYWQiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicG9zdDpyZWFkIiwicG9zdDpjcmVhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZTpvd24iLCJjb21tZW50OmNyZWF0ZSIsImRhc2hib2FyZDp2aWV3Il0sImlzTG9ja2VkIjpmYWxzZSwiaWF0IjoxNzY0MzkzNzc3LCJleHAiOjE3NjQzOTQ2Nzd9.KTyXuRGRsbLS0VnhNLLUQz7xasGHX8FAkWUGtqdQEM4
+
+### Get my profile
+PUT http://localhost:8000/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJhN2Q3MmEyOTRmNTBmZDMzNjlhN2UiLCJlbWFpbCI6ImR1b25naG9hbmdAZ21haWwuY29tIiwicm9sZUlkIjoiNjkyYTdkNjM0MWFkMDUxZmZhMWZjMGRjIiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9uIjpbImV2ZW50OnJlYWQiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicG9zdDpyZWFkIiwicG9zdDpjcmVhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZTpvd24iLCJjb21tZW50OmNyZWF0ZSIsImRhc2hib2FyZDp2aWV3Il0sImlzTG9ja2VkIjpmYWxzZSwiaWF0IjoxNzY0Mzk1MTc5LCJleHAiOjE3NjQzOTYwNzl9.VEr2BaJlv16aBXg7qjGh9Z25l6FxqmJZObmX0SaCMgA
+Content-Type: application/json
+
+{
+  "phoneNumber": "0987654321",
+  "avatar": "https://example.com/avatar.jpg",
+  "address": "123 Nguyen Trai, Ha Noi",
+  "bio": "heheh",
+  "dateOfBirth": "2000-05-21"
+}
+
+### Get my profile other user
+GET http://localhost:8000/users/692a7d9db7dcffa33610326f
