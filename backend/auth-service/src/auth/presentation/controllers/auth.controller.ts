@@ -99,6 +99,8 @@ export class AuthController {
         const token = await this.refreshTokenUseCase.execute(
             refreshTokenDto.refreshToken
         );
+        console.log(token)
+
 
         return {
             success: true,

@@ -38,6 +38,11 @@ import * as redisStore from 'cache-manager-redis-store';
       inject: [ConfigService],
       useFactory: getJwtConfig,
     }),
+    JwtModule.register({
+        secret: process.env.JWT_ACCESS_SECRET,
+        signOptions: { expiresIn: '15m' },
+    }),
+    
     CacheModule.register({
       store: redisStore,
       host: 'redis',
