@@ -4,7 +4,7 @@ import { UserRole } from '../entities/user-role.entity';
 export interface IAuthRepository {
     findByEmail(email: string): Promise<AuthEntity | null>;
     findById(id: string): Promise<AuthEntity | null>;
-    create(email: string, passwordHash: string, roleId: string): Promise<AuthEntity>;
+    create(email: string, passwordHash: string| null, roleId: string): Promise<AuthEntity>;
     updatePassword(id: string, passwordHash: string): Promise<void>;
     updateRole(id: string, roleId: string): Promise<void>;
     delete(id: string): Promise<void>;

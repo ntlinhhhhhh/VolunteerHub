@@ -5,8 +5,9 @@ POST http://localhost:4000/auth/register
 Content-Type: application/json
 
 {
-    "email": "tlinh1@gmail.com",
-    "fullname": "Nguyen Thuy Linh",
+    "email": "tlin1h11111@gmail.com",
+    "username": "duo11111n123ghoang1",
+    "fullName": "Nguyen Thuy Linh",
     "password": "123456"
 }
 
@@ -45,7 +46,7 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "duonghoang@gmail.com",
+    "email": "tlin1h11111@gmail.com",
     "password": "123456"
 }
 
@@ -55,8 +56,8 @@ POST http://localhost:8000/auth/register
 Content-Type: application/json
 
 {
-    "email": "tlinhn1e@gmail.com",
-    "username": "duonghoang1",
+    "email": "hehehe@gmail.com",
+    "username": "duo111n123ghoang1",
     "fullName": "Nguyen Thuy Linh",
     "password": "123456"
 }
@@ -66,7 +67,7 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "tlinhn1e@gmail.com",
+    "email": "tlin1h11111@gmail.com",
     "password": "123456"
 }
 
@@ -86,7 +87,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTI5MTgzZjNiMzMzNzA2ZTYxMDRiZmYiLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTc2NDM1MDEyNSwiZXhwIjoxNzY0OTU0OTI1fQ.TLfa1BJ0KuUHHm1jm6z-mNbAWH-8Qgl6nOQIso5tScs"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhlaGVoZUBnbWFpbC5jb20iLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTc2NDUyMTY1MSwiZXhwIjoxNzY1MTI2NDUxLCJzdWIiOiI2OTJjNzZiMzFmYTMxOGU5NDQ4YjdkNzgifQ.Tc-B5faOLM2an5K7aOQT4CyByomVfX9yrKVbzslUddU"
 }
 
 ###
@@ -95,14 +96,13 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImR1b25naG9hbmcxQGdtYWlsLmNvbSIsInR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzY0Mzk2ODg2LCJleHAiOjE3NjUwMDE2ODYsInN1YiI6IjY5MmE4ZjE5MzFjM2MzMWYwYzI2NjdkMSJ9.TgfCkWnI3OOefT0ttDiA1ROZERyNbGKlhuEo6LczfDc"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRsaW4xaDExMTExQGdtYWlsLmNvbSIsInR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzY0NTIxNDcxLCJleHAiOjE3NjUxMjYyNzEsInN1YiI6IjY5MmM3NWE5MWZhMzE4ZTk0NDhiN2Q1ZSJ9.BM7GMisoLopN9RzqTXsxOK7iLsvQm_AsxplA1lM-jVs"
 }
 
 
 ### Get my profile
 GET http://localhost:8000/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJhY2QzZDFkYjExOTIxYmI1N2RmY2IiLCJlbWFpbCI6InRsaW5objFlQGdtYWlsLmNvbSIsInJvbGVJZCI6IjY5MmE5MjllZmRkZGYwZGU3ZjJkY2M2YiIsInJvbGVOYW1lIjoidm9sdW50ZWVyIiwicGVybWlzc2lvbiI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpc0xvY2tlZCI6ZmFsc2UsImlhdCI6MTc2NDQxMjc0MSwiZXhwIjoxNzY0NDEzNjQxfQ.Uj6x2NVHkmN0_a3rBtGlqXywyhss_dQc7YfCmeuyFP8
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJjNzVhOTFmYTMxOGU5NDQ4YjdkNWUiLCJlbWFpbCI6InRsaW4xaDExMTExQGdtYWlsLmNvbSIsInJvbGVJZCI6IjY5MmM3NWE1NzQ4MzlmYTNjZDQxZmU3NiIsInJvbGVOYW1lIjoidm9sdW50ZWVyIiwicGVybWlzc2lvbiI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpc0xvY2tlZCI6ZmFsc2UsImlhdCI6MTc2NDUyMTUzOSwiZXhwIjoxNzY0NTIyNDM5fQ.g1ucZdn4EiHu22ar4a90r0UIeCJv1Json57ZxrTYJek
 ### Get my profile
 PUT http://localhost:8000/users/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJhY2QzZDFkYjExOTIxYmI1N2RmY2IiLCJlbWFpbCI6InRsaW5objFlQGdtYWlsLmNvbSIsInJvbGVJZCI6IjY5MmE5MjllZmRkZGYwZGU3ZjJkY2M2YiIsInJvbGVOYW1lIjoidm9sdW50ZWVyIiwicGVybWlzc2lvbiI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpc0xvY2tlZCI6ZmFsc2UsImlhdCI6MTc2NDQxMjc0MSwiZXhwIjoxNzY0NDEzNjQxfQ.Uj6x2NVHkmN0_a3rBtGlqXywyhss_dQc7YfCmeuyFP8
@@ -118,3 +118,16 @@ Content-Type: application/json
 
 ### Get my profile other user
 GET http://localhost:8000/users/692a7d9db7dcffa33610326f
+
+###
+POST https://oauth2.googleapis.com/token
+Content-Type: application/x-www-form-urlencoded
+
+code=4%2F0Ab32j9271_Gmz0sHwgAqCIjUZ1mEcGy7hgQctbkZTkOXEJ_o2FiVjJrAGNfXoVl4XtoioA
+&client_id=407408718192.apps.googleusercontent.com
+&client_secret=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
+&redirect_uri=https%3A%2F%2Fdevelopers.google.com%2Foauthplayground
+&grant_type=authorization_code
+
+###
+POST http://localhost:8000/auth/google/callback
