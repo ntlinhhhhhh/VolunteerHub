@@ -46,7 +46,7 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "tlin1h11111@gmail.com",
+    "email": "hehehe@gmail.com",
     "password": "123456"
 }
 
@@ -57,7 +57,7 @@ Content-Type: application/json
 
 {
     "email": "hehehe@gmail.com",
-    "username": "duo111n123ghoang1",
+    "username": "hehehe",
     "fullName": "Nguyen Thuy Linh",
     "password": "123456"
 }
@@ -67,7 +67,7 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "tlin1h11111@gmail.com",
+    "email": "hehehe@gmail.com",
     "password": "123456"
 }
 
@@ -86,9 +86,11 @@ POST http://localhost:8000/auth/refresh
 Content-Type: application/json
 Accept: application/json
 
+
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhlaGVoZUBnbWFpbC5jb20iLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTc2NDUyMTY1MSwiZXhwIjoxNzY1MTI2NDUxLCJzdWIiOiI2OTJjNzZiMzFmYTMxOGU5NDQ4YjdkNzgifQ.Tc-B5faOLM2an5K7aOQT4CyByomVfX9yrKVbzslUddU"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhlaGVoZUBnbWFpbC5jb20iLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTc2NDUyNTc2MCwiZXhwIjoxNzY1MTMwNTYwLCJzdWIiOiI2OTJjODA3M2I5M2U4ZGI3OTVlZTBlMzEifQ.xB_tkvt4HNoh8YaCZkudgdOPXnaHEKZ7gkbEVU7Fjvk"
 }
+
 
 ###
 POST http://localhost:8000/auth/logout
@@ -96,13 +98,16 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRsaW4xaDExMTExQGdtYWlsLmNvbSIsInR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzY0NTIxNDcxLCJleHAiOjE3NjUxMjYyNzEsInN1YiI6IjY5MmM3NWE5MWZhMzE4ZTk0NDhiN2Q1ZSJ9.BM7GMisoLopN9RzqTXsxOK7iLsvQm_AsxplA1lM-jVs"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhlaGVoZUBnbWFpbC5jb20iLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTc2NDUyNTczMywiZXhwIjoxNzY1MTMwNTMzLCJzdWIiOiI2OTJjODA3M2I5M2U4ZGI3OTVlZTBlMzEifQ.MWcNIrE34E3nLgqElpjACKc2kjkrRRgFVzc_xuZ1H4o" 
 }
 
 
 ### Get my profile
 GET http://localhost:8000/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJjNzVhOTFmYTMxOGU5NDQ4YjdkNWUiLCJlbWFpbCI6InRsaW4xaDExMTExQGdtYWlsLmNvbSIsInJvbGVJZCI6IjY5MmM3NWE1NzQ4MzlmYTNjZDQxZmU3NiIsInJvbGVOYW1lIjoidm9sdW50ZWVyIiwicGVybWlzc2lvbiI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpc0xvY2tlZCI6ZmFsc2UsImlhdCI6MTc2NDUyMTUzOSwiZXhwIjoxNzY0NTIyNDM5fQ.g1ucZdn4EiHu22ar4a90r0UIeCJv1Json57ZxrTYJek
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJjODA3M2I5M2U4ZGI3OTVlZTBlMzEiLCJlbWFpbCI6ImhlaGVoZUBnbWFpbC5jb20iLCJyb2xlSWQiOiI2OTJjODA2NDUzM2ZiOTlmOWU4MmE5ZDciLCJyb2xlTmFtZSI6InZvbHVudGVlciIsInBlcm1pc3Npb24iOlsiZXZlbnQ6cmVhZCIsInJlZ2lzdHJhdGlvbjpjcmVhdGUiLCJyZWdpc3RyYXRpb246cmVhZCIsInJlZ2lzdHJhdGlvbjpjYW5jZWwiLCJwb3N0OnJlYWQiLCJwb3N0OmNyZWF0ZSIsInBvc3Q6dXBkYXRlOm93biIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiZGFzaGJvYXJkOnZpZXciXSwiaXNMb2NrZWQiOmZhbHNlLCJpYXQiOjE3NjQ1MjUxMDUsImV4cCI6MTc2NDUyNjAwNX0.bNXEYF7W-hxirWWyEIYODG-o0MdUT7un4hl_gMWibXs
+
+
+
 ### Get my profile
 PUT http://localhost:8000/users/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJhY2QzZDFkYjExOTIxYmI1N2RmY2IiLCJlbWFpbCI6InRsaW5objFlQGdtYWlsLmNvbSIsInJvbGVJZCI6IjY5MmE5MjllZmRkZGYwZGU3ZjJkY2M2YiIsInJvbGVOYW1lIjoidm9sdW50ZWVyIiwicGVybWlzc2lvbiI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpc0xvY2tlZCI6ZmFsc2UsImlhdCI6MTc2NDQxMjc0MSwiZXhwIjoxNzY0NDEzNjQxfQ.Uj6x2NVHkmN0_a3rBtGlqXywyhss_dQc7YfCmeuyFP8

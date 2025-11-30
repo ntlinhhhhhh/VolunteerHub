@@ -7,52 +7,66 @@ import type { Cache } from 'cache-manager';
 
 @Injectable()
 export class RefreshTokenUseCase {
-  constructor(
-    private readonly jwtService: JwtService,
-    @Inject(IAuthRepository)
-    private readonly authRepository: IAuthRepository,
-    @Inject(CACHE_MANAGER)
-    private readonly cache: Cache
-  ) {}
+    constructor(
+        private readonly jwtService: JwtService,
+        @Inject(IAuthRepository)
+        private readonly authRepository: IAuthRepository,
+        @Inject(CACHE_MANAGER)
+        private readonly cache: Cache
+    ) { }
 
-  async execute(refreshToken: string): Promise<Token> {
-    try {
-      const payload = this.jwtService.verify(refreshToken);
+    async execute(refreshToken: string): Promise<Token> {
+        try {
+            const payload = this.jwtService.verify(refreshToken, {
+                secret: process.env.JWT_REFRESH_SECRET,
+            });
+            console.log('Payload:', payload);
 
-      const stored = await this.cache.get(`refresh:${payload.sub}`);
-      if (payload.type !== 'refresh') {
-        throw new UnauthorizedException('Invalid token type');
-      }
+            if (payload.type !== 'refresh') {
+                throw new UnauthorizedException('Invalid token type');
+            }
 
-      const auth = await this.authRepository.findById(payload.userId);
-      if (!auth) {
-        throw new UnauthorizedException('User not found');
-      }
+            const userId = payload.sub;
 
-      if (auth.isAccountLocked()) {
-        throw new UnauthorizedException('Your account is currently locked');
-      }
+            const stored = await this.cache.get(`refresh:${userId}`);
+            console.log('Stored:', stored);
 
-      const accessToken = this.jwtService.sign(
-        {
-          userId: auth.id,
-          email: auth.email,
-          roleId: auth.roleId,
-          roleName: auth.role?.name,
-          permissions: auth.role?.permissions || [],
-        },
-        { expiresIn: '15m' }
-      );
+            if (!stored || stored !== refreshToken) {
+                throw new UnauthorizedException('Refresh token mismatch or expired');
+            }
 
-      const newRefreshToken = this.jwtService.sign(
-        { userId: auth.id, type: 'refresh' },
-        { expiresIn: '7d' }
-      );
+            const auth = await this.authRepository.findById(userId);
+            if (!auth) {
+                throw new UnauthorizedException('User not found');
+            }
 
-      await this.cache.set(`refresh:${payload.sub}`, newRefreshToken, 7 * 24 * 60 * 60);
-      return new Token(accessToken, newRefreshToken, 900);
-    } catch (error) {
-      throw new UnauthorizedException('Refresh token is invalid or expired');
+            if (auth.isAccountLocked()) {
+                throw new UnauthorizedException('Your account is currently locked');
+            }
+
+            const accessToken = this.jwtService.sign(
+                {
+                    userId: auth.id,
+                    email: auth.email,
+                    roleId: auth.roleId,
+                    roleName: auth.role?.name,
+                    permissions: auth.role?.permissions || [],
+                },
+                { expiresIn: '15m' }
+            );
+
+            const newRefreshToken = this.jwtService.sign(
+                { userId: auth.id, type: 'refresh' },
+                { expiresIn: '7d' }
+            );
+
+            await this.cache.set(`refresh:${auth.id}`, newRefreshToken, 7 * 24 * 60 * 60);
+            console.log('Stored refresh token in cache:', await this.cache.get(`refresh:${payload.userId}`));
+
+            return new Token(accessToken, newRefreshToken, 900);
+        } catch (error) {
+            console.log(error)
+            throw new UnauthorizedException('Refresh token is invalid or expired', error);
+        }
     }
-  }
 }

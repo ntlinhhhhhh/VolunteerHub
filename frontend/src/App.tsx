@@ -1,13 +1,15 @@
-import Login from "./pages/Login/Login";
-import RefreshToken from "./pages/RefreshToken/RefreshToken";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import GoogleLoginButton from './components/GoogleLoginButton';
+import GoogleCallback from './pages/GoogleCallback';
 
 function App() {
   return (
-    <div style={{ padding: 20 }}>
-      <Login />
-      <hr />
-      <RefreshToken />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<GoogleLoginButton />} />
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
+      </Routes>
+    </Router>
   );
 }
 
