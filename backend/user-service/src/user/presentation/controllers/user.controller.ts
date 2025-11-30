@@ -54,21 +54,32 @@ export class UserController {
 
     @MessagePattern('user.create')
     async createUser(@Payload() data: CreateUserDto) {
-        const user = await this.createUserUseCase.execute(
-            data.authId,
-            data.email,
-            data.username,
-            data.fullName
-        );
-        return {
-            success: true,
-            data: user.toSafeObject(),
-        };
+        try {
+            const user = await this.createUserUseCase.execute(
+                data.authId,
+                data.email,
+                data.username,
+                data.fullName
+            );
+            return {
+                success: true,
+                data: user.toSafeObject(),
+            };
+        }catch(err) {
+            console.error(err);
+        }
+
     }
 
     @MessagePattern('user.findByAuthId')
     async findByAuthId(@Payload() data: { authId: string }) {
         const user = await this.getUserProfileUseCase.executeByAuthId(data.authId);
+        return user.toSafeObject();
+    }
+
+    @MessagePattern('user.findByEmail')
+    async findByEmail(@Payload() data: { email: string }) {
+        const user = await this.getUserProfileUseCase.executeByEmail(data.email);
         return user.toSafeObject();
     }
 }

@@ -11,14 +11,6 @@ import { firstValueFrom } from 'rxjs';
 import { LogoutDto } from 'auth/application/dto/logout.dto';
 import { LogOutUseCase } from 'auth/application/use-cases/logout.use-case';
 
-interface JwtPayload {
-  userId: string;
-  email: string;
-  roleId: string;
-  roleName: string;
-  permissions: string[];
-}
-
 @Controller('auth')
 export class AuthController {
     constructor(
