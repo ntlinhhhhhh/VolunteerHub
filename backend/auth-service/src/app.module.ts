@@ -27,6 +27,9 @@ import { GoogleController } from 'auth/presentation/controllers/google.controlle
 import { GoogleLoginUseCase } from 'auth/application/use-cases/google-login.use-case';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from 'auth/strategies/jwt.strategy';
+import { ForgotPasswordUseCase } from 'auth/application/use-cases/forgot-password.use-case';
+import { ResetPasswordUseCase } from 'auth/application/use-cases/reset-password.use-case';
+import { EmailService } from 'auth/infrastructure/email/email.service';
 
 @Module({
   imports: [
@@ -69,8 +72,11 @@ import { JwtStrategy } from 'auth/strategies/jwt.strategy';
     RefreshTokenUseCase,
     ValidateTokenUseCase,
     GoogleAuthService,
+    EmailService,
     GoogleLoginUseCase,
+    ForgotPasswordUseCase,
     LogOutUseCase,
+    ResetPasswordUseCase,
     JwtStrategy,
     {
       provide: 'USER_SERVICE',
@@ -87,6 +93,8 @@ import { JwtStrategy } from 'auth/strategies/jwt.strategy';
     RefreshTokenUseCase,
     ValidateTokenUseCase,
     LogOutUseCase,
+    ForgotPasswordUseCase,
+    ResetPasswordUseCase,
     JwtModule,
     PassportModule,
     JwtStrategy,

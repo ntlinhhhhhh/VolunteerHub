@@ -7,6 +7,7 @@ export interface IAuthRepository {
     create(email: string, passwordHash: string| null, roleId: string): Promise<AuthEntity>;
     updatePassword(id: string, passwordHash: string): Promise<void>;
     updateRole(id: string, roleId: string): Promise<void>;
+    updateAuth(id: string, auth: AuthEntity): Promise<void>;
     delete(id: string): Promise<void>;
 
     // sercurity method

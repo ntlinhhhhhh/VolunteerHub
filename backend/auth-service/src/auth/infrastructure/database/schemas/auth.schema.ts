@@ -29,6 +29,12 @@ export class Auth {
     @Prop({ default: null })
     lastLoginAt: Date;
 
+    @Prop({ type: String, default: null })
+    resetPasswordToken?: string;
+
+    @Prop({ type: Date, default: null })
+    resetPasswordExpires?: Date
+
     createdAt: Date;
     updatedAt: Date;
 }
