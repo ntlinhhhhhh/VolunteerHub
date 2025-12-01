@@ -8,6 +8,7 @@ import { AuthRepository } from 'auth/infrastructure/repositories/auth.repository
 import { IRoleRepository } from 'auth/domain/repositories/role.repository.interface';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class GoogleLoginUseCase {
@@ -17,6 +18,7 @@ export class GoogleLoginUseCase {
         @Inject(IRoleRepository)
         private readonly roleRepository: IRoleRepository,
         private readonly jwtService: JwtService,
+        private readonly configService: ConfigService,
         @Inject('USER_SERVICE') private userClient: ClientProxy
     ) { }
 
@@ -49,15 +51,21 @@ export class GoogleLoginUseCase {
                 user = await firstValueFrom(this.userClient.send('user.findByEmail', { email: profile.email }));
             }
 
-            const jwtPayload = { sub: user.id, email: user.email, name: user.fullName };
-            const accessToken = this.jwtService.sign(jwtPayload, {
-                secret: process.env.JWT_ACCESS_SECRET,
-                expiresIn: '15m',
-            });
-            const refreshToken = this.jwtService.sign(jwtPayload, {
-                secret: process.env.JWT_REFRESH_SECRET,
-                expiresIn: '7d',
-            });
+        const jwtPayload = { sub: user.id, email: user.email, name: user.fullName };
+
+        console.log('JWT payload:', jwtPayload);
+        console.log('JWT_ACCESS_SECRET:', this.configService.get('JWT_ACCESS_SECRET'));
+        console.log('JWT_REFRESH_SECRET:', this.configService.get('JWT_REFRESH_SECRET'));
+
+        const accessToken = this.jwtService.sign(jwtPayload, {
+            secret: this.configService.get('JWT_ACCESS_SECRET'),
+            expiresIn: '15m',
+        });
+
+        const refreshToken = this.jwtService.sign(jwtPayload, {
+            secret: this.configService.get('JWT_REFRESH_SECRET'),
+            expiresIn: '7d',
+        });
 
             return { accessToken, refreshToken, profile };
         } catch (err: any) {

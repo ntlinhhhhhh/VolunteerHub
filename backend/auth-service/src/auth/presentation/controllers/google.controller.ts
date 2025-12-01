@@ -1,10 +1,14 @@
 import { Controller, Get, Query, Res, InternalServerErrorException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { GoogleLoginUseCase } from 'auth/application/use-cases/google-login.use-case';
 import express from 'express';
 
 @Controller('auth/google')
 export class GoogleController {
-  constructor(private readonly googleLoginUseCase: GoogleLoginUseCase) {}
+  constructor(
+    private readonly googleLoginUseCase: GoogleLoginUseCase,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Get('callback')
   async googleCallback(@Query('code') code: string, @Res() res: express.Response) {
@@ -17,9 +21,10 @@ export class GoogleController {
         client_id: process.env.GOOGLE_CLIENT_ID,
       });
 
-      const { accessToken } = await this.googleLoginUseCase.execute(code);
+        const { accessToken } = await this.googleLoginUseCase.execute(code);
+        const frontendUrl = this.configService.get('FRONTEND_URL');
+        res.redirect(`${frontendUrl}/login-success?token=${accessToken}`);
 
-      res.redirect(`${process.env.FRONTEND_URL}/login-success?token=${accessToken}`);
     } catch (error) {
       console.error('Google callback error:', error);
       throw new InternalServerErrorException('Google login failed');
