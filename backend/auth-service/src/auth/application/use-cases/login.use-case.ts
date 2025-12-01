@@ -5,6 +5,7 @@ import { IAuthRepository } from '../../domain/repositories/auth.repository.inter
 import { Token } from '../../domain/entities/token.entity';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import * as cacheManager from 'cache-manager';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class LoginUseCase {
@@ -16,7 +17,7 @@ export class LoginUseCase {
 
     @Inject(IAuthRepository)
     private readonly authRepository: IAuthRepository,
-
+    private readonly configService: ConfigService,
     private readonly jwtService: JwtService
   ) {}
 
@@ -53,24 +54,27 @@ export class LoginUseCase {
 
     await this.authRepository.updateLastLogin(auth.id);
 
-    const payload = {
-      userId: auth.id,
-      email: auth.email,
-      roleId: auth.roleId,
-      roleName: auth.role?.name,
-      permission: auth.role?.permissions || [],
-      isLocked: auth.isLocked
-    };
-
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const accessToken = this.jwtService.sign(
+      {
+        userId: auth.id,
+        email: auth.email,
+        roleId: auth.roleId,
+        roleName: 'volunteer',
+        permissions: auth.role?.permissions || [],
+      },
+      {
+        secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+        expiresIn: '15m',
+      }
+    );
 
     const refreshToken = this.jwtService.sign(
-        { email: auth.email, type: 'refresh' },
-        {
-            secret: process.env.JWT_REFRESH_SECRET,
-            expiresIn: '7d',
-            subject: auth.id.toString()
-        }
+      { email: auth.email, type: 'refresh' },
+      {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        expiresIn: '7d',
+        subject: auth.id.toString(),
+      }
     );
 
     await this.cache.set(`refresh:${auth.id}`, refreshToken, 7 * 24 * 60 * 60);

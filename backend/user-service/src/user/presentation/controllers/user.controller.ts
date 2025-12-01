@@ -20,12 +20,20 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     @Get('me')
     async getMyProfile(@Request() req) {
-        console.log(req.user);
-        const user = await this.getUserProfileUseCase.executeByAuthId(req.user.userId);
-        return {
-            success: true,
-            data: user?.toSafeObject() || null,
-        };
+        try {
+            console.log('Headers:', req.headers);
+            console.log('Authorization:', req.headers.authorization);
+            console.log('req.user', req.user);
+            console.log('req.user', req.user);
+            const user = await this.getUserProfileUseCase.executeByAuthId(req.user.userId);
+            return {
+                success: true,
+                data: user?.toSafeObject() || null,
+            };
+        } catch (err) {
+            console.error(err)
+        }
+        
     }
 
     @UseGuards(JwtAuthGuard)

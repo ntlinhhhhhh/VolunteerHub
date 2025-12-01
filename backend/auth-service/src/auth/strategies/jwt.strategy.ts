@@ -9,6 +9,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const secret = configService.get<string>('JWT_ACCESS_SECRET');
     if (!secret) throw new Error('JWT_ACCESS_SECRET is not defined');
 
+    console.log('JwtStrategy secret:', secret); // check secret
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -17,6 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
+    console.log('Decoded JWT payload:', payload);
     return {
       userId: payload.userId,
       email: payload.email,
