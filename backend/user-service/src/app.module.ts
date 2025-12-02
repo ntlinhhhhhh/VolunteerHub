@@ -10,7 +10,8 @@ import { UpdateUserProfileUseCase } from './user/application/use-cases/update-us
 import { UserRepository } from './user/infrastructure/repositories/user.repository';
 import { IUserRepository } from './user/domain/repositories/user.repository.interface';
 import { User, UserSchema } from './user/infrastructure/database/schemas/user.schema';
-import { JwtStrategy } from './user/strategies/jwt.strategy';
+import { JwtStrategy } from './user/infrastructure/strategies/jwt.strategy';
+import { GetUserUseCase } from 'user/application/use-cases/get-user.use-case';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { JwtStrategy } from './user/strategies/jwt.strategy';
     CreateUserUseCase,
     GetUserProfileUseCase,
     UpdateUserProfileUseCase,
+    GetUserUseCase,
     { provide: IUserRepository, useClass: UserRepository },
     JwtStrategy,
   ],

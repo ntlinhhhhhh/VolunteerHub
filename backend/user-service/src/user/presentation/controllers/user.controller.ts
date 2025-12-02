@@ -7,15 +7,27 @@ import { UpdateUserProfileUseCase } from '../../application/use-cases/update-use
 import { CreateUserDto } from '../../application/dto/create-user.dto';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
 import { JwtPayload } from 'jsonwebtoken';
-import { JwtAuthGuard } from 'user/guards/jwt-auth.guard';
+import { GetUserUseCase } from 'user/application/use-cases/get-user.use-case';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 @Controller('users')
 export class UserController {
     constructor(
         private readonly createUserUseCase: CreateUserUseCase,
         private readonly getUserProfileUseCase: GetUserProfileUseCase,
+        private readonly getUserUseCase: GetUserUseCase,
         private readonly updateUserProfileUseCase: UpdateUserProfileUseCase
     ) { }
+
+    @Get()
+    // @Roles('admin')
+    async findAll() {
+        const users = await this.getUserUseCase.execute();
+        return {
+            success: true,
+            data: users || null,
+        };
+    }
 
     @UseGuards(JwtAuthGuard)
     @Get('me')
@@ -90,4 +102,8 @@ export class UserController {
         const user = await this.getUserProfileUseCase.executeByEmail(data.email);
         return user.toSafeObject();
     }
+}
+
+function Roles(arg0: string): (target: UserController, propertyKey: "findAll", descriptor: TypedPropertyDescriptor<() => any>) => void | TypedPropertyDescriptor<() => any> {
+    throw new Error('Function not implemented.');
 }

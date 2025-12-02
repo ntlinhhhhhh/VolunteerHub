@@ -4,6 +4,7 @@ import { Token } from '../../domain/entities/token.entity';
 import { IAuthRepository } from '../../domain/repositories/auth.repository.interface';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class RefreshTokenUseCase {
@@ -12,7 +13,8 @@ export class RefreshTokenUseCase {
         @Inject(IAuthRepository)
         private readonly authRepository: IAuthRepository,
         @Inject(CACHE_MANAGER)
-        private readonly cache: Cache
+        private readonly cache: Cache,
+        private readonly configService: ConfigService,
     ) { }
 
     async execute(refreshToken: string): Promise<Token> {
@@ -54,11 +56,15 @@ export class RefreshTokenUseCase {
                 },
                 { expiresIn: '15m' }
             );
-
+            
             const newRefreshToken = this.jwtService.sign(
-                { userId: auth.id, type: 'refresh' },
-                { expiresIn: '7d' }
-            );
+            { userId: auth.id, type: 'refresh' },
+            {
+                secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+                expiresIn: '7d',
+                subject: auth.id.toString(),
+            }
+        );
 
             await this.cache.set(`refresh:${auth.id}`, newRefreshToken, 7 * 24 * 60 * 60);
             console.log('Stored refresh token in cache:', await this.cache.get(`refresh:${payload.userId}`));
