@@ -1,5 +1,3 @@
-version: '3.9'
-
 networks:
   volunteerhub-net:
     driver: bridge
@@ -69,6 +67,44 @@ services:
       - JWT_REFRESH_SECRET=your_refresh_secret
       - MONGO_URI=mongodb://volunteer-mongo:27017/user-service
 
+  notification-service:
+    build: 
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    env_file:
+      - ./notification-service/.env
+    ports:
+      - '4004:4004'
+    networks:
+      - volunteerhub-net
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    depends_on:
+      - rabbitmq
+      - mongo
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - MONGO_URI=mongodb://volunteer-mongo:27017/notification-service
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - '5672:5672'      # AMQP protocol
+      - '15672:15672'    # Web management UI
+    networks:
+      - volunteerhub-net
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+
   # Kong Gateway (DB-less mode)
   kong:
     image: kong:3.5
@@ -90,7 +126,9 @@ services:
       KONG_ADMIN_ERROR_LOG: /dev/stderr
       KONG_ADMIN_LISTEN: "0.0.0.0:8001"
       KONG_PROXY_LISTEN: "0.0.0.0:8000"
-      
     volumes:
       - ./kong/kong.yml:/usr/local/kong/declarative/kong.yml
     restart: unless-stopped
+
+volumes:
+  rabbitmq-data:

@@ -53,7 +53,7 @@ POST http://localhost:8000/auth/register
 Content-Type: application/json
 
 {
-    "email": "nguyenthuylinh26012005@gmail.com",
+    "email": "nguyenthuylinh26012001151@gmail.com",
     "username": "hehe",
     "fullName": "Nguyen Thuy Linh",
     "password": "123456"
@@ -64,8 +64,8 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "nguyenthuylinh26012005@gmail.com",
-    "password": "123!"
+    "email": "nguyenthuylinh2601200115@gmail.com",
+    "password": "123456"
 }
 
 ### for-got password
@@ -120,7 +120,7 @@ Accept: application/json
 
 ### Get my profile
 GET http://localhost:4002/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJkYTUzZGZlYzg4OTljNjUwNTFjMDIiLCJlbWFpbCI6ImhlaGVAZ21haWwuY29tIiwicm9sZUlkIjoiNjkyZGExMWE0NDA3YTQ2YjYyZDJlNjExIiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjQ1OTkyMjIsImV4cCI6MTc2NDYwMDEyMn0.x29waD_4PsQ95pdOg4hhYcT6ZO2sCdDNe5TDmpAQpuI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJlZDBkMTNmMzc5NzQ0ODZkZDIwN2MiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDExNUBnbWFpbC5jb20iLCJyb2xlSWQiOiI2OTJlYmU4ZWY5OWY5ZmNlNTE5ZDM3NGYiLCJyb2xlTmFtZSI6InZvbHVudGVlciIsInBlcm1pc3Npb25zIjpbImV2ZW50OnJlYWQiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicG9zdDpyZWFkIiwicG9zdDpjcmVhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZTpvd24iLCJjb21tZW50OmNyZWF0ZSIsImRhc2hib2FyZDp2aWV3Il0sImlhdCI6MTc2NDY3NTgxMywiZXhwIjoxNzY0Njc2NzEzfQ.2360irsWDPl9sEGQFuIZrkrK3dWGYBOqyPvbnltJvlY
 
 ### Get my profile
 PUT http://localhost:8000/users/me
@@ -150,3 +150,31 @@ code=4%2F0Ab32j9271_Gmz0sHwgAqCIjUZ1mEcGy7hgQctbkZTkOXEJ_o2FiVjJrAGNfXoVl4XtoioA
 
 ###
 GET  http://localhost:8000/auth/google/callback?code=4/0Ab32j90SHvUtBwoQIPq4IydxLdqPQWhhtmBI44HB9oC2yCsDv1Qs-zIj3stAVeaB3thqzg4/0Ab32j92jkwxtQuzzaAw_zQc5IxIkyrhHSx5Ld575VcpQZaeMBFrLjCJeKE2DK9vQLLjFZA
+
+### Send a notification (email + DB)
+POST http://localhost:4004/notifications/send
+Content-Type: application/json
+
+{
+  "userId": "123456",
+  "recipient": "duonghoang@example.com",
+  "type": "user_registered",
+  "channel": "email",
+  "subject": "Welcome to VolunteerHub!",
+  "content": "Hi, welcome to our platform!",
+  "data": { "customKey": "customValue" }
+}
+
+###
+PATCH http://localhost:4004/notifications/692f3116eb9afbdaae05d16b/read
+
+### Test gửi email
+POST http://localhost:4004/notifications/test-email
+Content-Type: application/json
+
+{
+  "recipient": "nguyenthuylinh26012005@gmail.com",
+  "subject": "Test Email",
+  "content": "Hello! Đây là email test."
+}
+
