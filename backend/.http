@@ -1,14 +1,11 @@
-
-
-### register
 POST http://localhost:4000/auth/register
 Content-Type: application/json
 
 {
-    "email": "tlin1h11111@gmail.com",
-    "username": "duo11111n123ghoang1",
-    "fullName": "Nguyen Thuy Linh",
-    "password": "123456"
+    "email": "hyunlinhits@gmail.com",
+    "username": "zzz3",
+    "fullName": "Le Huyen Linh",
+    "password": "111111"
 }
 
 ###
@@ -19,8 +16,22 @@ POST http://localhost:4000/auth/login
 Content-Type: application/json
 
 {
-    "email": "tlinh1@gmail.com",
+    "email": "tlin1h11111@gmail.com",
     "password": "123456"
+}
+
+###
+GET http://localhost:4000/health
+
+
+
+### login
+POST http://localhost:8000/auth/login
+Content-Type: application/json
+
+{
+    "email": "zzz2@gmail.com",
+    "password": "111111"
 }
 
 ###
@@ -56,9 +67,9 @@ POST http://localhost:8000/auth/register
 Content-Type: application/json
 
 {
-    "email": "hehehe@gmail.com",
-    "username": "hehehe",
-    "fullName": "Nguyen Thuy Linh",
+    "email": "zzzzz@gmail.com",
+    "username": "hli",
+    "fullName": "Le Huyen Linh",
     "password": "123456"
 }
 
@@ -67,9 +78,28 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "hehehe@gmail.com",
+    "email": "zzzzz@gmail.com",
     "password": "123456"
 }
+
+### for-got password
+POST http://localhost:8000/auth/forgot-password
+Content-Type: application/json
+
+{
+    "email": "zzzzz@gmail.com"
+}
+
+###
+POST http://localhost:8000/auth/reset-password
+Content-Type: application/json
+
+{
+    "email": "nguyenthuylinh26012005@gmail.com",
+    "token": "d2f00c7affc33363fc796877b1a61b4550ab731cea2d09d0b740f11ffcfe3e0c",
+    "newPassword": "123!"
+}
+
 
 ### login-admin
 POST http://localhost:8000/auth/admin/login
@@ -88,7 +118,7 @@ Accept: application/json
 
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhlaGVoZUBnbWFpbC5jb20iLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTc2NDUyNTc2MCwiZXhwIjoxNzY1MTMwNTYwLCJzdWIiOiI2OTJjODA3M2I5M2U4ZGI3OTVlZTBlMzEifQ.xB_tkvt4HNoh8YaCZkudgdOPXnaHEKZ7gkbEVU7Fjvk"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhlaGVAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NjQ1OTkxMDQsImV4cCI6MTc2NTIwMzkwNCwic3ViIjoiNjkyZGE1M2RmZWM4ODk5YzY1MDUxYzAyIn0.8bGYTV_TyJhjD8GLs-0_JCYGgH465mz88APZYrk6afo"
 }
 
 
@@ -98,19 +128,17 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhlaGVoZUBnbWFpbC5jb20iLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTc2NDUyNTczMywiZXhwIjoxNzY1MTMwNTMzLCJzdWIiOiI2OTJjODA3M2I5M2U4ZGI3OTVlZTBlMzEifQ.MWcNIrE34E3nLgqElpjACKc2kjkrRRgFVzc_xuZ1H4o" 
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhlaGVAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NjQ1OTkyMDAsImV4cCI6MTc2NTIwNDAwMCwic3ViIjoiNjkyZGE1M2RmZWM4ODk5YzY1MDUxYzAyIn0.TK4CyK56YxEHXKX7wv5cP1whQ1bxt6UsphjkHLOX1Dk" 
 }
 
 
 ### Get my profile
-GET http://localhost:8000/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJjODA3M2I5M2U4ZGI3OTVlZTBlMzEiLCJlbWFpbCI6ImhlaGVoZUBnbWFpbC5jb20iLCJyb2xlSWQiOiI2OTJjODA2NDUzM2ZiOTlmOWU4MmE5ZDciLCJyb2xlTmFtZSI6InZvbHVudGVlciIsInBlcm1pc3Npb24iOlsiZXZlbnQ6cmVhZCIsInJlZ2lzdHJhdGlvbjpjcmVhdGUiLCJyZWdpc3RyYXRpb246cmVhZCIsInJlZ2lzdHJhdGlvbjpjYW5jZWwiLCJwb3N0OnJlYWQiLCJwb3N0OmNyZWF0ZSIsInBvc3Q6dXBkYXRlOm93biIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiZGFzaGJvYXJkOnZpZXciXSwiaXNMb2NrZWQiOmZhbHNlLCJpYXQiOjE3NjQ1MjUxMDUsImV4cCI6MTc2NDUyNjAwNX0.bNXEYF7W-hxirWWyEIYODG-o0MdUT7un4hl_gMWibXs
-
-
+GET http://localhost:4002/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJkYTUzZGZlYzg4OTljNjUwNTFjMDIiLCJlbWFpbCI6ImhlaGVAZ21haWwuY29tIiwicm9sZUlkIjoiNjkyZGExMWE0NDA3YTQ2YjYyZDJlNjExIiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjQ1OTkyMjIsImV4cCI6MTc2NDYwMDEyMn0.x29waD_4PsQ95pdOg4hhYcT6ZO2sCdDNe5TDmpAQpuI
 
 ### Get my profile
 PUT http://localhost:8000/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJhY2QzZDFkYjExOTIxYmI1N2RmY2IiLCJlbWFpbCI6InRsaW5objFlQGdtYWlsLmNvbSIsInJvbGVJZCI6IjY5MmE5MjllZmRkZGYwZGU3ZjJkY2M2YiIsInJvbGVOYW1lIjoidm9sdW50ZWVyIiwicGVybWlzc2lvbiI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpc0xvY2tlZCI6ZmFsc2UsImlhdCI6MTc2NDQxMjc0MSwiZXhwIjoxNzY0NDEzNjQxfQ.Uj6x2NVHkmN0_a3rBtGlqXywyhss_dQc7YfCmeuyFP8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJkYTUzZGZlYzg4OTljNjUwNTFjMDIiLCJlbWFpbCI6ImhlaGVAZ21haWwuY29tIiwicm9sZUlkIjoiNjkyZGExMWE0NDA3YTQ2YjYyZDJlNjExIiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjQ1OTkyMjIsImV4cCI6MTc2NDYwMDEyMn0.x29waD_4PsQ95pdOg4hhYcT6ZO2sCdDNe5TDmpAQpuI
 Content-Type: application/json
 
 {
@@ -122,7 +150,7 @@ Content-Type: application/json
 }
 
 ### Get my profile other user
-GET http://localhost:8000/users/692a7d9db7dcffa33610326f
+GET http://localhost:8000/users/692d357cd13b6bca449ae4d9
 
 ###
 POST https://oauth2.googleapis.com/token
@@ -135,4 +163,4 @@ code=4%2F0Ab32j9271_Gmz0sHwgAqCIjUZ1mEcGy7hgQctbkZTkOXEJ_o2FiVjJrAGNfXoVl4XtoioA
 &grant_type=authorization_code
 
 ###
-POST http://localhost:8000/auth/google/callback
+GET  http://localhost:8000/auth/google/callback?code=4/0Ab32j90SHvUtBwoQIPq4IydxLdqPQWhhtmBI44HB9oC2yCsDv1Qs-zIj3stAVeaB3thqzg4/0Ab32j92jkwxtQuzzaAw_zQc5IxIkyrhHSx5Ld575VcpQZaeMBFrLjCJeKE2DK9vQLLjFZA

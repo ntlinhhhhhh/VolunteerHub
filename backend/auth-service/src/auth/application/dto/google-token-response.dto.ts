@@ -1,4 +1,4 @@
-export class GoogleTokenResponse {
+export class GoogleTokenResponseDto {
   access_token: string;
   expires_in: number;
   refresh_token?: string;

@@ -26,6 +26,8 @@ export class AuthRepository implements IAuthRepository {
             doc.lastLoginAt,
             doc.createdAt,
             doc.updatedAt,
+            doc.resetPasswordToken,
+            doc.resetPasswordExpires,
             role || undefined
         );
     }
@@ -73,6 +75,14 @@ export class AuthRepository implements IAuthRepository {
         await this.authModel.updateOne(
             { _id: id },
             { roleId }
+        ).exec();
+    }
+    
+    async updateAuth(id: string, authData: Partial<AuthEntity>): Promise<void> {
+        await this.authModel.findByIdAndUpdate(
+            id,
+            authData,
+            { new: true }
         ).exec();
     }
 

@@ -18,7 +18,7 @@ export class User {
         public readonly dateOfBirth: Date | null,
         public readonly status: UserStatus,
         public readonly createdAt: Date,
-        public readonly updatedAt: Date
+        public readonly updatedAt: Date,
     ) { }
 
     isActive(): boolean {

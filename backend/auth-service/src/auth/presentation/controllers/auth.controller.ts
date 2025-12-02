@@ -10,6 +10,8 @@ import { RefreshTokenDto } from '../../application/dto/refresh-token.dto';
 import { firstValueFrom } from 'rxjs';
 import { LogoutDto } from 'auth/application/dto/logout.dto';
 import { LogOutUseCase } from 'auth/application/use-cases/logout.use-case';
+import { ForgotPasswordUseCase } from 'auth/application/use-cases/forgot-password.use-case';
+import { ResetPasswordUseCase } from 'auth/application/use-cases/reset-password.use-case';
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +22,8 @@ export class AuthController {
         private readonly validateTokenUseCase: ValidateTokenUseCase,
         private readonly logoutUseCase: LogOutUseCase,
         @Inject('USER_SERVICE') private userClient: ClientProxy,
+        private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
+        private readonly resetPasswordUseCase: ResetPasswordUseCase,
     ) { }
 
     @Post('register')
@@ -112,6 +116,16 @@ export class AuthController {
             }
         };
     }
+
+    @Post('forgot-password')
+    async forgotPassword(@Body('email') email: string) {
+        return this.forgotPasswordUseCase.execute(email);
+    }
+
+    @Post('reset-password')
+    async resetPassword(@Body() body: { email: string; token: string; newPassword: string }) {
+        return this.resetPasswordUseCase.execute(body.email, body.token, body.newPassword);
+    }    
 
     @Post('logout')
     @HttpCode(HttpStatus.OK)

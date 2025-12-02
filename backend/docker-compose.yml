@@ -35,6 +35,9 @@ services:
       - ./auth-service/.env
     networks:
       - volunteerhub-net
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     ports:
       - "4000:4000"
     depends_on:
@@ -52,6 +55,9 @@ services:
       - ./user-service/.env
     networks:
       - volunteerhub-net
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     ports:
       - "4002:4002"
     depends_on:
@@ -59,8 +65,8 @@ services:
       - redis
     restart: unless-stopped
     environment:
-      - JWT_ACCESS_SECRET=your_super_secret_key
-      - JWT_REFRESH_SECRET=your_refresh_secret_key
+      - JWT_ACCESS_SECRET=your_access_secret
+      - JWT_REFRESH_SECRET=your_refresh_secret
       - MONGO_URI=mongodb://volunteer-mongo:27017/user-service
 
   # Kong Gateway (DB-less mode)

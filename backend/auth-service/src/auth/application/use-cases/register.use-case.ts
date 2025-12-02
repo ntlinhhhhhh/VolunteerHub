@@ -7,6 +7,7 @@ import bcrypt from 'bcryptjs';
 import { IRoleRepository } from 'auth/domain/repositories/role.repository.interface';
 import { AuthToken } from 'auth/domain/entities/authtoken.entity';
 import type { Cache } from 'cache-manager';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class RegisterUseCase {
@@ -15,7 +16,7 @@ export class RegisterUseCase {
         private readonly authRepository: IAuthRepository,
         @Inject(IRoleRepository)
         private readonly roleRepository: IRoleRepository,
-
+        private readonly configService: ConfigService,
         private readonly jwtService: JwtService
     ) { }
 
@@ -51,17 +52,19 @@ export class RegisterUseCase {
                 email: auth.email,
                 roleId: auth.roleId,
                 roleName: 'volunteer',
-                permissions: volunteerRole.permissions
+                permissions: auth.role?.permissions || [],
             },
-            { expiresIn: '15m' }
+            {
+                secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+            }
         );
 
         const refreshToken = this.jwtService.sign(
             { email: auth.email, type: 'refresh' },
             {
-                secret: process.env.JWT_REFRESH_SECRET,
+                secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
                 expiresIn: '7d',
-                subject: auth.id.toString()
+                subject: auth.id.toString(),
             }
         );
 

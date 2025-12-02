@@ -22,6 +22,14 @@ import { AuthController } from './auth/presentation/controllers/auth.controller'
 import { HealthController } from './auth/presentation/controllers/health.controller';
 
 import * as redisStore from 'cache-manager-redis-store';
+import { GoogleAuthService } from 'auth/infrastructure/google/google-auth.service';
+import { GoogleController } from 'auth/presentation/controllers/google.controller';
+import { GoogleLoginUseCase } from 'auth/application/use-cases/google-login.use-case';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from 'auth/infrastructure/strategies/jwt.strategy';
+import { ForgotPasswordUseCase } from 'auth/application/use-cases/forgot-password.use-case';
+import { ResetPasswordUseCase } from 'auth/application/use-cases/reset-password.use-case';
+import { EmailService } from 'auth/infrastructure/email/email.service';
 
 @Module({
   imports: [
@@ -34,13 +42,13 @@ import * as redisStore from 'cache-manager-redis-store';
       { name: Auth.name, schema: AuthSchema },
       { name: Role.name, schema: RoleSchema },
     ]),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: getJwtConfig,
-    }),
-    JwtModule.register({
-        secret: process.env.JWT_ACCESS_SECRET,
-        signOptions: { expiresIn: '15m' },
+        inject: [ConfigService],
+        useFactory: (config: ConfigService) => ({
+            secret: config.get<string>('JWT_ACCESS_SECRET'),
+            signOptions: { expiresIn: '15m' },
+        }),
     }),
     
     CacheModule.register({
@@ -52,7 +60,7 @@ import * as redisStore from 'cache-manager-redis-store';
     DatabaseModule,
     InfrastructureModule,
   ],
-  controllers: [AuthController, HealthController],
+  controllers: [AuthController, HealthController, GoogleController],
   providers: [
     AuthRepository,
     RoleRepository,
@@ -63,7 +71,13 @@ import * as redisStore from 'cache-manager-redis-store';
     LoginUseCase,
     RefreshTokenUseCase,
     ValidateTokenUseCase,
+    GoogleAuthService,
+    EmailService,
+    GoogleLoginUseCase,
+    ForgotPasswordUseCase,
     LogOutUseCase,
+    ResetPasswordUseCase,
+    JwtStrategy,
     {
       provide: 'USER_SERVICE',
       useFactory: () =>
@@ -79,6 +93,11 @@ import * as redisStore from 'cache-manager-redis-store';
     RefreshTokenUseCase,
     ValidateTokenUseCase,
     LogOutUseCase,
+    ForgotPasswordUseCase,
+    ResetPasswordUseCase,
+    JwtModule,
+    PassportModule,
+    JwtStrategy,
     'USER_SERVICE',
   ],
 })
