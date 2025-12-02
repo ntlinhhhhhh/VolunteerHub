@@ -1,62 +1,3 @@
-// import { useState } from "react";
-
-// function App() {
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const [message, setMessage] = useState("");
-//   const [data, setData] = useState(null);
-
-//   const handleLogin = async () => {
-//     try {
-//       const response = await fetch("http://localhost:8000/auth/login", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ email, password }),
-//       });
-
-//       const data = await response.json();
-//       setData(data);
-
-//       if (response.ok) {
-//         setMessage("Login successful!");
-//         localStorage.setItem("accessToken", data.accessToken);
-//         localStorage.setItem("refreshToken", data.refreshToken);
-
-//         console.log("Access token:", data.accessToken);
-//         console.log("Refresh token:", data.refreshToken);
-//       } else {
-//         setMessage(`Login failed: ${data.message}`);
-//       }
-//     } catch (err) {
-//       setMessage("Error connecting to API");
-//       console.error(err);
-//     }
-//   };
-
-//   return (
-//     <div style={{ padding: 20 }}>
-//       <h1>Login</h1>
-//       <input
-//         type="email"
-//         placeholder="Email"
-//         value={email}
-//         onChange={(e) => setEmail(e.target.value)}
-//       />
-//       <input
-//         type="password"
-//         placeholder="Password"
-//         value={password}
-//         onChange={(e) => setPassword(e.target.value)}
-//       />
-//       <button onClick={handleLogin}>Login</button>
-//       <p>{message}</p>
-//       <pre>{data && JSON.stringify(data, null, 2)}</pre>
-//     </div>
-//   );
-// }
-
-// export default App;
-
 import React, { useEffect, useState } from "react";
 
 // Khai báo interface cho user Google
@@ -132,7 +73,6 @@ const GoogleLogin: React.FC = () => {
 
   return (
     <div>
-      <h2>Login Google + Gọi Backend</h2>
       <div id="google-signin-btn"></div>
 
       {user && (
@@ -146,4 +86,120 @@ const GoogleLogin: React.FC = () => {
   );
 };
 
-export default GoogleLogin;
+//export default GoogleLogin;
+interface UserCredentials {
+  email: string;
+  password: string;
+}
+
+// Type for login response
+interface LoginResponse {
+  accessToken?: string;
+  refreshToken?: string;
+  message?: string;
+}
+
+const Login: React.FC = () => {
+  const [credentials, setCredentials] = useState<UserCredentials>({ email: "", password: "" });
+  const [message, setMessage] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+
+  // Handle input change
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
+  };
+
+  // Handle email/password login
+  const handleEmailLogin = async () => {
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const res = await fetch("http://localhost:8000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials),
+      });
+      const data: LoginResponse = await res.json();
+
+      if (res.ok && data.accessToken) {
+        setMessage("Login successful!");
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken || "");
+      } else {
+        setMessage(`Login failed: ${data.message || "Unknown error"}`);
+      }
+    } catch (err) {
+      setMessage("Error connecting to API");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "50px",
+        gap: "20px",
+        maxWidth: "400px",
+        margin: "0 auto",
+      }}
+    >
+      <h1>Welcome! Please Log In</h1>
+
+      {/* Google Login */}
+      <GoogleLogin />
+
+      <div style={{ marginTop: "20px", width: "100%" }}>
+        <p style={{ textAlign: "center" }}>Or login with email/password</p>
+
+        {/* Email login form */}
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={credentials.email}
+          onChange={handleChange}
+          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={credentials.password}
+          onChange={handleChange}
+          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+        />
+        <button
+          onClick={handleEmailLogin}
+          style={{
+            width: "100%",
+            padding: "10px",
+            backgroundColor: "#1976d2",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+          disabled={loading}
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+
+        {message && <p style={{ marginTop: "10px", color: message.includes("failed") ? "red" : "green" }}>{message}</p>}
+      </div>
+
+      {/* Placeholder for future login methods */}
+      <div style={{ marginTop: "20px", textAlign: "center" }}>
+        <p>Other login options coming soon...</p>
+      </div>
+    </div>
+  );
+};
+
+export default Login;
