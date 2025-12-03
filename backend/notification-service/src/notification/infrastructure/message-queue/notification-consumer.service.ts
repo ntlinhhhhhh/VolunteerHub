@@ -36,7 +36,7 @@ export class NotificationConsumerService implements OnModuleInit {
                 userId: message.userId,
                 recipient: message.recipient,
                 type: mappedType,
-                channel: NotificationChannel.EMAIL,
+                channel: NotificationChannel.IN_APP,
                 subject: `Thông báo: ${mappedType}`,
                 content: `Bạn có thông báo mới: ${mappedType}`,
                 data: message.data,

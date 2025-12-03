@@ -1,8 +1,3 @@
-/**
- * GIẢI THÍCH:
- * Service render HTML email templates.
- * Dùng Handlebars để compile templates với data dynamic.
- */
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as Handlebars from 'handlebars';
