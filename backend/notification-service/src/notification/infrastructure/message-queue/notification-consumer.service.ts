@@ -14,10 +14,9 @@ export class NotificationConsumerService implements OnModuleInit {
         private readonly rabbitMQService: RabbitMQService,
         private readonly sendEmailUseCase: SendEmailNotificationUseCase,
         private readonly createNotificationUseCase: CreateNotificationUseCase
-    ) { }
+    ) {}
 
     async onModuleInit() {
-        // Bắt đầu lắng nghe message từ RabbitMQ
         await this.rabbitMQService.consume(this.handleMessage.bind(this));
     }
 
@@ -25,33 +24,26 @@ export class NotificationConsumerService implements OnModuleInit {
         this.logger.log(`Processing notification: ${message.type}`);
 
         try {
-            // Validate message type
             if (!this.isValidNotificationType(message.type)) {
                 this.logger.warn(`Unknown notification type: ${message.type}`);
                 return;
             }
 
-            // Map message type thành NotificationType
             const mappedType = this.mapMessageType(message.type);
 
-            // Tạo notification trong DB
+            // create noti
             await this.createNotificationUseCase.execute({
                 userId: message.userId,
                 recipient: message.recipient,
                 type: mappedType,
-                channel: NotificationChannel.EMAIL, // Hoặc IN_APP nếu muốn
+                channel: NotificationChannel.EMAIL,
                 subject: `Thông báo: ${mappedType}`,
                 content: `Bạn có thông báo mới: ${mappedType}`,
                 data: message.data,
             });
 
-            // Gửi email notification
-            await this.sendEmailUseCase.execute(
-                message.userId,
-                message.recipient,
-                mappedType,
-                message.data
-            );
+            // send email
+            await this.sendEmailUseCase.execute(message.userId, message.recipient, mappedType, message.data);
         } catch (error) {
             this.logger.error(`Failed to process message: ${message.type}`, error);
             throw error;

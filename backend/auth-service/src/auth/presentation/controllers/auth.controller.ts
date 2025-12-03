@@ -12,6 +12,7 @@ import { LogoutDto } from 'auth/application/dto/logout.dto';
 import { LogOutUseCase } from 'auth/application/use-cases/logout.use-case';
 import { ForgotPasswordUseCase } from 'auth/application/use-cases/forgot-password.use-case';
 import { ResetPasswordUseCase } from 'auth/application/use-cases/reset-password.use-case';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Controller('auth')
 export class AuthController {
@@ -24,6 +25,7 @@ export class AuthController {
         @Inject('USER_SERVICE') private userClient: ClientProxy,
         private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
         private readonly resetPasswordUseCase: ResetPasswordUseCase,
+        private readonly rabbitmq: AmqpConnection,
     ) { }
 
     @Post('register')
@@ -37,7 +39,7 @@ export class AuthController {
         console.log(registerDto.username);
 
         try {
-            const result = await firstValueFrom(
+            await firstValueFrom(
                 this.userClient.send('user.create', {
                     authId: token.authId,
                     email: registerDto.email,
@@ -47,6 +49,18 @@ export class AuthController {
         } catch (err) {
             console.error('Error calling user service:', err);
         }
+
+        this.rabbitmq.publish(
+            'notification_exchange',
+            'user.registered',
+            {
+                type: 'user_registered', 
+                userId: token.authId,
+                recipient: registerDto.email,
+                fullName: registerDto.fullName,
+                data: {}
+            }
+        );
 
         return {
             success: true,
@@ -178,4 +192,8 @@ export class AuthController {
             expiresIn: token.expiresIn,
         };
     }
+}
+
+function InjectRabbitMQ(): (target: typeof AuthController, propertyKey: undefined, parameterIndex: 8) => void {
+    throw new Error('Function not implemented.');
 }

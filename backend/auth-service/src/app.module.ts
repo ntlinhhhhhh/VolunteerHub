@@ -30,6 +30,8 @@ import { JwtStrategy } from 'auth/infrastructure/strategies/jwt.strategy';
 import { ForgotPasswordUseCase } from 'auth/application/use-cases/forgot-password.use-case';
 import { ResetPasswordUseCase } from 'auth/application/use-cases/reset-password.use-case';
 import { EmailService } from 'auth/infrastructure/email/email.service';
+import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+// import { RabbitMQService } from 'auth/infrastructure/rabbitmq/rabbitmq.service';
 
 @Module({
   imports: [
@@ -59,6 +61,18 @@ import { EmailService } from 'auth/infrastructure/email/email.service';
     }),
     DatabaseModule,
     InfrastructureModule,
+    RabbitMQModule.forRootAsync({
+        useFactory: () => ({
+            uri: 'amqp://rabbitmq:5672',
+            exchanges: [
+            {
+                name: 'notification_exchange',
+                type: 'topic',
+            },
+            ],
+        }),
+        }),
+
   ],
   controllers: [AuthController, HealthController, GoogleController],
   providers: [
@@ -99,6 +113,7 @@ import { EmailService } from 'auth/infrastructure/email/email.service';
     PassportModule,
     JwtStrategy,
     'USER_SERVICE',
+    RabbitMQModule,
   ],
 })
 export class AppModule {}
