@@ -64,4 +64,6 @@ RUN chmod +x wait-for-services.sh
 EXPOSE 4002
 
 # CMD chạy với wait script
-CMD ["./wait-for-services.sh", "node", "dist/main.js"]
+CMD ["./wait-for-services.sh", "node", "dist/user-service/src/main.js"]
+
+

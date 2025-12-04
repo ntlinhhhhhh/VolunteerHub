@@ -11,7 +11,6 @@ import { RegisterUseCase } from './auth/application/use-cases/register.use-case'
 import { ValidateTokenUseCase } from './auth/application/use-cases/validate-token.use-case';
 import { getDatabaseConfig } from './auth/infrastructure/config/database.config';
 import { DatabaseService } from './auth/infrastructure/config/database.service';
-import { getJwtConfig } from './auth/infrastructure/config/jwt.config';
 import { DatabaseModule } from './auth/infrastructure/database/connection';
 import { Auth, AuthSchema } from './auth/infrastructure/database/schemas/auth.schema';
 import { Role, RoleSchema } from './auth/infrastructure/database/schemas/role.schema';
@@ -20,17 +19,20 @@ import { AuthRepository } from './auth/infrastructure/repositories/auth.reposito
 import { RoleRepository } from './auth/infrastructure/repositories/role.repository';
 import { AuthController } from './auth/presentation/controllers/auth.controller';
 import { HealthController } from './auth/presentation/controllers/health.controller';
-
 import * as redisStore from 'cache-manager-redis-store';
 import { PassportModule } from '@nestjs/passport';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
-import { JwtStrategy } from './auth/infrastructure/auth/jwt.strategy';
+import { JwtStrategy } from '@share/auth/jwt.strategy'
 import { GoogleController } from './auth/presentation/controllers/google.controller';
 import { GoogleAuthService } from './auth/infrastructure/google/google-auth.service';
 import { EmailService } from './auth/infrastructure/email/email.service';
 import { GoogleLoginUseCase } from './auth/application/use-cases/google-login.use-case';
 import { ForgotPasswordUseCase } from './auth/application/use-cases/forgot-password.use-case';
 import { ResetPasswordUseCase } from './auth/application/use-cases/reset-password.use-case';
+import { AdminLoginUseCase } from './auth/application/use-cases/admin-login.use-case';
+import { EventManagerLoginUseCase } from './auth/application/use-cases/event-manager.use-case';
+import { ShareModule } from '@share/share.module'
+import { RefreshTokenStrategy } from '@share/auth/refresh-token.strategy'
 
 @Module({
   imports: [
@@ -70,8 +72,8 @@ import { ResetPasswordUseCase } from './auth/application/use-cases/reset-passwor
             },
             ],
         }),
-        }),
-
+    }),
+    ShareModule,
   ],
   controllers: [AuthController, HealthController, GoogleController],
   providers: [
@@ -90,7 +92,10 @@ import { ResetPasswordUseCase } from './auth/application/use-cases/reset-passwor
     ForgotPasswordUseCase,
     LogOutUseCase,
     ResetPasswordUseCase,
+    AdminLoginUseCase,
+    EventManagerLoginUseCase,
     JwtStrategy,
+    RefreshTokenStrategy,
     {
       provide: 'USER_SERVICE',
       useFactory: () =>
@@ -101,6 +106,11 @@ import { ResetPasswordUseCase } from './auth/application/use-cases/reset-passwor
     },
   ],
   exports: [
+    'USER_SERVICE',
+    JwtModule,
+    PassportModule,
+    JwtStrategy,
+    RabbitMQModule,
     RegisterUseCase,
     LoginUseCase,
     RefreshTokenUseCase,
@@ -108,11 +118,8 @@ import { ResetPasswordUseCase } from './auth/application/use-cases/reset-passwor
     LogOutUseCase,
     ForgotPasswordUseCase,
     ResetPasswordUseCase,
-    JwtModule,
-    PassportModule,
-    JwtStrategy,
-    'USER_SERVICE',
-    RabbitMQModule,
+    AdminLoginUseCase,
+    EventManagerLoginUseCase,
   ],
 })
 export class AppModule {}

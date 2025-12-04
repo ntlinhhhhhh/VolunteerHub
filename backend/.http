@@ -7,7 +7,7 @@ POST http://localhost:8000/auth/register
 Content-Type: application/json
 
 {
-    "email": "nguyenthuqyli1nh26101200511@gmail.com",
+    "email": "nguyenthuylinh26012005@gmail.com",
     "username": "hehe",
     "fullName": "Nguyen Thuy Linh",
     "password": "123456"
@@ -18,8 +18,8 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "nguyenthuqyli1nh26101200511@gmail.com",
-    "password": "123456"
+    "email": "nguyenthuylinh26012005@gmail.com",
+    "password": "123"
 }
 
 ### for-got password
@@ -36,7 +36,7 @@ Content-Type: application/json
 
 {
     "email": "nguyenthuylinh26012005@gmail.com",
-    "token": "f8027e75417e47d87cb073a09c93eb6c78977499fe219a562e68375ed7f3cd18",
+    "token": "f5f23174628c26c3a44d96abbeb0ae3d14a9319909f8fe3e3e05e3129053db54",
     "newPassword": "123"
 }
 
@@ -50,15 +50,23 @@ Content-Type: application/json
     "password": "tlinh123"
 }
 
+### login-manager
+POST http://localhost:8000/auth/event-manager/login
+Content-Type: application/json
+
+{
+    "email": "tlinh_manager@gmail.com",
+    "password": "tlinh123"
+}
+
 
 ###
 POST http://localhost:8000/auth/refresh
 Content-Type: application/json
 Accept: application/json
 
-
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NjQ4MTU4NjIsImV4cCI6MTc2NTQyMDY2Miwic3ViIjoiNjkzMGYzYTE3ODI4MjU1YmQ5OTdlNDRiIn0.Z0_krFIB_0HPQXJnvbQXF_2MSnI4mlHHpTjTNdFvfMY"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhoZTFAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NjQ4NzQ4NjAsImV4cCI6MTc2NTQ3OTY2MCwic3ViIjoiNjkzMWQ0ZTc0ZDYyODRlNmM0MDAyY2ViIn0.DOSUHsalc0xitQM6s2LXYO-ynFjkgdwHDinqzCphmP0"
 }
 
 
@@ -68,17 +76,17 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMwZjNhMTc4MjgyNTViZDk5N2U0NGIiLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTc2NDgxNTg4MiwiZXhwIjoxNzY1NDIwNjgyLCJzdWIiOiI2OTMwZjNhMTc4MjgyNTViZDk5N2U0NGIifQ.vZWSqjMf-CS3rw9l5Es32tho1DKEFIcua52BD2gRg3w" 
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMxZDRlNzRkNjI4NGU2YzQwMDJjZWIiLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTc2NDg3NDE5MywiZXhwIjoxNzY1NDc4OTkzLCJzdWIiOiI2OTMxZDRlNzRkNjI4NGU2YzQwMDJjZWIifQ.rtdHUob6N5aqJR6m4LAsxERZOKQAUx7Qca69hx5Yv-8" 
 }
 
 
 ### Get my profile
 GET http://localhost:8000/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMxMjcwZTcyOWZiOWY0MThhMWFlODMiLCJlbWFpbCI6Im5ndXllbnRodXF5bGkxbmgyNjEwMTIwMDUxMUBnbWFpbC5jb20iLCJyb2xlSWQiOiI2OTMwZjM5OWQxYzNjNWNiNzEyZDI0MzciLCJyb2xlTmFtZSI6InZvbHVudGVlciIsInBlcm1pc3Npb25zIjpbImV2ZW50OnJlYWQiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicG9zdDpyZWFkIiwicG9zdDpjcmVhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZTpvd24iLCJjb21tZW50OmNyZWF0ZSIsImRhc2hib2FyZDp2aWV3Il0sImlhdCI6MTc2NDgyODk0OCwiZXhwIjoxNzY0ODI5ODQ4fQ.A52ztQcvEd4OjpJEDJDEdLk0GOzhmo_ctrwSa1sb8Js
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMxZDRlNzRkNjI4NGU2YzQwMDJjZWIiLCJlbWFpbCI6ImhoZTFAZ21haWwuY29tIiwicm9sZUlkIjoiNjkzMWM4ZGMzYmU5MzcwZTU3OTllYzY2Iiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjQ4NzU0MDEsImV4cCI6MTc2NDg3NjMwMX0.bBRtXOXD-EAZ9YcnLVhjw8Nca7r2HoNWUxoxagjWffU
 
 ### Get my profile
 PUT http://localhost:8000/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMwZjNhMTc4MjgyNTViZDk5N2U0NGIiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwicm9sZUlkIjoiNjkzMGYzOTlkMWMzYzVjYjcxMmQyNDM3Iiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjQ4MTU5MDMsImV4cCI6MTc2NDgxNjgwM30.8MiyTDBOSlyElickIDJx59Jgd-CvHqPa3oWB3zV355I
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMxOWQ4OGExZGVhNDU2MjkwNzYwNTUiLCJlbWFpbCI6Im5ndXllbnRodXF5bGkxMm5oMjYxMDEyMDA1MTFAZ21haWwuY29tIiwicm9sZUlkIjoiNjkzMGYzOTlkMWMzYzVjYjcxMmQyNDM3Iiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjQ4NTkzMzAsImV4cCI6MTc2NDg2MDIzMH0.ZzTtfm4Kbcw9gUjZ7bt5KshEaBI-RHi-YDqAU5JYSpY
 Content-Type: application/json
 
 {

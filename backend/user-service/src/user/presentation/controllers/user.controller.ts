@@ -6,10 +6,12 @@ import { GetUserProfileUseCase } from '../../application/use-cases/get-user-prof
 import { UpdateUserProfileUseCase } from '../../application/use-cases/update-user-profile.use-case';
 import { CreateUserDto } from '../../application/dto/create-user.dto';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
-import { JwtPayload } from 'jsonwebtoken';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { JwtAuthGuard } from '@share/auth/jwt-auth.guard';
 import { GetUserUseCase } from 'src/user/application/use-cases/get-user.use-case';
+import { RolesGuard } from '@share/auth/roles.guard'
+import { Roles } from '@share/auth/roles.decorator'
 
+// @UseGuards(RolesGuard)
 @Controller('users')
 export class UserController {
     constructor(
@@ -19,8 +21,8 @@ export class UserController {
         private readonly updateUserProfileUseCase: UpdateUserProfileUseCase
     ) { }
 
+    @Roles('admin')
     @Get()
-    // @Roles('admin')
     async findAll() {
         const users = await this.getUserUseCase.execute();
         return {
@@ -63,6 +65,7 @@ export class UserController {
     }
 
 
+    @Roles('ADMIN', 'EVENT_MANAGER')
     @Get(':id')
     async getUserById(@Param('id') id: string) {
         const user = await this.getUserProfileUseCase.execute(id);
@@ -102,8 +105,4 @@ export class UserController {
         const user = await this.getUserProfileUseCase.executeByEmail(data.email);
         return user.toSafeObject();
     }
-}
-
-function Roles(arg0: string): (target: UserController, propertyKey: "findAll", descriptor: TypedPropertyDescriptor<() => any>) => void | TypedPropertyDescriptor<() => any> {
-    throw new Error('Function not implemented.');
 }

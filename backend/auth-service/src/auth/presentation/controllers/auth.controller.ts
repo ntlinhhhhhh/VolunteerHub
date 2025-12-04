@@ -14,11 +14,18 @@ import { ForgotPasswordUseCase } from 'src/auth/application/use-cases/forgot-pas
 import { ResetPasswordUseCase } from 'src/auth/application/use-cases/reset-password.use-case';
 import { LogoutDto } from 'src/auth/application/dto/logout.dto';
 import { Public } from '@share/auth/public.decorator';
+import { AdminLoginUseCase } from 'src/auth/application/use-cases/admin-login.use-case';
+import { EventManagerLoginUseCase } from 'src/auth/application/use-cases/event-manager.use-case';
+import { RefreshTokenGuard } from '@share/auth/refresh-token.guard';
+import { Roles } from '@share/auth/roles.decorator';
+
 @Controller('auth')
 export class AuthController {
     constructor(
         private readonly registerUseCase: RegisterUseCase,
         private readonly loginUseCase: LoginUseCase,
+        private readonly adminLoginUseCase: AdminLoginUseCase,
+        private readonly eventManagerLoginUseCase: EventManagerLoginUseCase,
         private readonly refreshTokenUseCase: RefreshTokenUseCase,
         private readonly validateTokenUseCase: ValidateTokenUseCase,
         private readonly logoutUseCase: LogOutUseCase,
@@ -28,6 +35,7 @@ export class AuthController {
         private readonly rabbitmq: AmqpConnection,
     ) { }
 
+    @Public()
     @Post('register')
     @HttpCode(HttpStatus.CREATED)
     async register(@Body() registerDto: RegisterDto) {
@@ -54,7 +62,7 @@ export class AuthController {
             'notification_exchange',
             'user.registered',
             {
-                type: 'user_registered', 
+                type: 'user_registered',
                 userId: token.authId,
                 recipient: registerDto.email,
                 fullName: registerDto.fullName,
@@ -84,7 +92,7 @@ export class AuthController {
 
         return {
             success: true,
-            message: 'login succesful',
+            message: 'Volunteer login succesful',
             data: {
                 accessToken: token.accessToken,
                 refreshToken: token.refreshToken,
@@ -93,17 +101,18 @@ export class AuthController {
         };
     }
 
+    @Roles('admin')
     @Post('admin/login')
     @HttpCode(HttpStatus.OK)
     async adminLogin(@Body() loginDto: LoginDto) {
-        const token = await this.loginUseCase.execute(
+        const token = await this.adminLoginUseCase.execute(
             loginDto.email,
             loginDto.password
         );
 
         return {
             success: true,
-            message: 'login succesful',
+            message: 'Admin login succesful',
             data: {
                 accessToken: token.accessToken,
                 refreshToken: token.refreshToken,
@@ -112,18 +121,18 @@ export class AuthController {
         };
     }
 
-    @Post('refresh')
+    @Roles('event_manager')
+    @Post('event-manager/login')
     @HttpCode(HttpStatus.OK)
-    async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
-        const token = await this.refreshTokenUseCase.execute(
-            refreshTokenDto.refreshToken
+    async eventManagerLogin(@Body() loginDto: LoginDto) {
+        const token = await this.eventManagerLoginUseCase.execute(
+            loginDto.email,
+            loginDto.password
         );
-        console.log(token)
-
 
         return {
             success: true,
-            message: 'Token refresh',
+            message: 'Event manager login succesful',
             data: {
                 accessToken: token.accessToken,
                 refreshToken: token.refreshToken,
@@ -132,16 +141,48 @@ export class AuthController {
         };
     }
 
+    @UseGuards(RefreshTokenGuard)
+    @Post('refresh')
+    @HttpCode(HttpStatus.OK)
+    async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
+        try {
+            const token = await this.refreshTokenUseCase.execute(
+                refreshTokenDto.refreshToken
+            );
+            console.log('Refreshed token:', token);
+
+            return {
+                success: true,
+                message: 'Token refreshed',
+                data: {
+                    accessToken: token.accessToken,
+                    refreshToken: token.refreshToken,
+                    expiresIn: token.expiresIn,
+                }
+            };
+        } catch (err) {
+            console.error('Error refreshing token:', err);
+            return {
+                success: false,
+                message: err.message || 'Unknown error',
+            };
+        }
+    }
+
+
+    @Public()
     @Post('forgot-password')
     async forgotPassword(@Body('email') email: string) {
         return this.forgotPasswordUseCase.execute(email);
     }
 
+    @Public()
     @Post('reset-password')
     async resetPassword(@Body() body: { email: string; token: string; newPassword: string }) {
         return this.resetPasswordUseCase.execute(body.email, body.token, body.newPassword);
-    }    
+    }
 
+    @Roles('ADMIN', 'EVENT_MANAGER', 'VOLUNTEER')
     @Post('logout')
     @HttpCode(HttpStatus.OK)
     async logout(@Body() logoutDto: LogoutDto) {
@@ -152,12 +193,6 @@ export class AuthController {
             message: result.message,
         };
     }
-
-    // @Get('me')
-    // getProfile(@Request() req: ExpressRequest & { user: JwtPayload }) {
-    // return req.user;
-    // }
-
 
     @MessagePattern('auth.validate')
     async validateToken(@Payload() data: { token: string }) {
@@ -193,8 +228,4 @@ export class AuthController {
             expiresIn: token.expiresIn,
         };
     }
-}
-
-function InjectRabbitMQ(): (target: typeof AuthController, propertyKey: undefined, parameterIndex: 8) => void {
-    throw new Error('Function not implemented.');
 }

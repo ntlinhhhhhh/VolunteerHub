@@ -51,7 +51,7 @@ export class RegisterUseCase {
                 userId: auth.id,
                 email: auth.email,
                 roleId: auth.roleId,
-                roleName: 'volunteer',
+                roleName: auth.role?.name,
                 permissions: auth.role?.permissions || [],
             },
             {

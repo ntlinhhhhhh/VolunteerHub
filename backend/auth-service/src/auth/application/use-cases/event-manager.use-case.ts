@@ -10,7 +10,7 @@ import * as cacheManager from '@nestjs/cache-manager';
 import { Token } from "src/auth/domain/entities/token.entity";
 
 @Injectable()
-export class AdminLoginUseCase{
+export class EventManagerLoginUseCase {
     constructor(
         @Inject(AuthRepository)
         private readonly authRepository: IAuthRepository,
@@ -23,32 +23,30 @@ export class AdminLoginUseCase{
     ) {}
 
     async execute(email: string, password: string) {
-        const admin = await this.authRepository.findByEmail(email);
+        const eventManger = await this.authRepository.findByEmail(email);
 
-        if (!admin) {
-            console.log('!admin')
+        if (!eventManger) {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        const role = await this.roleRepository.findById(admin.roleId);
-        if (!role || role.name !== 'admin') {
+        const role = await this.roleRepository.findById(eventManger.roleId);
+        if (!role || role.name !== 'event_manager') {
             throw new UnauthorizedException('Access denied');
         }
 
-        const isPasswordValid = await bcrypt.compare(password, admin?.passwordHash);
+        const isPasswordValid = await bcrypt.compare(password, eventManger?.passwordHash);
         
         if (!isPasswordValid) {
-            console.log('isMatch')
             throw new UnauthorizedException('Invalid credentials');
         }
 
         const accessToken = this.jwtService.sign(
             {
-                userId: admin.id,
-                email: admin.email,
-                roleId: admin.roleId,
+                userId: eventManger.id,
+                email: eventManger.email,
+                roleId: eventManger.roleId,
                 roleName: role.name,
-                permissions: admin.role?.permissions || [],
+                permissions: eventManger.role?.permissions || [],
             },
             {
                 secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
@@ -57,15 +55,15 @@ export class AdminLoginUseCase{
         );
 
         const refreshToken = this.jwtService.sign(
-            { email: admin.email, type: 'refresh' },
+            { email: eventManger.email, type: 'refresh' },
             {
                 secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
                 expiresIn: '7d',
-                subject: admin.id.toString(),
+                subject: eventManger.id.toString(),
             }
         );
 
-        await this.cache.set(`refresh:${admin.id}`, refreshToken, 7 * 24 * 60 * 60);
+        await this.cache.set(`refresh:${eventManger.id}`, refreshToken, 7 * 24 * 60 * 60);
         return new Token(accessToken, refreshToken, 900);
     }
 }
