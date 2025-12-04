@@ -7,7 +7,7 @@ POST http://localhost:8000/auth/register
 Content-Type: application/json
 
 {
-    "email": "nguyenthuylinh26012005@gmail.com",
+    "email": "nguyenthuqyli1nh26101200511@gmail.com",
     "username": "hehe",
     "fullName": "Nguyen Thuy Linh",
     "password": "123456"
@@ -18,8 +18,8 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "nguyenthuylinh26012005@gmail.com",
-    "password": "123"
+    "email": "nguyenthuqyli1nh26101200511@gmail.com",
+    "password": "123456"
 }
 
 ### for-got password
@@ -74,7 +74,7 @@ Accept: application/json
 
 ### Get my profile
 GET http://localhost:8000/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMwZjNhMTc4MjgyNTViZDk5N2U0NGIiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwicm9sZUlkIjoiNjkzMGYzOTlkMWMzYzVjYjcxMmQyNDM3Iiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjQ4MTU5MDMsImV4cCI6MTc2NDgxNjgwM30.8MiyTDBOSlyElickIDJx59Jgd-CvHqPa3oWB3zV355I
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMxMjcwZTcyOWZiOWY0MThhMWFlODMiLCJlbWFpbCI6Im5ndXllbnRodXF5bGkxbmgyNjEwMTIwMDUxMUBnbWFpbC5jb20iLCJyb2xlSWQiOiI2OTMwZjM5OWQxYzNjNWNiNzEyZDI0MzciLCJyb2xlTmFtZSI6InZvbHVudGVlciIsInBlcm1pc3Npb25zIjpbImV2ZW50OnJlYWQiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicG9zdDpyZWFkIiwicG9zdDpjcmVhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZTpvd24iLCJjb21tZW50OmNyZWF0ZSIsImRhc2hib2FyZDp2aWV3Il0sImlhdCI6MTc2NDgyODk0OCwiZXhwIjoxNzY0ODI5ODQ4fQ.A52ztQcvEd4OjpJEDJDEdLk0GOzhmo_ctrwSa1sb8Js
 
 ### Get my profile
 PUT http://localhost:8000/users/me
