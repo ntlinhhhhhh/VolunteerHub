@@ -26,12 +26,11 @@ import { GoogleAuthService } from 'auth/infrastructure/google/google-auth.servic
 import { GoogleController } from 'auth/presentation/controllers/google.controller';
 import { GoogleLoginUseCase } from 'auth/application/use-cases/google-login.use-case';
 import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy } from 'auth/infrastructure/strategies/jwt.strategy';
 import { ForgotPasswordUseCase } from 'auth/application/use-cases/forgot-password.use-case';
 import { ResetPasswordUseCase } from 'auth/application/use-cases/reset-password.use-case';
 import { EmailService } from 'auth/infrastructure/email/email.service';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
-// import { RabbitMQService } from 'auth/infrastructure/rabbitmq/rabbitmq.service';
+import { JwtStrategy } from './auth/infrastructure/auth/jwt.strategy';
 
 @Module({
   imports: [

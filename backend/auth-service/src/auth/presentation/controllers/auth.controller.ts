@@ -13,6 +13,7 @@ import { LogOutUseCase } from 'auth/application/use-cases/logout.use-case';
 import { ForgotPasswordUseCase } from 'auth/application/use-cases/forgot-password.use-case';
 import { ResetPasswordUseCase } from 'auth/application/use-cases/reset-password.use-case';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Public } from 'auth/infrastructure/auth/public.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -73,6 +74,7 @@ export class AuthController {
         };
     }
 
+    @Public()
     @Post('login')
     @HttpCode(HttpStatus.OK)
     async login(@Body() loginDto: LoginDto) {
