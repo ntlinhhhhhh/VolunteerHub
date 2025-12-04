@@ -1,52 +1,6 @@
-POST http://localhost:4000/auth/register
-Content-Type: application/json
-
-{
-    "email": "tlin1h11111@gmail.com",
-    "username": "duo11111n123ghoang1",
-    "fullName": "Nguyen Thuy Linh",
-    "password": "123456"
-}
-
-###
-GET http://localhost:4000/health
-
-### login
-POST http://localhost:4000/auth/login
-Content-Type: application/json
-
-{
-    "email": "tlinh1@gmail.com",
-    "password": "123456"
-}
-
-###
-POST http://localhost:4000/auth/register
-Content-Type: application/json
-
-{
-    "email": "kkk@gmail.com",
-    "password": "123456"
-}
-
-
-###
-GET http://localhost:4000/redis/test
-
 ###
 GET http://localhost:8001/services
 Accept: application/json
-
-
-###
-POST http://localhost:8000/auth/login
-Content-Type: application/json
-
-{
-    "email": "hehehe@gmail.com",
-    "password": "123456"
-}
-
 
 ###
 POST http://localhost:8000/auth/register
@@ -64,8 +18,8 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "hehe1@gmail.com",
-    "password": "123456"
+    "email": "nguyenthuylinh26012005@gmail.com",
+    "password": "123"
 }
 
 ### for-got password
@@ -82,8 +36,8 @@ Content-Type: application/json
 
 {
     "email": "nguyenthuylinh26012005@gmail.com",
-    "token": "d2f00c7affc33363fc796877b1a61b4550ab731cea2d09d0b740f11ffcfe3e0c",
-    "newPassword": "123!"
+    "token": "f8027e75417e47d87cb073a09c93eb6c78977499fe219a562e68375ed7f3cd18",
+    "newPassword": "123"
 }
 
 
@@ -104,7 +58,7 @@ Accept: application/json
 
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhlaGVAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NjQ1OTkxMDQsImV4cCI6MTc2NTIwMzkwNCwic3ViIjoiNjkyZGE1M2RmZWM4ODk5YzY1MDUxYzAyIn0.8bGYTV_TyJhjD8GLs-0_JCYGgH465mz88APZYrk6afo"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NjQ4MTU4NjIsImV4cCI6MTc2NTQyMDY2Miwic3ViIjoiNjkzMGYzYTE3ODI4MjU1YmQ5OTdlNDRiIn0.Z0_krFIB_0HPQXJnvbQXF_2MSnI4mlHHpTjTNdFvfMY"
 }
 
 
@@ -114,17 +68,17 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhlaGVAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NjQ1OTkyMDAsImV4cCI6MTc2NTIwNDAwMCwic3ViIjoiNjkyZGE1M2RmZWM4ODk5YzY1MDUxYzAyIn0.TK4CyK56YxEHXKX7wv5cP1whQ1bxt6UsphjkHLOX1Dk" 
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMwZjNhMTc4MjgyNTViZDk5N2U0NGIiLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTc2NDgxNTg4MiwiZXhwIjoxNzY1NDIwNjgyLCJzdWIiOiI2OTMwZjNhMTc4MjgyNTViZDk5N2U0NGIifQ.vZWSqjMf-CS3rw9l5Es32tho1DKEFIcua52BD2gRg3w" 
 }
 
 
 ### Get my profile
-GET http://localhost:4002/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJlZDBkMTNmMzc5NzQ0ODZkZDIwN2MiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDExNUBnbWFpbC5jb20iLCJyb2xlSWQiOiI2OTJlYmU4ZWY5OWY5ZmNlNTE5ZDM3NGYiLCJyb2xlTmFtZSI6InZvbHVudGVlciIsInBlcm1pc3Npb25zIjpbImV2ZW50OnJlYWQiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicG9zdDpyZWFkIiwicG9zdDpjcmVhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZTpvd24iLCJjb21tZW50OmNyZWF0ZSIsImRhc2hib2FyZDp2aWV3Il0sImlhdCI6MTc2NDY3NTgxMywiZXhwIjoxNzY0Njc2NzEzfQ.2360irsWDPl9sEGQFuIZrkrK3dWGYBOqyPvbnltJvlY
+GET http://localhost:8000/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMwZjNhMTc4MjgyNTViZDk5N2U0NGIiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwicm9sZUlkIjoiNjkzMGYzOTlkMWMzYzVjYjcxMmQyNDM3Iiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjQ4MTU5MDMsImV4cCI6MTc2NDgxNjgwM30.8MiyTDBOSlyElickIDJx59Jgd-CvHqPa3oWB3zV355I
 
 ### Get my profile
 PUT http://localhost:8000/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJkYTUzZGZlYzg4OTljNjUwNTFjMDIiLCJlbWFpbCI6ImhlaGVAZ21haWwuY29tIiwicm9sZUlkIjoiNjkyZGExMWE0NDA3YTQ2YjYyZDJlNjExIiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjQ1OTkyMjIsImV4cCI6MTc2NDYwMDEyMn0.x29waD_4PsQ95pdOg4hhYcT6ZO2sCdDNe5TDmpAQpuI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMwZjNhMTc4MjgyNTViZDk5N2U0NGIiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwicm9sZUlkIjoiNjkzMGYzOTlkMWMzYzVjYjcxMmQyNDM3Iiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjQ4MTU5MDMsImV4cCI6MTc2NDgxNjgwM30.8MiyTDBOSlyElickIDJx59Jgd-CvHqPa3oWB3zV355I
 Content-Type: application/json
 
 {
@@ -136,7 +90,7 @@ Content-Type: application/json
 }
 
 ### Get my profile other user
-GET http://localhost:8000/users/692d357cd13b6bca449ae4d9
+GET http://localhost:8000/users/6930f3a1b837edfdbdfefaac
 
 ###
 POST https://oauth2.googleapis.com/token
@@ -152,7 +106,7 @@ code=4%2F0Ab32j9271_Gmz0sHwgAqCIjUZ1mEcGy7hgQctbkZTkOXEJ_o2FiVjJrAGNfXoVl4XtoioA
 GET  http://localhost:8000/auth/google/callback?code=4/0Ab32j90SHvUtBwoQIPq4IydxLdqPQWhhtmBI44HB9oC2yCsDv1Qs-zIj3stAVeaB3thqzg4/0Ab32j92jkwxtQuzzaAw_zQc5IxIkyrhHSx5Ld575VcpQZaeMBFrLjCJeKE2DK9vQLLjFZA
 
 ### Send a notification (email + DB)
-POST http://localhost:4004/notifications/send
+POST http://localhost:8000/notifications/send
 Content-Type: application/json
 
 {
@@ -166,10 +120,10 @@ Content-Type: application/json
 }
 
 ###
-PATCH http://localhost:4004/notifications/692f3116eb9afbdaae05d16b/read
+PATCH http://localhost:8000/notifications/692f3116eb9afbdaae05d16b/read
 
 ### Test gửi email
-POST http://localhost:4004/notifications/test-email
+POST http://localhost:8000/notifications/test-email
 Content-Type: application/json
 
 {
