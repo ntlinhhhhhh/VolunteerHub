@@ -1,8 +1,8 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { Auth } from "auth/domain/entities/auth.entity";
-import { IAuthRepository } from "auth/domain/repositories/auth.repository.interface";
-import { IRoleRepository } from "auth/domain/repositories/role.repository.interface";
 import bcrypt from 'bcryptjs';
+import { Auth } from "src/auth/domain/entities/auth.entity";
+import { IAuthRepository } from "src/auth/domain/repositories/auth.repository.interface";
+import { IRoleRepository } from "src/auth/domain/repositories/role.repository.interface";
 
 @Injectable()
 export class CreateAdminUseCase {

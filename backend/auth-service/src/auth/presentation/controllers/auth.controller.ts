@@ -8,13 +8,12 @@ import { RegisterDto } from '../../application/dto/register.dto';
 import { LoginDto } from '../../application/dto/login.dto';
 import { RefreshTokenDto } from '../../application/dto/refresh-token.dto';
 import { firstValueFrom } from 'rxjs';
-import { LogoutDto } from 'auth/application/dto/logout.dto';
-import { LogOutUseCase } from 'auth/application/use-cases/logout.use-case';
-import { ForgotPasswordUseCase } from 'auth/application/use-cases/forgot-password.use-case';
-import { ResetPasswordUseCase } from 'auth/application/use-cases/reset-password.use-case';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Public } from 'auth/infrastructure/auth/public.decorator';
-
+import { LogOutUseCase } from 'src/auth/application/use-cases/logout.use-case';
+import { ForgotPasswordUseCase } from 'src/auth/application/use-cases/forgot-password.use-case';
+import { ResetPasswordUseCase } from 'src/auth/application/use-cases/reset-password.use-case';
+import { LogoutDto } from 'src/auth/application/dto/logout.dto';
+import { Public } from '@share/auth/public.decorator';
 @Controller('auth')
 export class AuthController {
     constructor(

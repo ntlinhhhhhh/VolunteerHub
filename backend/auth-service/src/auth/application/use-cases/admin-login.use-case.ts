@@ -3,9 +3,9 @@ import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from 'bcryptjs';
 import type { Cache } from 'cache-manager';
-import { IAuthRepository } from "auth/domain/repositories/auth.repository.interface";
-import { IRoleRepository } from "auth/domain/repositories/role.repository.interface";
-import { AuthRepository } from "auth/infrastructure/repositories/auth.repository";
+import { IAuthRepository } from "src/auth/domain/repositories/auth.repository.interface";
+import { IRoleRepository } from "src/auth/domain/repositories/role.repository.interface";
+import { AuthRepository } from "src/auth/infrastructure/repositories/auth.repository";
 
 @Injectable()
 export class AdminLoginUseCase{

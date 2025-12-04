@@ -1,7 +1,7 @@
 import { Controller, Get, Query, Res, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleLoginUseCase } from 'auth/application/use-cases/google-login.use-case';
 import express from 'express';
+import { GoogleLoginUseCase } from 'src/auth/application/use-cases/google-login.use-case';
 
 @Controller('auth/google')
 export class GoogleController {

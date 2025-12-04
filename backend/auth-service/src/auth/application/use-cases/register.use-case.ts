@@ -4,10 +4,10 @@ import { IAuthRepository } from '../../domain/repositories/auth.repository.inter
 import { Token } from '../../domain/entities/token.entity';
 import { Auth } from '../../domain/entities/auth.entity';
 import bcrypt from 'bcryptjs';
-import { IRoleRepository } from 'auth/domain/repositories/role.repository.interface';
-import { AuthToken } from 'auth/domain/entities/authtoken.entity';
 import type { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
+import { AuthToken } from 'src/auth/domain/entities/authtoken.entity';
+import { IRoleRepository } from 'src/auth/domain/repositories/role.repository.interface';
 
 @Injectable()
 export class RegisterUseCase {

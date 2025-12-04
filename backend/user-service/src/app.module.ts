@@ -11,7 +11,7 @@ import { UserRepository } from './user/infrastructure/repositories/user.reposito
 import { IUserRepository } from './user/domain/repositories/user.repository.interface';
 import { User, UserSchema } from './user/infrastructure/database/schemas/user.schema';
 import { JwtStrategy } from './user/infrastructure/strategies/jwt.strategy';
-import { GetUserUseCase } from 'user/application/use-cases/get-user.use-case';
+import { GetUserUseCase } from './user/application/use-cases/get-user.use-case';
 
 @Module({
   imports: [

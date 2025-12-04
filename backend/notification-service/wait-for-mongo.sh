@@ -1,12 +1,15 @@
 #!/bin/sh
-set -e
 
-host="$1"
-shift
-
-until nc -z "$host" 27017; do
-  echo "Waiting for MongoDB at $host..."
-  sleep 2
+# Chờ nhiều host:port trước khi chạy app
+for hp in "volunteer-mongo:27017" "rabbitmq:5672"
+do
+  host=$(echo $hp | cut -d: -f1)
+  port=$(echo $hp | cut -d: -f2)
+  while ! nc -z $host $port; do
+    echo "Waiting for $host:$port..."
+    sleep 2
+  done
 done
 
+# Chạy lệnh Node app
 exec "$@"

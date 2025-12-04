@@ -1,5 +1,5 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { IAuthRepository } from "auth/domain/repositories/auth.repository.interface";
+import { IAuthRepository } from "src/auth/domain/repositories/auth.repository.interface";
 
 @Injectable()
 export class UnlockUserUseCase {

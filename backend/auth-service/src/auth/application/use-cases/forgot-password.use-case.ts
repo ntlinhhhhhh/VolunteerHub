@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { IAuthRepository } from 'auth/domain/repositories/auth.repository.interface';
-import { EmailService } from 'auth/infrastructure/email/email.service';
 import crypto from 'crypto';
+import { IAuthRepository } from 'src/auth/domain/repositories/auth.repository.interface';
+import { EmailService } from 'src/auth/infrastructure/email/email.service';
 
 @Injectable()
 export class ForgotPasswordUseCase {

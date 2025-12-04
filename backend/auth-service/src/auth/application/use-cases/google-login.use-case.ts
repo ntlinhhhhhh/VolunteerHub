@@ -3,12 +3,12 @@ import { JwtService } from '@nestjs/jwt';
 import { GoogleTokenResponseDto } from '../dto/google-token-response.dto';
 import { GoogleUserProfileDto } from '../dto/google-user-profile.dto';
 import { GoogleLoginResultDto } from '../dto/google-login-result.dto';
-import { GoogleAuthService } from 'auth/infrastructure/google/google-auth.service';
-import { AuthRepository } from 'auth/infrastructure/repositories/auth.repository';
-import { IRoleRepository } from 'auth/domain/repositories/role.repository.interface';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
+import { AuthRepository } from 'src/auth/infrastructure/repositories/auth.repository';
+import { GoogleAuthService } from 'src/auth/infrastructure/google/google-auth.service';
+import { IRoleRepository } from 'src/auth/domain/repositories/role.repository.interface';
 
 @Injectable()
 export class GoogleLoginUseCase {

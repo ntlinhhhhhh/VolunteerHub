@@ -1,9 +1,10 @@
+# version: "3.9"
+
 networks:
   volunteerhub-net:
     driver: bridge
 
 services:
-  # MongoDB cho các service
   mongo:
     image: mongo:6
     container_name: volunteer-mongo
@@ -13,7 +14,6 @@ services:
       - volunteerhub-net
     restart: unless-stopped
 
-  # Redis
   redis:
     image: redis:7
     container_name: redis
@@ -23,89 +23,72 @@ services:
       - volunteerhub-net
     restart: unless-stopped
 
-  # Auth-service
-  auth-service:
-    build:
-      context: ./auth-service
-      dockerfile: Dockerfile
-    container_name: auth-service
-    env_file:
-      - ./auth-service/.env
-    networks:
-      - volunteerhub-net
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
-    ports:
-      - "4000:4000"
-    depends_on:
-      - mongo
-      - redis
-    restart: unless-stopped
-
-  # User-service
-  user-service:
-    build:
-      context: ./user-service
-      dockerfile: Dockerfile
-    container_name: user-service
-    env_file:
-      - ./user-service/.env
-    networks:
-      - volunteerhub-net
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
-    ports:
-      - "4002:4002"
-    depends_on:
-      - mongo
-      - redis
-    restart: unless-stopped
-    environment:
-      - JWT_ACCESS_SECRET=your_access_secret
-      - JWT_REFRESH_SECRET=your_refresh_secret
-      - MONGO_URI=mongodb://volunteer-mongo:27017/user-service
-
-  notification-service:
-    build: 
-      context: ./notification-service
-      dockerfile: Dockerfile
-    container_name: notification-service
-    env_file:
-      - ./notification-service/.env
-    ports:
-      - '4004:4004'
-    networks:
-      - volunteerhub-net
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
-    depends_on:
-      - rabbitmq
-      - mongo
-    restart: unless-stopped
-    environment:
-      - RABBITMQ_URL=amqp://rabbitmq:5672
-      - MONGO_URI=mongodb://volunteer-mongo:27017/notification-service
-
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
-      - '5672:5672'      # AMQP protocol
-      - '15672:15672'    # Web management UI
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - volunteerhub-net
+    restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    container_name: auth-service
+    env_file:
+      - ./auth-service/.env
+    networks:
+      - volunteerhub-net
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
     restart: unless-stopped
 
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: user-service
+    env_file:
+      - ./user-service/.env
+    networks:
+      - volunteerhub-net
+    ports:
+      - "4002:4002"
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    restart: unless-stopped
 
-  # Kong Gateway (DB-less mode)
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: notification-service
+    env_file:
+      - ./notification-service/.env
+    networks:
+      - volunteerhub-net
+    ports:
+      - "4004:4004"
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    restart: unless-stopped
+
   kong:
     image: kong:3.5
     container_name: kong
@@ -115,10 +98,10 @@ services:
       - auth-service
       - user-service
     ports:
-      - "8000:8000"   # proxy
-      - "8001:8001"   # admin
+      - "8000:8000"
+      - "8001:8001"
     environment:
-      KONG_DATABASE: "off"  # DB-less mode
+      KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: "/usr/local/kong/declarative/kong.yml"
       KONG_PROXY_ACCESS_LOG: /dev/stdout
       KONG_ADMIN_ACCESS_LOG: /dev/stdout

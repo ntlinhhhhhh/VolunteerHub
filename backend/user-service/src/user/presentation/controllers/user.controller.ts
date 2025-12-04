@@ -7,8 +7,8 @@ import { UpdateUserProfileUseCase } from '../../application/use-cases/update-use
 import { CreateUserDto } from '../../application/dto/create-user.dto';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
 import { JwtPayload } from 'jsonwebtoken';
-import { GetUserUseCase } from 'user/application/use-cases/get-user.use-case';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { GetUserUseCase } from 'src/user/application/use-cases/get-user.use-case';
 
 @Controller('users')
 export class UserController {

@@ -22,15 +22,15 @@ import { AuthController } from './auth/presentation/controllers/auth.controller'
 import { HealthController } from './auth/presentation/controllers/health.controller';
 
 import * as redisStore from 'cache-manager-redis-store';
-import { GoogleAuthService } from 'auth/infrastructure/google/google-auth.service';
-import { GoogleController } from 'auth/presentation/controllers/google.controller';
-import { GoogleLoginUseCase } from 'auth/application/use-cases/google-login.use-case';
 import { PassportModule } from '@nestjs/passport';
-import { ForgotPasswordUseCase } from 'auth/application/use-cases/forgot-password.use-case';
-import { ResetPasswordUseCase } from 'auth/application/use-cases/reset-password.use-case';
-import { EmailService } from 'auth/infrastructure/email/email.service';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { JwtStrategy } from './auth/infrastructure/auth/jwt.strategy';
+import { GoogleController } from './auth/presentation/controllers/google.controller';
+import { GoogleAuthService } from './auth/infrastructure/google/google-auth.service';
+import { EmailService } from './auth/infrastructure/email/email.service';
+import { GoogleLoginUseCase } from './auth/application/use-cases/google-login.use-case';
+import { ForgotPasswordUseCase } from './auth/application/use-cases/forgot-password.use-case';
+import { ResetPasswordUseCase } from './auth/application/use-cases/reset-password.use-case';
 
 @Module({
   imports: [

@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, Inject } from '@nestjs/common';
-import { IAuthRepository } from 'auth/domain/repositories/auth.repository.interface';
 import bcrypt from 'bcrypt';
+import { IAuthRepository } from 'src/auth/domain/repositories/auth.repository.interface';
 
 @Injectable()
 export class ResetPasswordUseCase {
