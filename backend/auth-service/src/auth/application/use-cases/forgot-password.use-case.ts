@@ -1,29 +1,47 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import crypto from 'crypto';
-import { IAuthRepository } from 'src/auth/domain/repositories/auth.repository.interface';
-import { EmailService } from 'src/auth/infrastructure/email/email.service';
-
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { AUTH_REPOSITORY } from "../../domain/repositories/auth.repository.interface";
+import type { IAuthRepository } from "../../domain/repositories/auth.repository.interface";
 @Injectable()
 export class ForgotPasswordUseCase {
-  constructor(
-    @Inject('IAuthRepository') private readonly authRepository: IAuthRepository,
-    private readonly emailService: EmailService,
-  ) {}
+    constructor(
+        @Inject(AUTH_REPOSITORY) private readonly authRepository: IAuthRepository,
+        private readonly rabbitmq: AmqpConnection,
 
-  async execute(email: string) {
-    const auth = await this.authRepository.findByEmail(email);
-    if (!auth) throw new NotFoundException('Email not found');
+    ) { console.log('✅ ForgotPasswordUseCase constructor called'); }
 
-    const token = crypto.randomBytes(32).toString('hex');
-    const expires = new Date(Date.now() + 3600_000);
+    async execute(email: string) {
+        const auth = await this.authRepository.findByEmail(email);
+        if (!auth) throw new NotFoundException('Email not found');
 
-    auth.resetPasswordToken = token;
-    auth.resetPasswordExpires = expires;
+        const token = crypto.randomBytes(32).toString('hex');
+        const expires = new Date(Date.now() + 3600_000);
 
-    await this.authRepository.updateAuth(auth.id, auth);
+        auth.resetPasswordToken = token;
+        auth.resetPasswordExpires = expires;
 
-    await this.emailService.sendResetPassword(email, token);
+        await this.authRepository.updateAuth(auth.id, auth);
 
-    return { message: 'Reset password email sent' };
-  }
+        this.rabbitmq.publish(
+            'notification_exchange',
+            'user.reset_password',
+            {
+                type: 'password_reset',
+                userId: auth.id,
+                recipient: email,
+                data: {
+                    username: 'tlinh',
+                    resetUrl: `https://frontend.com/reset-password?token=${token}&email=${email}`,
+                    title: 'Reset Password',
+                    message: 'Click link để đổi mật khẩu của bạn.',
+                }
+            }
+        );
+
+        return {
+            message: 'Reset password email sent',
+            token: `${token}`,
+        };
+    }
 }

@@ -61,14 +61,6 @@ export class SendEmailNotificationUseCase {
             this.logger.log(`✅ Email sent successfully to ${recipient}`);
         } catch (error) {
             this.logger.error(`❌ Failed to send email to ${recipient}:`, error.message);
-
-            // Update status to FAILED with error message
-            // await this.notificationRepository.updateStatus(
-            //   notification.id,
-            //   NotificationStatus.FAILED,
-            //   error.message
-            // );
-
             throw error;
         }
     }

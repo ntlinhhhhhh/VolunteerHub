@@ -3,24 +3,24 @@ import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from 'bcryptjs';
-import { IAuthRepository } from "src/auth/domain/repositories/auth.repository.interface";
-import { IRoleRepository } from "src/auth/domain/repositories/role.repository.interface";
-import { AuthRepository } from "src/auth/infrastructure/repositories/auth.repository";
+import { AUTH_REPOSITORY } from "../../domain/repositories/auth.repository.interface";
+import type { IAuthRepository } from "../../domain/repositories/auth.repository.interface";
+import { ROLE_REPOSITORY } from "../../domain/repositories/role.repository.interface";
+import type { IRoleRepository } from "../../domain/repositories/role.repository.interface";
+
 import * as cacheManager from '@nestjs/cache-manager';
 import { Token } from "src/auth/domain/entities/token.entity";
 
 @Injectable()
 export class EventManagerLoginUseCase {
     constructor(
-        @Inject(AuthRepository)
-        private readonly authRepository: IAuthRepository,
-        @Inject(IRoleRepository)
-        private readonly roleRepository: IRoleRepository,
+        @Inject(AUTH_REPOSITORY) private readonly authRepository: IAuthRepository,
+        @Inject(ROLE_REPOSITORY) private readonly roleRepository: IRoleRepository,
         private readonly jwtService: JwtService,
         @Inject(CACHE_MANAGER)
         private readonly cache: cacheManager.Cache,
         private readonly configService: ConfigService,
-    ) {}
+    ) { console.log('✅ EventManagerLoginUseCase constructor called'); }
 
     async execute(email: string, password: string) {
         const eventManger = await this.authRepository.findByEmail(email);
@@ -35,7 +35,7 @@ export class EventManagerLoginUseCase {
         }
 
         const isPasswordValid = await bcrypt.compare(password, eventManger?.passwordHash);
-        
+
         if (!isPasswordValid) {
             throw new UnauthorizedException('Invalid credentials');
         }

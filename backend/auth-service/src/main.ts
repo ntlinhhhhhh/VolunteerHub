@@ -8,6 +8,7 @@ async function bootstrap() {
     const logger = new Logger('AuthService');
 
     try {
+
         const app = await NestFactory.create(AppModule);
 
         app.useGlobalPipes(

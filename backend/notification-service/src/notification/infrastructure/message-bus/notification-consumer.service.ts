@@ -56,20 +56,23 @@ export class NotificationConsumerService implements OnModuleInit {
 
     private mapMessageType(type: string): NotificationType {
         const mapping: Record<string, NotificationType> = {
-            'user.registered': NotificationType.USER_REGISTERED,
-            'user.login': NotificationType.USER_LOGIN,
-            'event.created': NotificationType.EVENT_CREATED,
-            'event.approved': NotificationType.EVENT_APPROVED,
-            'event.rejected': NotificationType.EVENT_REJECTED,
-            'event.cancelled': NotificationType.EVENT_CANCELLED,
-            'registration.submitted': NotificationType.REGISTRATION_SUBMITTED,
-            'registration.accepted': NotificationType.REGISTRATION_ACCEPTED,
-            'registration.rejected': NotificationType.REGISTRATION_REJECTED,
-            'registration.completed': NotificationType.REGISTRATION_COMPLETED,
-            'new.post': NotificationType.NEW_POST_ON_EVENT,
-            'new.comment': NotificationType.NEW_COMMENT_ON_POST,
-            'new.event.pending': NotificationType.NEW_EVENT_PENDING,
-            'new.volunteer.registered': NotificationType.NEW_VOLUNTEER_REGISTERED,
+            'user_registered': NotificationType.USER_REGISTERED,
+            'user_login': NotificationType.USER_LOGIN,
+            'password_reset': NotificationType.PASSWORD_RESET,
+            'user_locked': NotificationType.USER_LOCKED,
+            'user_unlocked': NotificationType.USER_UNLOCKED,
+            'event_created': NotificationType.EVENT_CREATED,
+            'event_approved': NotificationType.EVENT_APPROVED,
+            'event_rejected': NotificationType.EVENT_REJECTED,
+            'event_cancelled': NotificationType.EVENT_CANCELLED,
+            'registration_submitted': NotificationType.REGISTRATION_SUBMITTED,
+            'registration_accepted': NotificationType.REGISTRATION_ACCEPTED,
+            'registration_rejected': NotificationType.REGISTRATION_REJECTED,
+            'registration_completed': NotificationType.REGISTRATION_COMPLETED,
+            'new_post_on_event': NotificationType.NEW_POST_ON_EVENT,
+            'new_comment_on_post': NotificationType.NEW_COMMENT_ON_POST,
+            'new_event_pending': NotificationType.NEW_EVENT_PENDING,
+            'new_volunteer_registered': NotificationType.NEW_VOLUNTEER_REGISTERED,
         };
 
         return mapping[type] || NotificationType.USER_REGISTERED;

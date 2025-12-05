@@ -8,4 +8,5 @@ export interface IRoleRepository {
     update(id: string, data: Partial<UserRole>): Promise<UserRole>;
     delete(id: string): Promise<void>;
 }
-export const IRoleRepository = Symbol('IRoleRepository');
+
+export const ROLE_REPOSITORY = 'ROLE_REPOSITORY';

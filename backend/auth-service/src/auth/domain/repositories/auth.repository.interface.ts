@@ -1,4 +1,4 @@
-import { Auth as AuthEntity } from '../entities/auth.entity';
+import { Auth, Auth as AuthEntity } from '../entities/auth.entity';
 import { UserRole } from '../entities/user-role.entity';
 
 export interface IAuthRepository {
@@ -7,7 +7,7 @@ export interface IAuthRepository {
     create(email: string, passwordHash: string| null, roleId: string): Promise<AuthEntity>;
     updatePassword(id: string, passwordHash: string): Promise<void>;
     updateRole(id: string, roleId: string): Promise<void>;
-    updateAuth(id: string, auth: AuthEntity): Promise<void>;
+    updateAuth(id: string, authData: Partial<Auth>): Promise<void>;
     delete(id: string): Promise<void>;
 
     // sercurity method
@@ -22,4 +22,4 @@ export interface IAuthRepository {
 
 }
 
-export const IAuthRepository = Symbol('IAuthRepository');
+export const AUTH_REPOSITORY = 'AUTH_REPOSITORY';

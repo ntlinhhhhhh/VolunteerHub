@@ -3,6 +3,8 @@ export enum NotificationType {
   USER_REGISTERED = 'user_registered',
   USER_LOGIN = 'user_login',
   PASSWORD_RESET = 'password_reset',
+  USER_LOCKED = 'user_locked',
+  USER_UNLOCKED = 'user_unlocked',
   
   // Event events
   EVENT_CREATED = 'event_created',

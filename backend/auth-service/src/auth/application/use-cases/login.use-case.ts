@@ -1,31 +1,31 @@
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
-import { IAuthRepository } from '../../domain/repositories/auth.repository.interface';
 import { Token } from '../../domain/entities/token.entity';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import * as cacheManager from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
-import { IRoleRepository } from 'src/auth/domain/repositories/role.repository.interface';
+// import type { Cache } from 'cache-manager';
+import { AUTH_REPOSITORY } from "../../domain/repositories/auth.repository.interface";
+import type { IAuthRepository } from "../../domain/repositories/auth.repository.interface";
+import { ROLE_REPOSITORY } from "../../domain/repositories/role.repository.interface";
+import type { IRoleRepository } from "../../domain/repositories/role.repository.interface";
 
 @Injectable()
 export class LoginUseCase {
     private readonly MAX_FAILED_ATTEMPTS = 5;
 
     constructor(
-        @Inject(CACHE_MANAGER)
-        private readonly cache: cacheManager.Cache,
-
-        @Inject(IAuthRepository)
-        private readonly authRepository: IAuthRepository,
+        @Inject(CACHE_MANAGER) private readonly cache: cacheManager.Cache,
+        @Inject(AUTH_REPOSITORY) private readonly authRepository: IAuthRepository,
+        @Inject(ROLE_REPOSITORY) private readonly roleRepository: IRoleRepository,
         private readonly configService: ConfigService,
         private readonly jwtService: JwtService,
-        @Inject(IRoleRepository)
-        private readonly roleRepository: IRoleRepository,
-    ) { }
+    ) {
+        console.log('✅ LoginUseCase constructor called');
+    }
 
     async execute(email: string, password: string): Promise<Token> {
-
         const auth = await this.authRepository.findByEmail(email);
         if (!auth) {
             throw new UnauthorizedException('No account found with this email');
@@ -41,7 +41,6 @@ export class LoginUseCase {
         }
         const isPasswordValid = await bcrypt.compare(password, auth?.passwordHash);
         if (!isPasswordValid) {
-
             const attempts = await this.authRepository.incrementFailedLoginAttempts(auth.id);
 
             if (attempts >= this.MAX_FAILED_ATTEMPTS) {

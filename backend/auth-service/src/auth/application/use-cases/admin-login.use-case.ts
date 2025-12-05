@@ -3,30 +3,31 @@ import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from 'bcryptjs';
-import { IAuthRepository } from "src/auth/domain/repositories/auth.repository.interface";
-import { IRoleRepository } from "src/auth/domain/repositories/role.repository.interface";
-import { AuthRepository } from "src/auth/infrastructure/repositories/auth.repository";
+
 import * as cacheManager from '@nestjs/cache-manager';
 import { Token } from "src/auth/domain/entities/token.entity";
+import { AUTH_REPOSITORY } from "../../domain/repositories/auth.repository.interface";
+import type { IAuthRepository } from "../../domain/repositories/auth.repository.interface";
+import { ROLE_REPOSITORY } from "../../domain/repositories/role.repository.interface";
+import type { IRoleRepository } from "../../domain/repositories/role.repository.interface";
 
 @Injectable()
-export class AdminLoginUseCase{
+export class AdminLoginUseCase {
     constructor(
-        @Inject(AuthRepository)
+        @Inject(AUTH_REPOSITORY)
         private readonly authRepository: IAuthRepository,
-        @Inject(IRoleRepository)
+        @Inject(ROLE_REPOSITORY)
         private readonly roleRepository: IRoleRepository,
         private readonly jwtService: JwtService,
         @Inject(CACHE_MANAGER)
         private readonly cache: cacheManager.Cache,
         private readonly configService: ConfigService,
-    ) {}
+    ) { console.log('✅ AdminLoginUseCase constructor called'); }
 
     async execute(email: string, password: string) {
         const admin = await this.authRepository.findByEmail(email);
 
         if (!admin) {
-            console.log('!admin')
             throw new UnauthorizedException('Invalid credentials');
         }
 
@@ -36,9 +37,8 @@ export class AdminLoginUseCase{
         }
 
         const isPasswordValid = await bcrypt.compare(password, admin?.passwordHash);
-        
+
         if (!isPasswordValid) {
-            console.log('isMatch')
             throw new UnauthorizedException('Invalid credentials');
         }
 

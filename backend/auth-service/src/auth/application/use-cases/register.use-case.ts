@@ -1,24 +1,22 @@
 import { Injectable, ConflictException, Inject, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { IAuthRepository } from '../../domain/repositories/auth.repository.interface';
-import { Token } from '../../domain/entities/token.entity';
 import { Auth } from '../../domain/entities/auth.entity';
-import bcrypt from 'bcryptjs';
-import type { Cache } from 'cache-manager';
+import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { AuthToken } from 'src/auth/domain/entities/authtoken.entity';
-import { IRoleRepository } from 'src/auth/domain/repositories/role.repository.interface';
+import { AUTH_REPOSITORY } from "../../domain/repositories/auth.repository.interface";
+import type { IAuthRepository } from "../../domain/repositories/auth.repository.interface";
+import { ROLE_REPOSITORY } from "../../domain/repositories/role.repository.interface";
+import type { IRoleRepository } from "../../domain/repositories/role.repository.interface";
 
 @Injectable()
 export class RegisterUseCase {
     constructor(
-        @Inject(IAuthRepository)
-        private readonly authRepository: IAuthRepository,
-        @Inject(IRoleRepository)
-        private readonly roleRepository: IRoleRepository,
+        @Inject(AUTH_REPOSITORY) private readonly authRepository: IAuthRepository,
+        @Inject(ROLE_REPOSITORY) private readonly roleRepository: IRoleRepository,
         private readonly configService: ConfigService,
         private readonly jwtService: JwtService
-    ) { }
+    ) { console.log('✅ RegisterUseCase constructor called'); }
 
     async execute(email: string, password: string): Promise<AuthToken> {
         if (!Auth.isValidEmail(email)) {
@@ -33,7 +31,6 @@ export class RegisterUseCase {
         }
 
         const volunteerRole = await this.roleRepository.findByName('volunteer');
-        console.log(volunteerRole);
         if (!volunteerRole) {
             throw new NotFoundException('Volunteer role does not exist');
         }
@@ -56,6 +53,7 @@ export class RegisterUseCase {
             },
             {
                 secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+                expiresIn: '15m',
             }
         );
 

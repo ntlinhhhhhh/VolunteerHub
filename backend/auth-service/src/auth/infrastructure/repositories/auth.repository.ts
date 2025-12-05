@@ -1,17 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IAuthRepository } from '../../domain/repositories/auth.repository.interface';
 import { Auth as AuthEntity } from '../../domain/entities/auth.entity';
 import { Auth as AuthSchema, AuthDocument } from '../database/schemas/auth.schema';
-import { RoleRepository } from './role.repository';
+import type { IAuthRepository } from "../../domain/repositories/auth.repository.interface";
+import { ROLE_REPOSITORY } from '../../domain/repositories/role.repository.interface';
+import type { IRoleRepository } from '../../domain/repositories/role.repository.interface';
 
 @Injectable()
 export class AuthRepository implements IAuthRepository {
     constructor(
         @InjectModel(AuthSchema.name)
         private readonly authModel: Model<AuthDocument>,
-        private readonly roleRepository: RoleRepository,
+        @Inject(ROLE_REPOSITORY)
+        private readonly roleRepository: IRoleRepository,
     ) { }
 
     private async toEntity(doc: AuthDocument): Promise<AuthEntity> {
@@ -105,6 +107,7 @@ export class AuthRepository implements IAuthRepository {
             { _id: id },
             {
                 isLocked: true,
+                lockReason: reason,
                 lockedAt: new Date()
             }
         ).exec();
