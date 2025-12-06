@@ -2,11 +2,15 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, BadRequestException, ValidationError } from '@nestjs/common';
 import * as dotenv from 'dotenv';
+import { EventCategorySeeder } from './event/infrastructure/database/seed/event-category.seed';
 
 async function bootstrap() {
   dotenv.config();
   const app = await NestFactory.create(AppModule);
-
+  
+  const seeder = app.get(EventCategorySeeder);
+  await seeder.seed();
+  
   app.enableCors({ origin: process.env.CORS_ORIGIN || '*' });
 
   app.useGlobalPipes(

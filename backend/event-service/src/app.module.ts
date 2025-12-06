@@ -112,6 +112,7 @@ import { PassportModule } from '@nestjs/passport';
 
 import { JwtStrategy } from '@share/auth/jwt.strategy'; // import strategy từ share
 import { JwtAuthGuard } from '@share/auth/jwt-auth.guard'; // import guard từ share
+import { EventCategorySeeder } from './event/infrastructure/database/seed/event-category.seed';
 
 @Module({
   imports: [
@@ -164,6 +165,7 @@ import { JwtAuthGuard } from '@share/auth/jwt-auth.guard'; // import guard từ 
     GetEventStatisticsUseCase,
     CreateCategoryUseCase,
     ListCategoriesUseCase,
+    EventCategorySeeder,
 
     // ⬅ Thêm chiến lược JWT và guard để @GetUser() hoạt động
     JwtStrategy,

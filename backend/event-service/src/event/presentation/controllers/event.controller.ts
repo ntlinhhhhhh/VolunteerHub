@@ -32,8 +32,8 @@ import { Public } from '@share/auth/public.decorator';
 import { Roles } from '@share/auth/roles.decorator';
 import { GetUser } from '@share/auth/get-user.decorator';
 import { JwtAuthGuard } from '@share/auth/jwt-auth.guard'
+
 @Controller('events')
-// @UseGuards(JwtAuthGuard, RolesGuard)
 export class EventController {
     constructor(
         private readonly createEventUseCase: CreateEventUseCase,
@@ -113,9 +113,6 @@ export class EventController {
         @GetUser('userId') userId: string,
         @GetUser() user: any
     ) {
-        console.log('User from decorator:', user);
-        console.log('UserId from decorator:', userId);
-
         const event = await this.createEventUseCase.execute({
             dto: createEventDto,
             organizerId: userId,

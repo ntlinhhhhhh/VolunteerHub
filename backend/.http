@@ -5,8 +5,7 @@ Accept: application/json
 
 ### Get my profile
 GET http://localhost:8000/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM0M2FiMjU2MTY0ZWJkZDgzMzQxMGYiLCJlbWFpbCI6IjEyMzFAZ21haWwuY29tIiwicm9sZUlkIjoiNjkzM2VmY2ZhZmYyYzhkZGJjNTQzNjg1Iiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjUwMzE0OTEsImV4cCI6MTc2NTAzMjM5MX0.S4yCt5BSWRWm_2vz5SwR3UE-jFNtotb3TKGmC0HTt_U
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM0NWY0NTlkZWJiMTA0ODM1YzM4ZWQiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwicm9sZUlkIjoiNjkzNDVmNDU5ZGViYjEwNDgzNWMzOGUxIiwicm9sZU5hbWUiOiJldmVudF9tYW5hZ2VyIiwicGVybWlzc2lvbnMiOlsiZXZlbnQ6Y3JlYXRlIiwiZXZlbnQ6cmVhZCIsImV2ZW50OnVwZGF0ZSIsImV2ZW50OmRlbGV0ZSIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246cmVhZCIsInJlZ2lzdHJhdGlvbjphcHByb3ZlIiwicmVnaXN0cmF0aW9uOm1hcmtfY29tcGxldGUiLCJwb3N0OmNyZWF0ZSIsInBvc3Q6cmVhZCIsInBvc3Q6dXBkYXRlOm93biIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiZGFzaGJvYXJkOnZpZXciLCJyZXBvcnQ6dmlldyIsInJlcG9ydDpleHBvcnQiXSwiaWF0IjoxNzY1MDQxMTkxLCJleHAiOjE3NjUwNDIwOTF9.logHBWcZE8YdeRZz3Iz-ux7vd7GwEvyl1H-KWHt7FKg
 ### Get my profile
 
 PUT http://localhost:8000/users/me
@@ -91,47 +90,53 @@ Content-Type: application/json
 ### Create Event
 POST http://localhost:4006/events
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMzZWZjZmFmZjJjOGRkYmM1NDM2ODkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsInJvbGVJZCI6IjY5MzNlZmNmYWZmMmM4ZGRiYzU0MzY4MSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJ1c2VyOmNyZWF0ZSIsInVzZXI6cmVhZCIsInVzZXI6dXBkYXRlIiwidXNlcjpkZWxldGUiLCJ1c2VyOmxvY2siLCJ1c2VyOnVubG9jayIsImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDp1cGRhdGU6b3duIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6ZGVsZXRlOm93biIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZSIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiY29tbWVudDpkZWxldGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCIsInN5c3RlbTpzZXR0aW5ncyIsInJvbGU6bWFuYWdlIl0sImlhdCI6MTc2NTAzMjc4NiwiZXhwIjoxNzY1MDMzNjg2fQ.7g26LZgGzmonwnUK97QyRjJXPIULSXvdivp6KcGmtXQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM0NGY4MjQzM2JjOGQwYjBmZGQzNjQiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsInJvbGVJZCI6IjY5MzQ0ZjgyNDMzYmM4ZDBiMGZkZDM1YyIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJ1c2VyOmNyZWF0ZSIsInVzZXI6cmVhZCIsInVzZXI6dXBkYXRlIiwidXNlcjpkZWxldGUiLCJ1c2VyOmxvY2siLCJ1c2VyOnVubG9jayIsImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDp1cGRhdGU6b3duIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6ZGVsZXRlOm93biIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZSIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiY29tbWVudDpkZWxldGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCIsInN5c3RlbTpzZXR0aW5ncyIsInJvbGU6bWFuYWdlIl0sImlhdCI6MTc2NTAzNzc4OCwiZXhwIjoxNzY1MDM4Njg4fQ.D3U0qd_GcaBysMubfCgtdSfwUC88JEEwtmO_7yNemQI
 
 {
-  "title": "Tổ chức chương trình tình nguyện cho trẻ em",
-  "description": "Mô tả chi tiết về chương trình dài hơn 50 ký tự...",
-  "categoryId": "6933efcfaff2c8ddbc543682",
+  "title": "Chủ nhật xanh cùng đại học công nghệ",
+  "description": "Cùng nhau dọn dẹp vệ sinh môi trường, làm sạch công viên và bãi biển.",
+  "categoryId": "693452cc6a07297366b9ea26",
   "location": {
-    "address": "123 Đường ABC",
+    "address": "Xuân Thủy - Hà Nội",
     "city": "Hà Nội",
-    "district": "Cầu Giấy",
-    "ward": "Dịch Vọng",
-    "coordinates": {
-      "lat": 21.028511,
-      "lng": 105.804817
-    }
+    "district": "Cầu Giấy"
   },
   "schedule": {
-    "startDate": "2025-12-15T08:00:00.000Z",
-    "endDate": "2025-12-20T17:00:00.000Z",
-    "registrationDeadline": "2025-12-10T23:59:59.000Z"
+    "startDate": "2025-12-20T07:00:00.000Z",
+    "endDate": "2025-12-20T11:00:00.000Z",
+    "registrationDeadline": "2025-12-18T23:59:59.000Z"
   },
   "requirements": {
-    "minAge": 18,
+    "minAge": 16,
     "maxAge": 60,
-    "skills": ["teamwork", "communication"],
-    "experience": "Ít nhất 1 năm kinh nghiệm tham gia tình nguyện",
-    "healthRequirements": "Không mắc bệnh truyền nhiễm"
+    "skills": ["Làm việc nhóm","Chăm chỉ"],
+    "experience": "Không yêu cầu kinh nghiệm",
+    "healthRequirements": "Sức khỏe tốt"
   },
   "capacity": {
-    "minVolunteers": 5,
-    "maxVolunteers": 50
+    "maxVolunteers": 50,
+    "minVolunteers": 10
   },
   "roles": [
-    {
-      "name": "Tình nguyện viên",
-      "description": "Hỗ trợ thực hiện chương trình",
-      "slots": 20
-    }
+    { "name": "Nhóm trưởng", "description": "Điều phối nhóm 5-10 người", "slots": 5 },
+    { "name": "Tình nguyện viên", "description": "Thu gom rác", "slots": 45 }
   ],
-  "images": ["https://example.com/image1.jpg"],
-  "videos": ["https://example.com/video1.mp4"],
+  "images": [],
+  "videos": [],
   "visibility": "public",
-  "tags": ["trẻ em", "giáo dục"]
+  "tags": ["xanh", "sinh viên"]
+}
+
+
+
+###
+POST http://localhost:4006/categories
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM0NGY4MjQzM2JjOGQwYjBmZGQzNjgiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwicm9sZUlkIjoiNjkzNDRmODI0MzNiYzhkMGIwZmRkMzVlIiwicm9sZU5hbWUiOiJldmVudF9tYW5hZ2VyIiwicGVybWlzc2lvbnMiOlsiZXZlbnQ6Y3JlYXRlIiwiZXZlbnQ6cmVhZCIsImV2ZW50OnVwZGF0ZSIsImV2ZW50OmRlbGV0ZSIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246cmVhZCIsInJlZ2lzdHJhdGlvbjphcHByb3ZlIiwicmVnaXN0cmF0aW9uOm1hcmtfY29tcGxldGUiLCJwb3N0OmNyZWF0ZSIsInBvc3Q6cmVhZCIsInBvc3Q6dXBkYXRlOm93biIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiZGFzaGJvYXJkOnZpZXciLCJyZXBvcnQ6dmlldyIsInJlcG9ydDpleHBvcnQiXSwiaWF0IjoxNzY1MDM1OTA4LCJleHAiOjE3NjUwMzY4MDh9.KV2MCszfTZuX3LyXCsggc0jbYVgAF9GJpmYE8kPfS3w
+
+{
+    "name": "Environment",
+    "description": "Environmental protection, tree planting, cleanup activities",
+    "icon": "🌳",
+    "color": "#3B82F6"
 }

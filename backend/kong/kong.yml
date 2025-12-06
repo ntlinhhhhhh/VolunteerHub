@@ -27,3 +27,11 @@ services:
         paths:
           - /notification
         strip_path: false
+    
+  - name: event-service
+    url: http://event-service:4004
+    routes:
+      - name: event-route
+        paths:
+          - /events
+        strip_path: false

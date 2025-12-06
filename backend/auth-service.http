@@ -36,6 +36,15 @@ Content-Type: application/json
     "password": "tlinh123"
 }
 
+### gg login
+POST https://oauth2.googleapis.com/token
+Content-Type: application/x-www-form-urlencoded
+
+code=4%2F0Ab32j9271_Gmz0sHwgAqCIjUZ1mEcGy7hgQctbkZTkOXEJ_o2FiVjJrAGNfXoVl4XtoioA
+&client_id=407408718192.apps.googleusercontent.com
+&client_secret=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
+&redirect_uri=https%3A%2F%2Fdevelopers.google.com%2Foauthplayground
+&grant_type=authorization_code
 
 ### quyên mật khẩu, sau khi tạo nó sẽ gửi mail cho bạn để reset (tạo frontend từ giống link mà nó trả về)
 POST http://localhost:8000/auth/forgot-password

@@ -1,16 +1,3 @@
-/**
- * EVENT STATUS LIFECYCLE
- * 
- * DRAFT → User tạo event nhưng chưa submit
- * PENDING_APPROVAL → User submit, đợi admin duyệt
- * APPROVED → Admin đã approve
- * PUBLISHED → Event đã publish công khai (sau khi approve)
- * ONGOING → Event đang diễn ra
- * COMPLETED → Event đã hoàn thành
- * CANCELLED → Event bị hủy do user tự hủy
- * REJECTED → Admin từ chối (cần chỉnh sửa)
- */
-
 export enum EventStatus {
     DRAFT = 'draft',
     PENDING_APPROVAL = 'pending_approval',
