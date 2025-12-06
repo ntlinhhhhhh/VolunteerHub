@@ -9,26 +9,23 @@ export class GetEventByIdUseCase {
   constructor(
     @Inject(IEventRepository)
     private readonly eventRepository: IEventRepository,
-    @Inject(CACHE_MANAGER) 
+
+    @Inject(CACHE_MANAGER)
     private readonly cacheManager: Cache,
   ) {}
 
   async execute(eventId: string): Promise<Event> {
-    // Try to get from cache first
     const cacheKey = `event:${eventId}`;
+
+    // 1. Check cache
     const cached = await this.cacheManager.get<Event>(cacheKey);
-    
-    if (cached) {
-      return cached;
-    }
+    if (cached) return cached;
 
-    // Get from database
+    // 2. Get from DB
     const event = await this.eventRepository.findById(eventId);
-    if (!event) {
-      throw new NotFoundException('Event not found');
-    }
+    if (!event) throw new NotFoundException('Event not found');
 
-    // Cache for 5 minutes
+    // 3. Save cache for 5 minutes
     await this.cacheManager.set(cacheKey, event, 300);
 
     return event;

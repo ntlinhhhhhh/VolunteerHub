@@ -19,6 +19,18 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
+class CoordinatesDto {
+    @IsNumber()
+    @Min(-90)
+    @Max(90)
+    lat: number;
+
+    @IsNumber()
+    @Min(-180)
+    @Max(180)
+    lng: number;
+}
+
 class LocationDto {
     @IsString()
     @IsNotEmpty()
@@ -43,17 +55,6 @@ class LocationDto {
     coordinates?: CoordinatesDto;
 }
 
-class CoordinatesDto {
-    @IsNumber()
-    @Min(-90)
-    @Max(90)
-    lat: number;
-
-    @IsNumber()
-    @Min(-180)
-    @Max(180)
-    lng: number;
-}
 
 class ScheduleDto {
     @IsDate()

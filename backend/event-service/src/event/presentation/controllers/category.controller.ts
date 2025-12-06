@@ -11,19 +11,15 @@ import {
     HttpCode,
     HttpStatus,
 } from '@nestjs/common';
-// import { RolesGuard } from '../../infrastructure/auth/roles.guard';
-// import { Roles } from '../../infrastructure/auth/roles.decorator';
-// import { Public } from '../../infrastructure/auth/public.decorator';
-// import { CreateCategoryUseCase } from '../../application/use-cases/category/create-category.use-case';
-// import { ListCategoriesUseCase } from '../../application/use-cases/category/list-categories.use-case';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../application/dto/create-category.dto';
 import { IEventCategoryRepository } from '../../domain/repositories/event-category.repository.interface';
 import { Inject } from '@nestjs/common';
 import { CreateCategoryUseCase } from 'src/event/application/use-cases/create-category.use-case';
 import { ListCategoriesUseCase } from 'src/event/application/use-cases/list-categories.use-case';
+import { Public } from '@share/auth/public.decorator';
+import { Roles } from '@share/auth/roles.decorator';
 
 @Controller('categories')
-// @UseGuards(JwtAuthGuard, RolesGuard)
 export class CategoryController {
     constructor(
         private readonly createCategoryUseCase: CreateCategoryUseCase,
@@ -36,7 +32,7 @@ export class CategoryController {
      * PUBLIC: List all categories
      * GET /api/categories
      */
-    //   @Public()
+    @Public()
     @Get()
     async listCategories(@Query('activeOnly') activeOnly?: string) {
         const active = activeOnly === 'false' ? false : true;
@@ -53,7 +49,7 @@ export class CategoryController {
      * PUBLIC: Get category by ID
      * GET /api/categories/:id
      */
-    //   @Public()
+    @Public()
     @Get(':id')
     async getCategoryById(@Param('id') id: string) {
         const category = await this.categoryRepository.findById(id);
@@ -69,7 +65,7 @@ export class CategoryController {
      * POST /api/categories
      */
     @Post()
-    //   @Roles('admin')
+    @Roles('admin')
     async createCategory(@Body() createCategoryDto: CreateCategoryDto) {
         const category = await this.createCategoryUseCase.execute(createCategoryDto);
 
@@ -85,7 +81,7 @@ export class CategoryController {
      * PUT /api/categories/:id
      */
     @Put(':id')
-    //   @Roles('admin')
+    @Roles('admin')
     async updateCategory(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
         const category = await this.categoryRepository.update(id, updateCategoryDto as any);
 
@@ -101,7 +97,7 @@ export class CategoryController {
      * DELETE /api/categories/:id
      */
     @Delete(':id')
-    //   @Roles('admin')
+    @Roles('admin')
     @HttpCode(HttpStatus.NO_CONTENT)
     async deleteCategory(@Param('id') id: string) {
         await this.categoryRepository.delete(id);
@@ -112,7 +108,7 @@ export class CategoryController {
      * POST /api/categories/seed
      */
     @Post('seed/default')
-    //   @Roles('admin')
+    @Roles('admin')
     @HttpCode(HttpStatus.OK)
     async seedDefaultCategories() {
         await this.categoryRepository.seedDefaultCategories();

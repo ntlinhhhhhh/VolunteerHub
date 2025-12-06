@@ -89,6 +89,24 @@ services:
       - rabbitmq
     restart: unless-stopped
 
+  event-service:
+    build:
+      context: .
+      dockerfile: event-service/Dockerfile
+    container_name: event-service
+    env_file:
+      - ./event-service/.env
+    networks:
+      - volunteerhub-net
+    ports:
+      - "4006:4006"
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    restart: unless-stopped
+
+
   kong:
     image: kong:3.5
     container_name: kong

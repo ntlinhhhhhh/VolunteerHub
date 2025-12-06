@@ -2,92 +2,15 @@
 GET http://localhost:8001/services
 Accept: application/json
 
-###
-POST http://localhost:8000/auth/register
-Content-Type: application/json
-
-{
-    "email": "1111@gmail.com",
-    "username": "hehe",
-    "fullName": "Nguyen Thuy Linh",
-    "password": "123456"
-}
-
-### login
-POST http://localhost:8000/auth/login
-Content-Type: application/json
-
-{
-    "email": "nguyenthuylinh26012005@gmail.com",
-    "password": "12345678"
-}
-
-### forgot password --> tạo ra đường link --> lấy cái đấy là đường link của resetpassword cho frontend
-POST http://localhost:8000/auth/forgot-password
-Content-Type: application/json
-
-{
-    "email": "nguyenthuylinh26012005@gmail.com"
-}
-
-### reset pw 
-POST http://localhost:8000/auth/reset-password
-Content-Type: application/json
-
-{
-    "email": "nguyenthuylinh26012005@gmail.com",
-    "token": "9a7c73de8013b52b94bd189d3b42dcbee64b854b0c70918ca433ad2c1df7a206",
-    "newPassword": "12345678"
-}
-
-
-### login-admin
-POST http://localhost:8000/auth/admin/login
-Content-Type: application/json
-
-{
-    "email": "tlinh@gmail.com",
-    "password": "tlinh123"
-}
-
-### login-manager
-POST http://localhost:8000/auth/event-manager/login
-Content-Type: application/json
-
-{
-    "email": "tlinh_manager@gmail.com",
-    "password": "tlinh123"
-}
-
-
-###
-POST http://localhost:8000/auth/refresh
-Content-Type: application/json
-Accept: application/json
-
-{
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNzc2xsMmxzQGdtYWlsLmNvbSIsInR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzY0OTY2ODc2LCJleHAiOjE3NjU1NzE2NzYsInN1YiI6IjY5MzM0MWJkYWQ2MDhiNzllMjdlNDU3YiJ9.P5Tx1VSC86-tmxJXebY6Vti7WKrf2CmXlkP-jek6Ng4"
-}
-
-
-###
-POST http://localhost:8000/auth/logout
-Content-Type: application/json
-Accept: application/json
-
-{
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NjQ5NjY5NjAsImV4cCI6MTc2NTU3MTc2MCwic3ViIjoiNjkzMzM1ZjZiMTdhOTJlNGI3NjFhOWExIn0.bCCu8ZNv6wTnNKpauRlfXhRrZ6J4bJA7VcA5dk3D3to" 
-}
-
 
 ### Get my profile
 GET http://localhost:8000/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMzZWZkNzIzYmMzM2E0NGQ2MWM1ZWQiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwicm9sZUlkIjoiNjkzM2VmY2ZhZmYyYzhkZGJjNTQzNjg1Iiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjUwMTE5OTUsImV4cCI6MTc2NTAxMjg5NX0.3y9DqMhc0WNxf0WovOF0yajjo3-glR_2BPbrfRJaROw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM0M2FiMjU2MTY0ZWJkZDgzMzQxMGYiLCJlbWFpbCI6IjEyMzFAZ21haWwuY29tIiwicm9sZUlkIjoiNjkzM2VmY2ZhZmYyYzhkZGJjNTQzNjg1Iiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjUwMzE0OTEsImV4cCI6MTc2NTAzMjM5MX0.S4yCt5BSWRWm_2vz5SwR3UE-jFNtotb3TKGmC0HTt_U
 
 ### Get my profile
 
 PUT http://localhost:8000/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMzZWZkNzIzYmMzM2E0NGQ2MWM1ZWQiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwicm9sZUlkIjoiNjkzM2VmY2ZhZmYyYzhkZGJjNTQzNjg1Iiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjUwMTE5OTUsImV4cCI6MTc2NTAxMjg5NX0.3y9DqMhc0WNxf0WovOF0yajjo3-glR_2BPbrfRJaROw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM0M2FiMjU2MTY0ZWJkZDgzMzQxMGYiLCJlbWFpbCI6IjEyMzFAZ21haWwuY29tIiwicm9sZUlkIjoiNjkzM2VmY2ZhZmYyYzhkZGJjNTQzNjg1Iiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjUwMzEwODUsImV4cCI6MTc2NTAzMTk4NX0.FIJBHPLoryxPPDx6zQ_Yx10Bew-n4onCVgA49QZ7N8w
 Content-Type: application/json
 
 {
@@ -160,4 +83,55 @@ Content-Type: application/json
 
 {
   "reason": "spam comment"
+}
+
+
+### EVENT
+### create
+### Create Event
+POST http://localhost:4006/events
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMzZWZjZmFmZjJjOGRkYmM1NDM2ODkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsInJvbGVJZCI6IjY5MzNlZmNmYWZmMmM4ZGRiYzU0MzY4MSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJ1c2VyOmNyZWF0ZSIsInVzZXI6cmVhZCIsInVzZXI6dXBkYXRlIiwidXNlcjpkZWxldGUiLCJ1c2VyOmxvY2siLCJ1c2VyOnVubG9jayIsImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDp1cGRhdGU6b3duIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6ZGVsZXRlOm93biIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZSIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiY29tbWVudDpkZWxldGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCIsInN5c3RlbTpzZXR0aW5ncyIsInJvbGU6bWFuYWdlIl0sImlhdCI6MTc2NTAzMjc4NiwiZXhwIjoxNzY1MDMzNjg2fQ.7g26LZgGzmonwnUK97QyRjJXPIULSXvdivp6KcGmtXQ
+
+{
+  "title": "Tổ chức chương trình tình nguyện cho trẻ em",
+  "description": "Mô tả chi tiết về chương trình dài hơn 50 ký tự...",
+  "categoryId": "6933efcfaff2c8ddbc543682",
+  "location": {
+    "address": "123 Đường ABC",
+    "city": "Hà Nội",
+    "district": "Cầu Giấy",
+    "ward": "Dịch Vọng",
+    "coordinates": {
+      "lat": 21.028511,
+      "lng": 105.804817
+    }
+  },
+  "schedule": {
+    "startDate": "2025-12-15T08:00:00.000Z",
+    "endDate": "2025-12-20T17:00:00.000Z",
+    "registrationDeadline": "2025-12-10T23:59:59.000Z"
+  },
+  "requirements": {
+    "minAge": 18,
+    "maxAge": 60,
+    "skills": ["teamwork", "communication"],
+    "experience": "Ít nhất 1 năm kinh nghiệm tham gia tình nguyện",
+    "healthRequirements": "Không mắc bệnh truyền nhiễm"
+  },
+  "capacity": {
+    "minVolunteers": 5,
+    "maxVolunteers": 50
+  },
+  "roles": [
+    {
+      "name": "Tình nguyện viên",
+      "description": "Hỗ trợ thực hiện chương trình",
+      "slots": 20
+    }
+  ],
+  "images": ["https://example.com/image1.jpg"],
+  "videos": ["https://example.com/video1.mp4"],
+  "visibility": "public",
+  "tags": ["trẻ em", "giáo dục"]
 }

@@ -20,6 +20,8 @@ import { Roles } from '@share/auth/roles.decorator';
 import { ClientProxy } from '@nestjs/microservices';
 import { Inject } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { GetUser } from '@share/auth/get-user.decorator';
+
 
 @Controller('users')
 export class UserController {
@@ -46,9 +48,10 @@ export class UserController {
 
     @UseGuards(JwtAuthGuard)
     @Put('me')
-    async updateMyProfile(@Request() req, @Body() updateDto: UpdateUserDto) {
+    async updateMyProfile(@GetUser() auth, @Body() updateDto: UpdateUserDto) {
+        console.log('getUser', auth)
         const user = await this.updateUserProfileUseCase.execute(
-            req.user.userId,
+            auth.userId,
             updateDto
         );
 
@@ -135,20 +138,27 @@ export class UserController {
         };
     }
 
-    // microsevice
     @MessagePattern('user.create')
     async createUser(@Payload() data: CreateUserDto) {
-        const user = await this.createUserUseCase.execute(
-            data.authId,
-            data.email,
-            data.username,
-            data.fullName
-        );
-        return {
-            success: true,
-            data: user.toSafeObject(),
-        };
+        console.log('Received user.create payload:', data);
+
+        try {
+            const user = await this.createUserUseCase.execute(
+                data.authId,
+                data.email,
+                data.username,
+                data.fullName
+            );
+            return {
+                success: true,
+                data: user.toSafeObject(),
+            };
+        } catch (err) {
+            console.error('Error inside userservice createUser:', err);
+            throw err;
+        }
     }
+
 
     @MessagePattern('user.findByAuthId')
     async findByAuthId(@Payload() data: { authId: string }) {
