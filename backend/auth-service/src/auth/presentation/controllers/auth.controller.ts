@@ -192,7 +192,6 @@ export class AuthController {
         }
     }
 
-    // @UseGuards(AuthGuard('jwt'))
     @Roles('admin', 'event_manager', 'volunteer')
     @Post('logout')
     @HttpCode(HttpStatus.OK)

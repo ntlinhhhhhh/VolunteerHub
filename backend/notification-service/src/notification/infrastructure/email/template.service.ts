@@ -154,7 +154,7 @@ export class TemplateService {
             [NotificationType.USER_LOCKED]: {
                 subject: '🔐 Tài Khoản của bạn đã bị khóa',
                 html:`
-                    !DOCTYPE html>
+                    <!DOCTYPE html>
                     <html>
                     <head>
                     <meta charset="UTF-8">
