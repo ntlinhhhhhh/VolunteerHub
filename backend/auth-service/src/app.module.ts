@@ -36,6 +36,11 @@ import { AUTH_REPOSITORY } from './auth/domain/repositories/auth.repository.inte
 import { ROLE_REPOSITORY } from './auth/domain/repositories/role.repository.interface';
 import { CreateAdminUseCase } from './auth/application/use-cases/create-admin.use-case';
 import { getDatabaseConfig } from './auth/infrastructure/config/database.config';
+import { CountUsersByRoleUseCase } from './auth/application/use-cases/count-users-by-role.use-case';
+import { DeleteUserUseCase } from './auth/application/use-cases/delete-user.use-case';
+import { GetUsersByRoleUseCase } from './auth/application/use-cases/get-users-by-role.use-case';
+import { SearchUsersUseCase } from './auth/application/use-cases/search-users.use-case';
+import { UpdateUserRoleUseCase } from './auth/application/use-cases/update-role.use-case';
 
 
 @Module({
@@ -96,6 +101,11 @@ import { getDatabaseConfig } from './auth/infrastructure/config/database.config'
         LockUserUseCase,
         UnlockUserUseCase,
         LogOutUseCase,
+        CountUsersByRoleUseCase,
+        DeleteUserUseCase,
+        GetUsersByRoleUseCase,
+        SearchUsersUseCase,
+        UpdateUserRoleUseCase,
 
         // Services
         DatabaseService,
@@ -131,6 +141,11 @@ import { getDatabaseConfig } from './auth/infrastructure/config/database.config'
         EventManagerLoginUseCase,
         LockUserUseCase,
         UnlockUserUseCase,
+        CountUsersByRoleUseCase,
+        DeleteUserUseCase,
+        GetUsersByRoleUseCase,
+        SearchUsersUseCase,
+        UpdateUserRoleUseCase,
     ],
 })
 export class AppModule { }

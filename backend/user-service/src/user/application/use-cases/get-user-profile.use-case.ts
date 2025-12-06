@@ -32,7 +32,7 @@ export class GetUserProfileUseCase {
         }
         return user;
     }
-        
+
     async executeAll(): Promise<{ users: User[]; total: number }> {
         const user = await this.userRepository.findAll();
         if (!user) {
@@ -40,4 +40,8 @@ export class GetUserProfileUseCase {
         }
         return user;
     }
+
+    // async search(keyword: string, role?: string, page = 1, limit = 20) {
+    //     return this.userRepository.search(keyword, role, page, limit);
+    // }
 }

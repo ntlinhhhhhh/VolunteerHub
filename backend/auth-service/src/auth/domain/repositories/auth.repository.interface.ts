@@ -1,5 +1,4 @@
 import { Auth, Auth as AuthEntity } from '../entities/auth.entity';
-import { UserRole } from '../entities/user-role.entity';
 
 export interface IAuthRepository {
     findByEmail(email: string): Promise<AuthEntity | null>;
@@ -9,6 +8,12 @@ export interface IAuthRepository {
     updateRole(id: string, roleId: string): Promise<void>;
     updateAuth(id: string, authData: Partial<Auth>): Promise<void>;
     delete(id: string): Promise<void>;
+    save(auth: AuthEntity);
+    
+    // Role-based queries
+    findByRoleId(roleId: string): Promise<AuthEntity[]>;
+    countByRoleId(roleId: string): Promise<number>;
+    count(): Promise<number>;
 
     // sercurity method
     updateLastLogin(id: string): Promise<void>;
@@ -20,6 +25,12 @@ export interface IAuthRepository {
     findInactiveUsers(days: number): Promise<AuthEntity[]>;
     findLockedUsers(): Promise<AuthEntity[]>;
 
+    search(
+        keyword: string,
+        roleId?: string,
+        page?: number,
+        limit?: number
+    ): Promise<{ users: AuthEntity[]; total: number }>;
 }
 
 export const AUTH_REPOSITORY = 'AUTH_REPOSITORY';

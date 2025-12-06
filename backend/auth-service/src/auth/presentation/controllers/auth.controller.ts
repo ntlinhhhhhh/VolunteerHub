@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Get, Inject, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get, Inject, UseGuards, Param, Query } from '@nestjs/common';
 import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import { AuthGuard } from '@nestjs/passport';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
@@ -24,6 +24,10 @@ import { LogoutDto } from 'src/auth/application/dto/logout.dto';
 import { Public } from '@share/auth/public.decorator';
 import { RefreshTokenGuard } from '@share/auth/refresh-token.guard';
 import { Roles } from '@share/auth/roles.decorator';
+import { DeleteUserUseCase } from 'src/auth/application/use-cases/delete-user.use-case';
+import { GetUsersByRoleUseCase } from 'src/auth/application/use-cases/get-users-by-role.use-case';
+import { CountUsersByRoleUseCase } from 'src/auth/application/use-cases/count-users-by-role.use-case';
+import { SearchUsersUseCase } from 'src/auth/application/use-cases/search-users.use-case';
 
 @Controller('auth')
 export class AuthController {
@@ -41,6 +45,10 @@ export class AuthController {
         private readonly resetPasswordUseCase: ResetPasswordUseCase,
         private readonly lockUserUseCase: LockUserUseCase,
         private readonly unlockUserUseCase: UnlockUserUseCase,
+        private readonly deleteUserUseCase: DeleteUserUseCase,
+        private readonly getUsersByRoleUseCase: GetUsersByRoleUseCase,
+        private readonly countUsersByRoleUseCase: CountUsersByRoleUseCase,
+        private readonly searchUsersUseCase: SearchUsersUseCase,
     ) {
         console.log('✅ AuthController constructor called');
     }
@@ -257,6 +265,54 @@ export class AuthController {
         return {
             success: true,
             message: `${data.userId} is unlocked`,
+        };
+    }
+    
+    @MessagePattern('auth.deleteUser')
+    async deleteUser(@Payload() data: { userId: string }) {
+        await this.deleteUserUseCase.execute(data.userId);
+        return {
+            success: true,
+            message: 'User deleted',
+        };
+    }
+
+    @MessagePattern('auth.getUsersByRole')
+    async getUsersByRole(@Payload() data: { role: string }) {
+        const users = await this.getUsersByRoleUseCase.execute(data.role);
+        return {
+            success: true,
+            data: users.map(u => u.toSafeObject()),
+        };
+    }
+
+    @MessagePattern('auth.countByRole')
+    async countByRole(@Payload() data: { role?: string }) {
+        const count = await this.countUsersByRoleUseCase.execute(data.role);
+        return {
+            success: true,
+            data: count,
+        };
+    }
+
+    @MessagePattern('auth.search')
+    async searchUsers(
+        @Payload() data: { 
+            keyword: string; 
+            role?: string; 
+            page?: number; 
+            limit?: number 
+        }
+    ) {
+        const result = await this.searchUsersUseCase.execute(
+            data.keyword,
+            data.role,
+            data.page,
+            data.limit
+        );
+        return {
+            success: true,
+            data: result,
         };
     }
 }

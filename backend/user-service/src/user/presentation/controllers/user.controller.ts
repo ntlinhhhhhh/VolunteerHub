@@ -6,6 +6,7 @@ import {
     Param,
     Request,
     UseGuards,
+    Query,
 } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
@@ -82,6 +83,26 @@ export class UserController {
             data: user?.toSafeObject() || null,
         };
     }
+    // @Roles('admin')
+    // @UseGuards(JwtAuthGuard, RolesGuard)
+    // @Get('search')
+    // async searchUsers(
+    //     @Query('q') q: string,
+    //     @Query('role') role?: string,
+    //     @Query('page') page: number = 1,
+    //     @Query('limit') limit: number = 20,
+    // ) {
+    //     const users = await this.getUserProfileUseCase.search(
+    //         q,
+    //         role,
+    //         Number(page),
+    //         Number(limit),
+    //     );
+
+    //     return { success: true, data: users };
+    // }
+
+
 
     @Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)

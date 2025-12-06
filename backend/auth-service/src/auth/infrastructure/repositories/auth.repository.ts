@@ -102,6 +102,75 @@ export class AuthRepository implements IAuthRepository {
         ).exec();
     }
 
+    async save(auth: AuthEntity): Promise<AuthEntity> {
+        const doc = await this.authModel.findByIdAndUpdate(
+            auth.id,
+            {
+                email: auth.email,
+                passwordHash: auth.passwordHash,
+                roleId: auth.roleId,
+                isLocked: auth.isLocked,
+                lastLoginAt: auth.lastLoginAt,
+                resetPasswordToken: auth.resetPasswordToken,
+                resetPasswordExpires: auth.resetPasswordExpires,
+                updatedAt: new Date(),
+            },
+            { new: true }
+        ).exec();
+
+        if (!doc) {
+            throw new Error('Auth not found');
+        }
+
+        return await this.toEntity(doc);
+    }
+
+    async findByRoleId(roleId: string): Promise<AuthEntity[]> {
+        const docs = await this.authModel.find({ roleId }).exec();
+        return Promise.all(docs.map(doc => this.toEntity(doc)));
+    }
+
+    async countByRoleId(roleId: string): Promise<number> {
+        return this.authModel.countDocuments({ roleId }).exec();
+    }
+
+    async count(): Promise<number> {
+        return this.authModel.countDocuments().exec();
+    }
+
+    async search(
+        keyword: string,
+        roleId?: string,
+        page: number = 1,
+        limit: number = 20
+    ): Promise<{ users: AuthEntity[]; total: number }> {
+        const query: any = {};
+
+        if (keyword) {
+            query.email = { $regex: keyword, $options: 'i' };
+        }
+
+        if (roleId) {
+            query.roleId = roleId;
+        }
+
+        const skip = (page - 1) * limit;
+
+        const [docs, total] = await Promise.all([
+            this.authModel
+                .find(query)
+                .skip(skip)
+                .limit(limit)
+                .sort({ createdAt: -1 })
+                .exec(),
+            this.authModel.countDocuments(query).exec(),
+        ]);
+
+        const users = await Promise.all(docs.map(doc => this.toEntity(doc)));
+
+        return { users, total };
+    }
+
     async lockAccount(id: string, reason?: string): Promise<void> {
         await this.authModel.updateOne(
             { _id: id },
