@@ -22,7 +22,7 @@ export class SubmitEventForApprovalUseCase {
         
     ) { }
 
-    async execute(eventId: string, userId: string): Promise<Event> {
+    async execute(eventId: string, userId: string, email: string): Promise<Event> {
         // 1. Find event
         const event = await this.eventRepository.findById(eventId);
         if (!event) {
@@ -48,8 +48,11 @@ export class SubmitEventForApprovalUseCase {
         // 6. Publish event to message bus (notify admin)
         await this.amqp.publish(
             'notification_exchange',
-            'event.submitted_for_approval', 
+            'event.new_event_pending', 
             {
+                type: "new_event_pending",
+                userId: userId,
+                recipient: email,
                 eventId: event.id,
                 eventTitle: event.title,
                 organizerId: event.organizerId,

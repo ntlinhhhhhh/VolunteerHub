@@ -117,6 +117,7 @@ export class EventController {
         @GetUser('userId') userId: string,
         @GetUser() user: any
     ) {
+        console.log('user', user)
         const event = await this.createEventUseCase.execute({
             dto: createEventDto,
             organizerId: userId,
@@ -138,13 +139,16 @@ export class EventController {
      * PUT /api/events/:id
      */
     @Put(':id')
+    @UseGuards(JwtAuthGuard)
     @Roles('event_manager', 'admin')
     async updateEvent(
         @Param('id') id: string,
         @Body() updateEventDto: UpdateEventDto,
         @GetUser('userId') userId: string,
-        @GetUser('role') role: string
+        @GetUser('roleName') role: string
     ) {
+        console.log('userId', userId)
+        console.log('role', role);
         const isAdmin = role === 'admin';
         const event = await this.updateEventUseCase.execute(id, updateEventDto, userId, isAdmin);
 
@@ -160,10 +164,12 @@ export class EventController {
      * POST /api/events/:id/submit
      */
     @Post(':id/submit')
+    @UseGuards(JwtAuthGuard)
     @Roles('event_manager', 'admin')
     @HttpCode(HttpStatus.OK)
-    async submitForApproval(@Param('id') id: string, @GetUser('userId') userId: string) {
-        const event = await this.submitEventForApprovalUseCase.execute(id, userId);
+    async submitForApproval(@Param('id') id: string, @GetUser('userId') userId: string, @GetUser('email') email: string) {
+        console.log('submit mail', email)
+        const event = await this.submitEventForApprovalUseCase.execute(id, userId, email);
 
         return {
             success: true,
@@ -177,6 +183,7 @@ export class EventController {
      * POST /api/events/:id/approve
      */
     @Post(':id/approve')
+    @UseGuards(JwtAuthGuard)
     @Roles('admin')
     @HttpCode(HttpStatus.OK)
     async approveEvent(
@@ -198,6 +205,7 @@ export class EventController {
      * POST /api/events/:id/reject
      */
     @Post(':id/reject')
+    @UseGuards(JwtAuthGuard)
     @Roles('admin')
     @HttpCode(HttpStatus.OK)
     async rejectEvent(
@@ -219,6 +227,7 @@ export class EventController {
      * POST /api/events/:id/publish
      */
     @Post(':id/publish')
+    @UseGuards(JwtAuthGuard)
     @Roles('event_manager', 'admin')
     @HttpCode(HttpStatus.OK)
     async publishEvent(@Param('id') id: string, @GetUser('userId') userId: string) {
@@ -236,6 +245,7 @@ export class EventController {
      * POST /api/events/:id/cancel
      */
     @Post(':id/cancel')
+    @UseGuards(JwtAuthGuard)
     @Roles('event_manager', 'admin')
     @HttpCode(HttpStatus.OK)
     async cancelEvent(
@@ -259,6 +269,7 @@ export class EventController {
      * DELETE /api/events/:id
      */
     @Delete(':id')
+    @UseGuards(JwtAuthGuard)
     @Roles('event_manager', 'admin')
     @HttpCode(HttpStatus.NO_CONTENT)
     async deleteEvent(
@@ -275,6 +286,7 @@ export class EventController {
      * GET /api/events/my/list
      */
     @Get('my/list')
+    @UseGuards(JwtAuthGuard)
     @Roles('event_manager', 'admin')
     async getMyEvents(@GetUser('userId') userId: string, @Query() filterDto: FilterEventDto) {
         const result = await this.listEventsUseCase.execute({
@@ -299,6 +311,7 @@ export class EventController {
      * GET /api/events/admin/pending
      */
     @Get('admin/pending')
+    @UseGuards(JwtAuthGuard)
     @Roles('admin')
     async getPendingEvents() {
         const result = await this.listEventsUseCase.execute({
@@ -319,6 +332,7 @@ export class EventController {
      * GET /api/events/admin/statistics
      */
     @Get('admin/statistics')
+    @UseGuards(JwtAuthGuard)
     @Roles('admin')
     async getStatistics() {
         const stats = await this.getEventStatisticsUseCase.execute();
