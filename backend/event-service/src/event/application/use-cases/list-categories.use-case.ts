@@ -4,12 +4,12 @@ import { IEventCategoryRepository } from 'src/event/domain/repositories/event-ca
 
 @Injectable()
 export class ListCategoriesUseCase {
-  constructor(
-    @Inject(IEventCategoryRepository)
-    private readonly categoryRepository: IEventCategoryRepository
-  ) {}
+    constructor(
+        @Inject(IEventCategoryRepository)
+        private readonly categoryRepository: IEventCategoryRepository
+    ) { }
 
-  async execute(activeOnly: boolean = true): Promise<EventCategory[]> {
-    return await this.categoryRepository.findAll(activeOnly);
-  }
+    async execute(activeOnly: boolean = true): Promise<EventCategory[]> {
+        return await this.categoryRepository.findAll(activeOnly);
+    }
 }

@@ -48,6 +48,9 @@ export class ApproveEventUseCase {
             'notification_exchange',
             'event.approved',
             {
+                type: 'event_approved',
+                recipient: event.organizerEmail,
+                userId: event.organizerId,
                 eventId: event.id,
                 eventTitle: event.title,
                 eventSlug: event.slug,

@@ -19,7 +19,7 @@ export class SubmitEventForApprovalUseCase {
         @Inject(IEventRepository)
         private readonly eventRepository: IEventRepository,
         private readonly amqp: AmqpConnection,
-        
+
     ) { }
 
     async execute(eventId: string, userId: string, email: string): Promise<Event> {
@@ -48,7 +48,7 @@ export class SubmitEventForApprovalUseCase {
         // 6. Publish event to message bus (notify admin)
         await this.amqp.publish(
             'notification_exchange',
-            'event.new_event_pending', 
+            'event.new_event_pending',
             {
                 type: "new_event_pending",
                 userId: userId,
@@ -62,7 +62,7 @@ export class SubmitEventForApprovalUseCase {
                 startDate: event.schedule.startDate.toISOString(),
                 location: `${event.location.district}, ${event.location.city}`,
                 maxVolunteers: event.capacity.maxVolunteers,
-        });
+            });
 
         this.logger.log(`Event submitted for approval: ${eventId}`);
 

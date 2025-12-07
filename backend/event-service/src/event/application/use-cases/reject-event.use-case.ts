@@ -19,7 +19,7 @@ export class RejectEventUseCase {
         @Inject(IEventRepository)
         private readonly eventRepository: IEventRepository,
         private readonly amqp: AmqpConnection,
-        
+
     ) { }
 
     async execute(eventId: string, adminId: string, dto: RejectEventDto): Promise<Event> {
@@ -47,16 +47,19 @@ export class RejectEventUseCase {
         // 4. Publish event to message bus (notify organizer)
         await this.amqp.publish(
             'notification_exchange',
-            'event.rejected', 
+            'event.rejected',
             {
-            eventId: event.id,
-            eventTitle: event.title,
-            eventSlug: event.slug,
-            organizerId: event.organizerId,
-            organizerName: event.organizerName,
-            organizerEmail: event.organizerEmail,
-            rejectionReason: dto.rejectionReason,
-        });
+                type: "event_rejected",
+                userId: event.organizerId,
+                recipient: event.organizerEmail,
+                eventId: event.id,
+                eventTitle: event.title,
+                eventSlug: event.slug,
+                organizerId: event.organizerId,
+                organizerName: event.organizerName,
+                organizerEmail: event.organizerEmail,
+                rejectionReason: dto.rejectionReason,
+            });
 
         this.logger.log(`Event rejected: ${eventId} by admin: ${adminId}`);
 

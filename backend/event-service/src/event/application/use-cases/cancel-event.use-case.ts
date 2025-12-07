@@ -53,6 +53,9 @@ export class CancelEventUseCase {
             'notification_exchange',
             'event.cancelled',
             {
+                type: 'event_cancelled',
+                userId: event.organizerId,
+                recipient: event.organizerEmail,
                 eventId: event.id,
                 eventTitle: event.title,
                 organizerId: event.organizerId,

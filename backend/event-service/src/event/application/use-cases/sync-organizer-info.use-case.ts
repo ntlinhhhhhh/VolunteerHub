@@ -9,39 +9,39 @@ import { IEventRepository } from '../../domain/repositories/event.repository.int
  */
 
 export interface SyncOrganizerData {
-  userId: string;
-  name?: string;
-  email?: string;
-  phone?: string;
+    userId: string;
+    name?: string;
+    email?: string;
+    phone?: string;
 }
 
 @Injectable()
 export class SyncOrganizerInfoUseCase {
-  private readonly logger = new Logger(SyncOrganizerInfoUseCase.name);
+    private readonly logger = new Logger(SyncOrganizerInfoUseCase.name);
 
-  constructor(
-    @Inject(IEventRepository)
-    private readonly eventRepository: IEventRepository
-  ) {}
+    constructor(
+        @Inject(IEventRepository)
+        private readonly eventRepository: IEventRepository
+    ) { }
 
-  async execute(data: SyncOrganizerData): Promise<void> {
-    const updateData: any = {};
+    async execute(data: SyncOrganizerData): Promise<void> {
+        const updateData: any = {};
 
-    if (data.name) {
-      updateData.organizerName = data.name;
+        if (data.name) {
+            updateData.organizerName = data.name;
+        }
+
+        if (data.email) {
+            updateData.organizerEmail = data.email;
+        }
+
+        if (data.phone) {
+            updateData.organizerPhone = data.phone;
+        }
+
+        if (Object.keys(updateData).length > 0) {
+            await this.eventRepository.updateOrganizerInfo(data.userId, updateData);
+            this.logger.log(`Synced organizer info for user: ${data.userId}`);
+        }
     }
-
-    if (data.email) {
-      updateData.organizerEmail = data.email;
-    }
-
-    if (data.phone) {
-      updateData.organizerPhone = data.phone;
-    }
-
-    if (Object.keys(updateData).length > 0) {
-      await this.eventRepository.updateOrganizerInfo(data.userId, updateData);
-      this.logger.log(`Synced organizer info for user: ${data.userId}`);
-    }
-  }
 }
