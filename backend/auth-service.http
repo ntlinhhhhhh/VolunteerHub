@@ -1,0 +1,84 @@
+### Tạo tài khoản với auth-service - chỉ có 1 trang register cho volunteer
+POST http://localhost:8000/auth/register
+Content-Type: application/json
+
+{
+    "email": "1231@gmail.com",
+    "username": "hehe",
+    "fullName": "Nguyen Thuy Linh",
+    "password": "123456"
+}
+
+### login - đăng nhập cho tình nguyện viên
+POST http://localhost:8000/auth/login
+Content-Type: application/json
+
+{
+    "email": "1231@gmail.com",
+    "password": "123456"
+}
+
+### login-admin: tạo một trang login cho admin với đường dấn /auth/admin/login
+POST http://localhost:8000/auth/admin/login
+Content-Type: application/json
+
+{
+    "email": "tlinh@gmail.com",
+    "password": "tlinh123"
+}
+
+### login-manager tương tự tạo 1 cái login cho quản lý sự kiện
+POST http://localhost:8000/auth/event-manager/login
+Content-Type: application/json
+
+{
+    "email": "tlinh_manager@gmail.com",
+    "password": "tlinh123"
+}
+
+### gg login
+POST https://oauth2.googleapis.com/token
+Content-Type: application/x-www-form-urlencoded
+
+code=4%2F0Ab32j9271_Gmz0sHwgAqCIjUZ1mEcGy7hgQctbkZTkOXEJ_o2FiVjJrAGNfXoVl4XtoioA
+&client_id=407408718192.apps.googleusercontent.com
+&client_secret=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
+&redirect_uri=https%3A%2F%2Fdevelopers.google.com%2Foauthplayground
+&grant_type=authorization_code
+
+### quyên mật khẩu, sau khi tạo nó sẽ gửi mail cho bạn để reset (tạo frontend từ giống link mà nó trả về)
+POST http://localhost:8000/auth/forgot-password
+Content-Type: application/json
+
+{
+    "email": "nguyenthuylinh26012005@gmail.com"
+}
+
+### reset password
+POST http://localhost:8000/auth/reset-password
+Content-Type: application/json
+
+{
+    "email": "nguyenthuylinh26012005@gmail.com",
+    "token": "9a7c73de8013b52b94bd189d3b42dcbee64b854b0c70918ca433ad2c1df7a206",
+    "newPassword": "12345678"
+}
+
+### refresh-token
+POST http://localhost:8000/auth/refresh
+Content-Type: application/json
+Accept: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNzc2xsMmxzQGdtYWlsLmNvbSIsInR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzY0OTY2ODc2LCJleHAiOjE3NjU1NzE2NzYsInN1YiI6IjY5MzM0MWJkYWQ2MDhiNzllMjdlNDU3YiJ9.P5Tx1VSC86-tmxJXebY6Vti7WKrf2CmXlkP-jek6Ng4"
+}
+
+
+### logout
+POST http://localhost:8000/auth/logout
+Content-Type: application/json
+Accept: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NjQ5NjY5NjAsImV4cCI6MTc2NTU3MTc2MCwic3ViIjoiNjkzMzM1ZjZiMTdhOTJlNGI3NjFhOWExIn0.bCCu8ZNv6wTnNKpauRlfXhRrZ6J4bJA7VcA5dk3D3to" 
+}

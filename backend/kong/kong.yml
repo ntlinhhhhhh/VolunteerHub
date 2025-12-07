@@ -19,3 +19,19 @@ services:
         paths:
           - /users
         strip_path: false
+
+  - name: notification-service
+    url: http://notification-service:4004
+    routes:
+      - name: notification-route
+        paths:
+          - /notification
+        strip_path: false
+    
+  - name: event-service
+    url: http://event-service:4004
+    routes:
+      - name: event-route
+        paths:
+          - /events
+        strip_path: false

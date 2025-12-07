@@ -1,17 +1,18 @@
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
 import type { Cache } from 'cache-manager';
 
 @Injectable()
 export class LogOutUseCase {
     constructor(
         private readonly jwtService: JwtService,
-
-        @Inject(CACHE_MANAGER)
-        private readonly cacheManager: Cache,
-
-    ) { }
+        @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+        private readonly configService: ConfigService,
+    ) {
+        console.log('✅ LogOutUseCase constructor called');
+    }
 
     async execute(refreshToken: string) {
         try {
@@ -22,7 +23,7 @@ export class LogOutUseCase {
             const userId = payload.sub;
 
             const storedToken = await this.cacheManager.get(`refresh:${userId}`);
-            console.log(userId);
+
             if (!storedToken || storedToken !== refreshToken) {
                 throw new UnauthorizedException('Invalid token');
             }

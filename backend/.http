@@ -1,144 +1,15 @@
-POST http://localhost:4000/auth/register
-Content-Type: application/json
-
-{
-    "email": "hyunlinhits@gmail.com",
-    "username": "zzz3",
-    "fullName": "Le Huyen Linh",
-    "password": "111111"
-}
-
-###
-GET http://localhost:4000/health
-
-### login
-POST http://localhost:4000/auth/login
-Content-Type: application/json
-
-{
-    "email": "tlin1h11111@gmail.com",
-    "password": "123456"
-}
-
-###
-GET http://localhost:4000/health
-
-
-
-### login
-POST http://localhost:8000/auth/login
-Content-Type: application/json
-
-{
-    "email": "zzz2@gmail.com",
-    "password": "111111"
-}
-
-###
-POST http://localhost:4000/auth/register
-Content-Type: application/json
-
-{
-    "email": "kkk@gmail.com",
-    "password": "123456"
-}
-
-
-###
-GET http://localhost:4000/redis/test
-
 ###
 GET http://localhost:8001/services
 Accept: application/json
 
 
-###
-POST http://localhost:8000/auth/login
-Content-Type: application/json
-
-{
-    "email": "hehehe@gmail.com",
-    "password": "123456"
-}
-
-
-###
-POST http://localhost:8000/auth/register
-Content-Type: application/json
-
-{
-    "email": "zzzzz@gmail.com",
-    "username": "hli",
-    "fullName": "Le Huyen Linh",
-    "password": "123456"
-}
-
-### login
-POST http://localhost:8000/auth/login
-Content-Type: application/json
-
-{
-    "email": "zzzzz@gmail.com",
-    "password": "123456"
-}
-
-### for-got password
-POST http://localhost:8000/auth/forgot-password
-Content-Type: application/json
-
-{
-    "email": "zzzzz@gmail.com"
-}
-
-###
-POST http://localhost:8000/auth/reset-password
-Content-Type: application/json
-
-{
-    "email": "nguyenthuylinh26012005@gmail.com",
-    "token": "d2f00c7affc33363fc796877b1a61b4550ab731cea2d09d0b740f11ffcfe3e0c",
-    "newPassword": "123!"
-}
-
-
-### login-admin
-POST http://localhost:8000/auth/admin/login
-Content-Type: application/json
-
-{
-    "email": "tlinh@gmail.com",
-    "password": "tlinh123"
-}
-
-
-###
-POST http://localhost:8000/auth/refresh
-Content-Type: application/json
-Accept: application/json
-
-
-{
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhlaGVAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NjQ1OTkxMDQsImV4cCI6MTc2NTIwMzkwNCwic3ViIjoiNjkyZGE1M2RmZWM4ODk5YzY1MDUxYzAyIn0.8bGYTV_TyJhjD8GLs-0_JCYGgH465mz88APZYrk6afo"
-}
-
-
-###
-POST http://localhost:8000/auth/logout
-Content-Type: application/json
-Accept: application/json
-
-{
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhlaGVAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NjQ1OTkyMDAsImV4cCI6MTc2NTIwNDAwMCwic3ViIjoiNjkyZGE1M2RmZWM4ODk5YzY1MDUxYzAyIn0.TK4CyK56YxEHXKX7wv5cP1whQ1bxt6UsphjkHLOX1Dk" 
-}
-
-
 ### Get my profile
-GET http://localhost:4002/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJkYTUzZGZlYzg4OTljNjUwNTFjMDIiLCJlbWFpbCI6ImhlaGVAZ21haWwuY29tIiwicm9sZUlkIjoiNjkyZGExMWE0NDA3YTQ2YjYyZDJlNjExIiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjQ1OTkyMjIsImV4cCI6MTc2NDYwMDEyMn0.x29waD_4PsQ95pdOg4hhYcT6ZO2sCdDNe5TDmpAQpuI
-
+GET http://localhost:8000/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM0NWY0NTlkZWJiMTA0ODM1YzM4ZWQiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwicm9sZUlkIjoiNjkzNDVmNDU5ZGViYjEwNDgzNWMzOGUxIiwicm9sZU5hbWUiOiJldmVudF9tYW5hZ2VyIiwicGVybWlzc2lvbnMiOlsiZXZlbnQ6Y3JlYXRlIiwiZXZlbnQ6cmVhZCIsImV2ZW50OnVwZGF0ZSIsImV2ZW50OmRlbGV0ZSIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246cmVhZCIsInJlZ2lzdHJhdGlvbjphcHByb3ZlIiwicmVnaXN0cmF0aW9uOm1hcmtfY29tcGxldGUiLCJwb3N0OmNyZWF0ZSIsInBvc3Q6cmVhZCIsInBvc3Q6dXBkYXRlOm93biIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiZGFzaGJvYXJkOnZpZXciLCJyZXBvcnQ6dmlldyIsInJlcG9ydDpleHBvcnQiXSwiaWF0IjoxNzY1MDQxMTkxLCJleHAiOjE3NjUwNDIwOTF9.logHBWcZE8YdeRZz3Iz-ux7vd7GwEvyl1H-KWHt7FKg
 ### Get my profile
+
 PUT http://localhost:8000/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTJkYTUzZGZlYzg4OTljNjUwNTFjMDIiLCJlbWFpbCI6ImhlaGVAZ21haWwuY29tIiwicm9sZUlkIjoiNjkyZGExMWE0NDA3YTQ2YjYyZDJlNjExIiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjQ1OTkyMjIsImV4cCI6MTc2NDYwMDEyMn0.x29waD_4PsQ95pdOg4hhYcT6ZO2sCdDNe5TDmpAQpuI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM0M2FiMjU2MTY0ZWJkZDgzMzQxMGYiLCJlbWFpbCI6IjEyMzFAZ21haWwuY29tIiwicm9sZUlkIjoiNjkzM2VmY2ZhZmYyYzhkZGJjNTQzNjg1Iiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjUwMzEwODUsImV4cCI6MTc2NTAzMTk4NX0.FIJBHPLoryxPPDx6zQ_Yx10Bew-n4onCVgA49QZ7N8w
 Content-Type: application/json
 
 {
@@ -150,7 +21,7 @@ Content-Type: application/json
 }
 
 ### Get my profile other user
-GET http://localhost:8000/users/692d357cd13b6bca449ae4d9
+GET http://localhost:8000/users/6930f3a1b837edfdbdfefaac
 
 ###
 POST https://oauth2.googleapis.com/token
@@ -164,3 +35,108 @@ code=4%2F0Ab32j9271_Gmz0sHwgAqCIjUZ1mEcGy7hgQctbkZTkOXEJ_o2FiVjJrAGNfXoVl4XtoioA
 
 ###
 GET  http://localhost:8000/auth/google/callback?code=4/0Ab32j90SHvUtBwoQIPq4IydxLdqPQWhhtmBI44HB9oC2yCsDv1Qs-zIj3stAVeaB3thqzg4/0Ab32j92jkwxtQuzzaAw_zQc5IxIkyrhHSx5Ld575VcpQZaeMBFrLjCJeKE2DK9vQLLjFZA
+
+### Send a notification (email + DB)
+POST http://localhost:8000/notifications/send
+Content-Type: application/json
+
+{
+  "userId": "123456",
+  "recipient": "duonghoang@example.com",
+  "type": "user_registered",
+  "channel": "email",
+  "subject": "Welcome to VolunteerHub!",
+  "content": "Hi, welcome to our platform!",
+  "data": { "customKey": "customValue" }
+}
+
+###
+PATCH http://localhost:8000/notifications/692f3116eb9afbdaae05d16b/read
+
+### Test gửi email
+POST http://localhost:8000/notifications/test-email
+Content-Type: application/json
+
+{
+  "recipient": "nguyenthuylinh26012005@gmail.com",
+  "subject": "Test Email",
+  "content": "Hello! Đây là email test."
+}
+
+
+
+
+### Lấy tất cả các user - role: admin
+GET http://localhost:8000/users/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMzZWZjZmFmZjJjOGRkYmM1NDM2ODkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsInJvbGVJZCI6IjY5MzNlZmNmYWZmMmM4ZGRiYzU0MzY4MSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJ1c2VyOmNyZWF0ZSIsInVzZXI6cmVhZCIsInVzZXI6dXBkYXRlIiwidXNlcjpkZWxldGUiLCJ1c2VyOmxvY2siLCJ1c2VyOnVubG9jayIsImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDp1cGRhdGU6b3duIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6ZGVsZXRlOm93biIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZSIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiY29tbWVudDpkZWxldGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCIsInN5c3RlbTpzZXR0aW5ncyIsInJvbGU6bWFuYWdlIl0sImlhdCI6MTc2NTAxMjc3MywiZXhwIjoxNzY1MDEzNjczfQ.jym1m2I7Ht2fyTnIjSlBxPwmvrLaz1SQu-kZwGJLnXQ
+
+
+### Lấy user theo id - role: admin
+GET http://localhost:8000/users/6933efd70fe73638aaf61d6b
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMzZWZjZmFmZjJjOGRkYmM1NDM2ODkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsInJvbGVJZCI6IjY5MzNlZmNmYWZmMmM4ZGRiYzU0MzY4MSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJ1c2VyOmNyZWF0ZSIsInVzZXI6cmVhZCIsInVzZXI6dXBkYXRlIiwidXNlcjpkZWxldGUiLCJ1c2VyOmxvY2siLCJ1c2VyOnVubG9jayIsImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDp1cGRhdGU6b3duIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6ZGVsZXRlOm93biIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZSIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiY29tbWVudDpkZWxldGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCIsInN5c3RlbTpzZXR0aW5ncyIsInJvbGU6bWFuYWdlIl0sImlhdCI6MTc2NTAxMjc3MywiZXhwIjoxNzY1MDEzNjczfQ.jym1m2I7Ht2fyTnIjSlBxPwmvrLaz1SQu-kZwGJLnXQ
+
+### khóa user - role: admin
+PUT http://localhost:8000/users/6933efd723bc33a44d61c5ed/unlock
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTMzZWZjZmFmZjJjOGRkYmM1NDM2ODkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsInJvbGVJZCI6IjY5MzNlZmNmYWZmMmM4ZGRiYzU0MzY4MSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJ1c2VyOmNyZWF0ZSIsInVzZXI6cmVhZCIsInVzZXI6dXBkYXRlIiwidXNlcjpkZWxldGUiLCJ1c2VyOmxvY2siLCJ1c2VyOnVubG9jayIsImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDp1cGRhdGU6b3duIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6ZGVsZXRlOm93biIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZSIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiY29tbWVudDpkZWxldGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCIsInN5c3RlbTpzZXR0aW5ncyIsInJvbGU6bWFuYWdlIl0sImlhdCI6MTc2NTAxMjc3MywiZXhwIjoxNzY1MDEzNjczfQ.jym1m2I7Ht2fyTnIjSlBxPwmvrLaz1SQu-kZwGJLnXQ
+Content-Type: application/json
+
+{
+  "reason": "spam comment"
+}
+
+
+### EVENT
+### create
+### Create Event
+POST http://localhost:4006/events
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM0NWY0NTlkZWJiMTA0ODM1YzM4ZTkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6bnVsbCwicm9sZUlkIjoiNjkzNDVmNDU5ZGViYjEwNDgzNWMzOGRjIiwicm9sZU5hbWUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbIioiXSwiaWF0IjoxNzY1MDgwMjA0LCJleHAiOjE3NjUwODExMDR9.1yHgsBwTLEJns-Zj2l0lqitScUrkw9Zsd51qPduwQ7g
+
+{
+  "title": "Chủ nhật xanh cùng đại học công nghệ",
+  "description": "Cùng nhau dọn dẹp vệ sinh môi trường, làm sạch công viên và bãi biển.",
+  "categoryId": "69345f451211344c6937b3c5",
+  "location": {
+    "address": "Xuân Thủy - Hà Nội",
+    "city": "Hà Nội",
+    "district": "Cầu Giấy"
+  },
+  "schedule": {
+    "startDate": "2025-12-20T07:00:00.000Z",
+    "endDate": "2025-12-20T11:00:00.000Z",
+    "registrationDeadline": "2025-12-18T23:59:59.000Z"
+  },
+  "requirements": {
+    "minAge": 16,
+    "maxAge": 60,
+    "skills": ["Làm việc nhóm","Chăm chỉ"],
+    "experience": "Không yêu cầu kinh nghiệm",
+    "healthRequirements": "Sức khỏe tốt"
+  },
+  "capacity": {
+    "maxVolunteers": 50,
+    "minVolunteers": 10
+  },
+  "roles": [
+    { "name": "Nhóm trưởng", "description": "Điều phối nhóm 5-10 người", "slots": 5 },
+    { "name": "Tình nguyện viên", "description": "Thu gom rác", "slots": 45 }
+  ],
+  "images": [],
+  "videos": [],
+  "visibility": "public",
+  "tags": ["xanh", "sinh viên"]
+}
+
+
+
+###
+POST http://localhost:4006/categories
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM0NWY0NTlkZWJiMTA0ODM1YzM4ZTkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsInJvbGVJZCI6IjY5MzQ1ZjQ1OWRlYmIxMDQ4MzVjMzhkYyIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTA3ODM5MCwiZXhwIjoxNzY1MDc5MjkwfQ._q6vw2B23HV1djRJ8_8IiA7oGx5lZ8vBr743Jdvh7PU
+
+{
+    "name": "Environment",
+    "description": "Environmental protection, tree planting, cleanup activities",
+    "icon": "🌳",
+    "color": "#3B82F6"
+}
