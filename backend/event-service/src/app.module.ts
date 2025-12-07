@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import * as redisStore from 'cache-manager-redis-store';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { ShareModule } from '@share/share.module';
+import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 
 import { getDatabaseConfig } from './event/infrastructure/config/database.config';
 import { EventSchema } from './event/infrastructure/database/schemas/event.schema';
@@ -115,62 +116,70 @@ import { JwtAuthGuard } from '@share/auth/jwt-auth.guard'; // import guard từ 
 import { EventCategorySeeder } from './event/infrastructure/database/seed/event-category.seed';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    // Mongoose
-    MongooseModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: getDatabaseConfig,
-    }),
-    MongooseModule.forFeature([
-      { name: Event.name, schema: EventSchema },
-      { name: EventCategory.name, schema: EventCategorySchema },
-    ]),
-    CacheModule.register({
-      store: redisStore,
-      host: 'redis',
-      port: 6379,
-      ttl: 0,
-    }),
-    DatabaseModule,
-    RabbitMQModule.forRootAsync({
-      useFactory: () => ({
-        uri: 'amqp://rabbitmq:5672',
-        exchanges: [{ name: 'notification_exchange', type: 'topic' }],
-      }),
-    }),
-    ShareModule,
-  ],
-  controllers: [EventController, CategoryController],
-  providers: [
-    DatabaseService,
+    imports: [
+        ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+        PassportModule.register({ defaultStrategy: 'jwt' }),
+        // Mongoose
+        MongooseModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: getDatabaseConfig,
+        }),
+        MongooseModule.forFeature([
+            { name: Event.name, schema: EventSchema },
+            { name: EventCategory.name, schema: EventCategorySchema },
+        ]),
+        CacheModule.register({
+            store: redisStore,
+            host: 'redis',
+            port: 6379,
+            ttl: 0,
+        }),
+        DatabaseModule,
+        RabbitMQModule.forRootAsync({
+            useFactory: () => ({
+                uri: 'amqp://rabbitmq:5672',
+                exchanges: [{ name: 'notification_exchange', type: 'topic' }],
+            }),
+        }),
+        ShareModule,
+    ],
+    controllers: [EventController, CategoryController],
+    providers: [
+        {
+            provide: 'USER_SERVICE',
+            useFactory: () =>
+                ClientProxyFactory.create({
+                    transport: Transport.REDIS,
+                    options: { host: 'redis', port: 6379 },
+                }),
+        },
+        DatabaseService,
 
-    // Repository Providers
-    { provide: IEventRepository, useClass: EventRepository },
-    { provide: IEventCategoryRepository, useClass: EventCategoryRepository },
+        // Repository Providers
+        { provide: IEventRepository, useClass: EventRepository },
+        { provide: IEventCategoryRepository, useClass: EventCategoryRepository },
 
-    // Use Cases
-    CreateEventUseCase,
-    UpdateEventUseCase,
-    ApproveEventUseCase,
-    RejectEventUseCase,
-    SubmitEventForApprovalUseCase,
-    PublishEventUseCase,
-    CancelEventUseCase,
-    DeleteEventUseCase,
-    GetEventByIdUseCase,
-    GetEventBySlugUseCase,
-    ListEventsUseCase,
-    GetEventStatisticsUseCase,
-    CreateCategoryUseCase,
-    ListCategoriesUseCase,
-    EventCategorySeeder,
+        // Use Cases
+        CreateEventUseCase,
+        UpdateEventUseCase,
+        ApproveEventUseCase,
+        RejectEventUseCase,
+        SubmitEventForApprovalUseCase,
+        PublishEventUseCase,
+        CancelEventUseCase,
+        DeleteEventUseCase,
+        GetEventByIdUseCase,
+        GetEventBySlugUseCase,
+        ListEventsUseCase,
+        GetEventStatisticsUseCase,
+        CreateCategoryUseCase,
+        ListCategoriesUseCase,
+        EventCategorySeeder,
 
-    // ⬅ Thêm chiến lược JWT và guard để @GetUser() hoạt động
-    JwtStrategy,
-    JwtAuthGuard,
-  ],
-  exports: [RabbitMQModule, CacheModule],
+        // ⬅ Thêm chiến lược JWT và guard để @GetUser() hoạt động
+        JwtStrategy,
+        JwtAuthGuard,
+    ],
+    exports: [RabbitMQModule, CacheModule],
 })
-export class AppModule {}
+export class AppModule { }

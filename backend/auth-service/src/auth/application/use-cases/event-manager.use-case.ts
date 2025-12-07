@@ -10,10 +10,13 @@ import type { IRoleRepository } from "../../domain/repositories/role.repository.
 
 import * as cacheManager from '@nestjs/cache-manager';
 import { Token } from "src/auth/domain/entities/token.entity";
+import { ClientProxy } from "@nestjs/microservices";
+import { firstValueFrom } from "rxjs";
 
 @Injectable()
 export class EventManagerLoginUseCase {
     constructor(
+        @Inject('USER_SERVICE') private userClient: ClientProxy,
         @Inject(AUTH_REPOSITORY) private readonly authRepository: IAuthRepository,
         @Inject(ROLE_REPOSITORY) private readonly roleRepository: IRoleRepository,
         private readonly jwtService: JwtService,
@@ -40,10 +43,17 @@ export class EventManagerLoginUseCase {
             throw new UnauthorizedException('Invalid credentials');
         }
 
+        const event_manager_profile = await firstValueFrom(
+            this.userClient.send('user.findByEmail', {
+                email: email,
+            }));
+
         const accessToken = this.jwtService.sign(
             {
                 userId: eventManger.id,
                 email: eventManger.email,
+                name: event_manager_profile.fullName,
+                phoneNumber: event_manager_profile.phoneNumber,
                 roleId: eventManger.roleId,
                 roleName: role.name,
                 permissions: eventManger.role?.permissions || [],

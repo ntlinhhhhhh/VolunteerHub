@@ -10,12 +10,15 @@ import { AUTH_REPOSITORY } from "../../domain/repositories/auth.repository.inter
 import type { IAuthRepository } from "../../domain/repositories/auth.repository.interface";
 import { ROLE_REPOSITORY } from "../../domain/repositories/role.repository.interface";
 import type { IRoleRepository } from "../../domain/repositories/role.repository.interface";
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class LoginUseCase {
     private readonly MAX_FAILED_ATTEMPTS = 5;
 
     constructor(
+        @Inject('USER_SERVICE') private userClient: ClientProxy,
         @Inject(CACHE_MANAGER) private readonly cache: cacheManager.Cache,
         @Inject(AUTH_REPOSITORY) private readonly authRepository: IAuthRepository,
         @Inject(ROLE_REPOSITORY) private readonly roleRepository: IRoleRepository,
@@ -59,11 +62,17 @@ export class LoginUseCase {
         }
 
         await this.authRepository.updateLastLogin(auth.id);
-
+        
+       const volunteer_profile = await firstValueFrom(
+            this.userClient.send('user.findByEmail', {
+                email: email,
+            }));
         const accessToken = this.jwtService.sign(
             {
                 userId: auth.id,
                 email: auth.email,
+                name: volunteer_profile.fullName,
+                phoneNumber: volunteer_profile.phoneNumber,
                 roleId: auth.roleId,
                 roleName: role.name,
                 permissions: auth.role?.permissions || [],

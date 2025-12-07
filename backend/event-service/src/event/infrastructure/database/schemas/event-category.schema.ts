@@ -38,4 +38,4 @@ export const EventCategorySchema = SchemaFactory.createForClass(EventCategory);
 
 // Indexes
 EventCategorySchema.index({ isActive: 1, order: 1 });
-EventCategorySchema.index({ parentId: 1 });
+// EventCategorySchema.index({ parentId: 1 });

@@ -11,6 +11,7 @@ import {
     UseGuards,
     HttpCode,
     HttpStatus,
+    Inject,
 } from '@nestjs/common';
 import { CreateEventUseCase } from '../../application/use-cases/create-event.use-case';
 import { UpdateEventUseCase } from '../../application/use-cases/update-event.use-case';
@@ -32,10 +33,13 @@ import { Public } from '@share/auth/public.decorator';
 import { Roles } from '@share/auth/roles.decorator';
 import { GetUser } from '@share/auth/get-user.decorator';
 import { JwtAuthGuard } from '@share/auth/jwt-auth.guard'
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 @Controller('events')
 export class EventController {
     constructor(
+        @Inject('USER_SERVICE') private userClient: ClientProxy,
         private readonly createEventUseCase: CreateEventUseCase,
         private readonly updateEventUseCase: UpdateEventUseCase,
         private readonly submitEventForApprovalUseCase: SubmitEventForApprovalUseCase,
@@ -116,9 +120,9 @@ export class EventController {
         const event = await this.createEventUseCase.execute({
             dto: createEventDto,
             organizerId: userId,
-            organizerName: user?.name || 'Unknown',
-            organizerEmail: user?.email,
-            organizerPhone: user?.phone || '',
+            organizerName: user.name,
+            organizerEmail: user.email,
+            organizerPhone: user.phoneNumber,
         });
 
         return {

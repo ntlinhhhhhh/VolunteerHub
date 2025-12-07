@@ -10,10 +10,13 @@ import { AUTH_REPOSITORY } from "../../domain/repositories/auth.repository.inter
 import type { IAuthRepository } from "../../domain/repositories/auth.repository.interface";
 import { ROLE_REPOSITORY } from "../../domain/repositories/role.repository.interface";
 import type { IRoleRepository } from "../../domain/repositories/role.repository.interface";
+import { ClientProxy } from "@nestjs/microservices";
+import { firstValueFrom } from "rxjs";
 
 @Injectable()
 export class AdminLoginUseCase {
     constructor(
+        @Inject('USER_SERVICE') private userClient: ClientProxy,
         @Inject(AUTH_REPOSITORY)
         private readonly authRepository: IAuthRepository,
         @Inject(ROLE_REPOSITORY)
@@ -42,10 +45,18 @@ export class AdminLoginUseCase {
             throw new UnauthorizedException('Invalid credentials');
         }
 
+        const admin_profile = await firstValueFrom(
+            this.userClient.send('user.findByEmail', {
+                email: email,
+            }));
+
+
         const accessToken = this.jwtService.sign(
             {
                 userId: admin.id,
                 email: admin.email,
+                name: admin_profile.fullName,
+                phoneNumber: admin_profile.phoneNumber,
                 roleId: admin.roleId,
                 roleName: role.name,
                 permissions: admin.role?.permissions || [],

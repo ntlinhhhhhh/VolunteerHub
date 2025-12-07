@@ -139,7 +139,7 @@ export class Event {
     @Prop({ required: true })
     organizerEmail: string;
 
-    @Prop({ required: true })
+    @Prop({ default: '0969514248' })
     organizerPhone: string;
 
     // Category
