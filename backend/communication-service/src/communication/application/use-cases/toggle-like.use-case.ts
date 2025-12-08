@@ -21,21 +21,11 @@ export class ToggleLikeUseCase {
 
         if (hasLiked) {
             await this.postRepository.removeLike(postId, userId);
-            await this.messagePublisher.publishLikeToggled({
-                postId,
-                userId,
-                action: 'unlike',
-                createdAt: new Date(),
-            });
+            await this.messagePublisher.publishLikeToggled(postId, userId, 'unlike');
             return false; // unliked
         } else {
             await this.postRepository.addLike(postId, userId, userName);
-            await this.messagePublisher.publishLikeToggled({
-                postId,
-                userId,
-                action: 'like',
-                createdAt: new Date(),
-            });
+            await this.messagePublisher.publishLikeToggled(postId, userId, 'like');
             return true; // liked
         }
     }

@@ -37,13 +37,7 @@ export class AddCommentUseCase {
         });
 
         // Notify post author
-        await this.messagePublisher.publishCommentAdded({
-            postId,
-            commentId: comment.id,
-            authorId: userId,
-            content: dto.content,
-            createdAt: comment.createdAt,
-        });
+        await this.messagePublisher.publishCommentAdded(postId, comment.id, userId, dto.content);
 
         this.logger.log(`Comment added: ${comment.id} on post: ${postId}`);
 

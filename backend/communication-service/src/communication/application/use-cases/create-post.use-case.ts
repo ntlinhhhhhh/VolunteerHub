@@ -65,13 +65,7 @@ export class CreatePostUseCase {
         const post = await this.postRepository.create(postData as any);
 
         // 3. Publish event to message bus
-        await this.messagePublisher.publishPostCreated({
-            postId: post.id,
-            eventId,
-            authorId: userId,
-            content: dto.content,
-            createdAt: post.createdAt,
-        });
+        await this.messagePublisher.publishPostCreated(post.id, eventId, userId, dto.content);
 
         this.logger.log(`Post created: ${post.id} in event: ${eventId}`);
 
