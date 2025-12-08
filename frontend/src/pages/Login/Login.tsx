@@ -155,6 +155,12 @@ const Login: React.FC = () => {
                     )}
                 </div>
 
+                <div style={{ width: "100%", textAlign: "right", marginBottom: "10px" }}>
+                    <Link to="/forgot-password" style={styles.forgotPasswordLink}>
+                        Forgot password?
+                    </Link>
+                </div>
+
                 {/* Register */}
                 <div style={styles.linkText}>
                     <p style={{ color: '#343a40' }}>

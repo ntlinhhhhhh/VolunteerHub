@@ -55,26 +55,66 @@ const Dashboard: React.FC = () => {
     const [user, setUser] = useState<any>(null);
     const [showMenu, setShowMenu] = useState(false);
 
+    // useEffect(() => {
+    //     const token = localStorage.getItem("accessToken");
+    //     // Giả lập dữ liệu user để hiển thị ngay (bạn có thể bỏ comment fetch để chạy thật)
+    //     // setUser({ 
+    //     //     email: "zmint2254@gmail.com", 
+    //     //     fullName: "ZM", 
+    //     //     username: "zm", 
+    //     //     phoneNumber: "0123456789",
+    //     //     bio: "Volunteer enthusiast",
+    //     //     avatar: "https://i.imgur.com/NGVz6NU.png"
+    //     // });
+
+    //     // Code fetch cũ của bạn giữ nguyên nếu cần
+    //     if (!token) return;
+    //     fetch("http://localhost:8000/users/me", { headers: { Authorization: `Bearer ${token}` } })
+    //     .then((res) => res.json())
+    //     .then((data) => setUser(data))
+    //     .catch((err) => console.error(err));
+        
+    // }, []);
     useEffect(() => {
         const token = localStorage.getItem("accessToken");
-        // Giả lập dữ liệu user để hiển thị ngay (bạn có thể bỏ comment fetch để chạy thật)
-        // setUser({ 
-        //     email: "zmint2254@gmail.com", 
-        //     fullName: "ZM", 
-        //     username: "zm", 
-        //     phoneNumber: "0123456789",
-        //     bio: "Volunteer enthusiast",
-        //     avatar: "https://i.imgur.com/NGVz6NU.png"
-        // });
+        const defaultAvatarUrl = 'https://via.placeholder.com/32/343a40/ffffff?text=U'; // Avatar mặc định
 
-        // Code fetch cũ của bạn giữ nguyên nếu cần
-        if (!token) return;
+        if (!token) {
+            navigate("/login"); 
+            return;
+        }
+
         fetch("http://localhost:8000/users/me", { headers: { Authorization: `Bearer ${token}` } })
-        .then((res) => res.json())
-        .then((data) => setUser(data))
-        .catch((err) => console.error(err));
+        .then((res) => {
+            if (res.status === 401) {
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
+                navigate("/login");
+                return null;
+            }
+            return res.json();
+        })
+        .then((result) => {
+            if (!result || !result.success || !result.data) return;
+
+            // --- SỬA ĐỔI QUAN TRỌNG: Lấy user data từ result.data ---
+            const userData = result.data;
+
+            // Xử lý avatar: Gán URL mặc định nếu avatar là null
+            userData.avatar = userData.avatar || defaultAvatarUrl; 
+
+            // Xử lý các trường null khác (đảm bảo chúng không phải là null khi gán)
+            // Đây chỉ là ví dụ để đảm bảo các trường profile có giá trị chuỗi rỗng thay vì null
+            userData.fullName = userData.fullName || '';
+            userData.username = userData.username || '';
+            userData.phoneNumber = userData.phoneNumber || '';
+            userData.bio = userData.bio || '';
+            
+            setUser(userData); // Gán dữ liệu user đã được xử lý
+        })
+        .catch((err) => console.error("Failed to fetch user:", err));
         
-    }, []);
+    }, [navigate]);
 
     const handleLogout = () => {
         localStorage.removeItem("token");
