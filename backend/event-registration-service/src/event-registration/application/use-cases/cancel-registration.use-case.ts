@@ -51,25 +51,25 @@ export class CancelRegistrationUseCase {
 
         await this.registrationRepository.updateStatus(registrationId, newStatus);
 
-        // Notify EVENT SERVICE to decrement volunteer count if was accepted
-        if (registration.status === RegistrationStatus.ACCEPTED ||
-            registration.status === RegistrationStatus.CONFIRMED) {
-            await this.amqp.publish(
-                'notification_exchange',
-                'registration.cancelled',
-                {
-                    type: 'registration_rejected',
-                    registrationId: registration.id,
-                    eventId: registration.eventId,
-                    eventTitle: registration.eventTitle,
-                    volunteerId: registration.volunteerId,
-                    volunteerName: registration.volunteerName,
-                    volunteerEmail: registration.volunteerEmail,
-                    organizerEmail: registration.organizerEmail,
-                    cancelledBy: isVolunteer ? 'volunteer' : 'organizer',
-                    cancellationReason: dto.cancellationReason,
-                });
-        }
+
+        // Notify EVENT SERVICE to decrement volunteer count if was accepted -- xử lý để gửi mail về cho người dùng
+        // if (newStatus === RegistrationStatus.CANCELLED_BY_ORGANIZER) {
+        //     await this.amqp.publish(
+        //         'notification_exchange',
+        //         'registration.cancelled',
+        //         {
+        //             type: 'registration_rejected',
+        //             registrationId: registration.id,
+        //             eventId: registration.eventId,
+        //             eventTitle: registration.eventTitle,
+        //             volunteerId: registration.volunteerId,
+        //             volunteerName: registration.volunteerName,
+        //             volunteerEmail: registration.volunteerEmail,
+        //             organizerEmail: registration.organizerEmail,
+        //             cancelledBy: isVolunteer ? 'volunteer' : 'organizer',
+        //             cancellationReason: dto.cancellationReason,
+        //         });
+        // }
 
         this.logger.log(`Registration cancelled: ${registrationId} by ${isVolunteer ? 'volunteer' : 'organizer'}`);
 
