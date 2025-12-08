@@ -73,23 +73,30 @@ export class GoogleLoginUseCase {
 
             await this.authRepository.updateLastLogin(auth.id);
 
-            const jwtPayload = {
-                sub: user.id,
-                email: user.email,
-                authId: auth.id,
-                roleId: auth.roleId,
-                roleName: volunteerRole.name,
-            };
+            const accessToken = this.jwtService.sign(
+                {
+                    userId: auth.id,
+                    email: auth.email,
+                    name: profile.name,
+                    phoneNumber: '',
+                    roleId: auth.roleId,
+                    roleName: volunteerRole.name,
+                    permissions: auth.role?.permissions || [],
+                },
+                {
+                    secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+                    expiresIn: '15m',
+                }
+            );
 
-            const accessToken = this.jwtService.sign(jwtPayload, {
-                secret: this.configService.get('JWT_ACCESS_SECRET'),
-                expiresIn: '15m',
-            });
-
-            const refreshToken = this.jwtService.sign(jwtPayload, {
-                secret: this.configService.get('JWT_REFRESH_SECRET'),
-                expiresIn: '7d',
-            });
+            const refreshToken = this.jwtService.sign(
+                { email: auth.email, type: 'refresh' },
+                {
+                    secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+                    expiresIn: '7d',
+                    subject: auth.id.toString(),
+                }
+            );
 
             return {
                 accessToken,
