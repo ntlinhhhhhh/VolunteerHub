@@ -191,7 +191,7 @@ const styles: ResetPasswordStyles = {
         justifyContent: 'center',
         width: "100%",
         padding: "15px", // Tăng padding button
-        backgroundColor: "#28a745",
+        backgroundColor: "#007bff",
         color: "#fff",
         border: "none",
         borderRadius: "8px",
