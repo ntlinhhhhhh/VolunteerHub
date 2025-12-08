@@ -29,9 +29,19 @@ services:
         strip_path: false
     
   - name: event-service
-    url: http://event-service:4004
+    url: http://event-service:4006
     routes:
       - name: event-route
         paths:
           - /events
+          - /categories
         strip_path: false
+
+  - name: event-registration-service
+    url: http://event-registration-service:4008
+    routes:
+      - name: event-registration-route
+        paths:
+          - /registrations
+        strip_path: false
+
