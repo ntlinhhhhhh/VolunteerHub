@@ -329,14 +329,6 @@ export class EventController {
         };
     }
 
-    @MessagePattern('event.incrementRoleFilled')
-    async incrementRoleFilled(@Payload() data: { eventId: string, roleId: string }) {
-        console.log("connect to event-service");
-        console.log('increment-filled', data.eventId, data.roleId);
-        await this.incrementRoleFilledUseCase.execute(data.eventId, data.roleId);
-        return { success: true, message: 'Role filled incremented' };
-    }
-    
     /**
      * ADMIN: Get statistics
      * GET /api/events/admin/statistics
@@ -351,6 +343,15 @@ export class EventController {
             success: true,
             data: stats,
         };
+    }
+
+    // patter to increase role filled
+    @MessagePattern('event.incrementRoleFilled')
+    async incrementRoleFilled(@Payload() data: { eventId: string, roleId: string }) {
+        console.log("connect to event-service");
+        console.log('increment-filled', data.eventId, data.roleId);
+        await this.incrementRoleFilledUseCase.execute(data.eventId, data.roleId);
+        return { success: true, message: 'Role filled incremented' };
     }
 
 }

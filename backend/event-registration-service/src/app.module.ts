@@ -102,6 +102,11 @@ import { ConfirmAttendanceUseCase } from './event-registration/application/use-c
         JwtStrategy,
         JwtAuthGuard,
     ],
-    exports: [RabbitMQModule, CacheModule],
+    exports: [
+        'EVENT_SERVICE',
+        'USER_SERVICE',
+        RabbitMQModule, 
+        CacheModule
+    ],
 })
 export class AppModule { }

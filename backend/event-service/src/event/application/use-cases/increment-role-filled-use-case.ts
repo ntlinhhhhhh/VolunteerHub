@@ -21,7 +21,6 @@ export class IncrementRoleFilledUseCase {
         }
 
         role.filled += 1;
-        role.slots -= 1;
         await this.eventRepository.update(eventId, { roles: event.roles });
     }
 }

@@ -55,13 +55,12 @@ export class ConfirmAttendanceUseCase {
 
         this.logger.log(`Registration confirmed: ${registrationId}`);
 
-        this.eventClient.send('event.incrementRoleFilled', {
-            eventId: registration.eventId,
-            roleId: registration.roleId,
-        })
-
-
-
+        await firstValueFrom(
+            this.eventClient.send('event.incrementRoleFilled', {
+                eventId: registration.eventId,
+                roleId: registration.roleId,
+            })
+        );
         const updated = await this.registrationRepository.findById(registrationId);
         return updated!;
     }

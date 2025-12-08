@@ -3,7 +3,7 @@ POST http://localhost:8000/auth/register
 Content-Type: application/json
 
 {
-    "email": "11@gmail.com",
+    "email": "hehe@gmail.com",
     "username": "hehe",
     "fullName": "Nguyen Thuy Linh",
     "password": "123456"
@@ -14,7 +14,7 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "11@gmail.com",
+    "email": "hehe@gmail.com",
     "password": "123456"
 }
 

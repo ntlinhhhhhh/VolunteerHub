@@ -121,7 +121,6 @@ export class UserController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Put(':id/lock')
     async lockUser(@Param('id') id: string, @Body('reason') reason: string) {
-
         try {
 
             await firstValueFrom(
@@ -142,28 +141,29 @@ export class UserController {
         } catch (err) {
             console.log(err);
         }
-
-
-
     }
 
     @Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Put(':id/unlock')
     async unlockUser(@Param('id') id: string) {
-        await firstValueFrom(
-            this.userClient.send('auth.unlock', { userId: id })
-        );
+        try {
+            await firstValueFrom(
+                this.userClient.send('auth.unlock', { userId: id })
+            );
 
-        await this.updateUserProfileUseCase.execute(
-            id,
-            { status: UserStatus.ACTIVE }
-        );
+            await this.updateUserProfileUseCase.execute(
+                id,
+                { status: UserStatus.ACTIVE }
+            );
 
-        return {
-            success: true,
-            message: `User ${id} unlocked`,
-        };
+            return {
+                success: true,
+                message: `User ${id} unlocked`,
+            };
+        } catch (err) {
+            console.log(err);
+        }
     }
 
     @MessagePattern('user.create')
