@@ -9,12 +9,12 @@ import {
 import { IRegistrationRepository } from '../../domain/repositories/registration.repository.interface';
 import { Registration } from '../../domain/entities/registration.entity';
 import { RegistrationStatus } from '../../domain/entities/registration-status.enum';
-import { AcceptRegistrationDto } from '../dto/action-registration.dto';
+import { RejectRegistrationDto } from '../dto/action-registration.dto';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
-export class AcceptRegistrationUseCase {
-    private readonly logger = new Logger(AcceptRegistrationUseCase.name);
+export class RejectRegistrationUseCase {
+    private readonly logger = new Logger(RejectRegistrationUseCase.name);
 
     constructor(
         @Inject(IRegistrationRepository)
@@ -25,57 +25,47 @@ export class AcceptRegistrationUseCase {
     async execute(
         registrationId: string,
         organizerId: string,
-        dto: AcceptRegistrationDto
+        dto: RejectRegistrationDto
     ): Promise<Registration> {
-        // 1. Find registration
         const registration = await this.registrationRepository.findById(registrationId);
         if (!registration) {
             throw new NotFoundException('Registration not found');
         }
 
-        // 2. Check permission
         if (registration.organizerId !== organizerId) {
-            throw new ForbiddenException('You do not have permission to accept this registration');
+            throw new ForbiddenException('You do not have permission to reject this registration');
         }
 
-        // 3. Check if can be accepted
-        if (!registration.canBeAccepted()) {
-            throw new BadRequestException(`Cannot accept registration with status: ${registration.status}`);
+        if (!registration.canBeRejected()) {
+            throw new BadRequestException(`Cannot reject registration with status: ${registration.status}`);
         }
 
-        // 4. Update registration
         await this.registrationRepository.update(registrationId, {
-            status: RegistrationStatus.ACCEPTED,
+            status: RegistrationStatus.REJECTED,
             approval: {
                 reviewedBy: organizerId,
                 reviewedAt: new Date(),
-                acceptanceNote: dto.acceptanceNote,
+                rejectionReason: dto.rejectionReason,
             },
         } as any);
 
-        // 5. Publish events to message bus
-        // Notify EVENT SERVICE to increment volunteer count
         await this.amqp.publish(
             'notification_exchange',
-            'registration.accepted',
+            'registration.rejected',
             {
-                type: 'registration_accepted',
+                type: 'registration_rejected',
                 userId: registration.volunteerId,
-                // recipient: registration.volunteerEmail,
-                recipient: 'nguyenthuylinh26012005@gmail.com',
+                recipient: registration.volunteerEmail,
                 registrationId: registration.id,
                 eventId: registration.eventId,
                 eventTitle: registration.eventTitle,
                 volunteerId: registration.volunteerId,
                 volunteerName: registration.volunteerName,
                 volunteerEmail: registration.volunteerEmail,
-                eventDate: registration.eventDate.toISOString(),
-                eventLocation: registration.eventLocation,
-                roleName: registration.roleName,
-                organizerPhone: registration.organizerEmail,
+                rejectionReason: dto.rejectionReason,
             });
 
-        this.logger.log(`Registration accepted: ${registrationId}`);
+        this.logger.log(`Registration rejected: ${registrationId}`);
 
         const updated = await this.registrationRepository.findById(registrationId);
         return updated!;

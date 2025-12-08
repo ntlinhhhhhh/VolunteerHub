@@ -105,6 +105,22 @@ services:
       - redis
       - rabbitmq
     restart: unless-stopped
+  event-registration-service:
+    build:
+      context: .
+      dockerfile: event-registration-service/Dockerfile
+    container_name: event-registration-service
+    env_file:
+      - ./event-registration-service/.env
+    networks:
+      - volunteerhub-net
+    ports:
+      - "4008:4008"
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    restart: unless-stopped
 
 
   kong:

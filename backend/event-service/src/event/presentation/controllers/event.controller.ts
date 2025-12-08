@@ -35,6 +35,7 @@ import { GetUser } from '@share/auth/get-user.decorator';
 import { JwtAuthGuard } from '@share/auth/jwt-auth.guard'
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { IncrementRoleFilledUseCase } from 'src/event/application/use-cases/increment-role-filled-use-case';
 
 @Controller('events')
 export class EventController {
@@ -51,7 +52,8 @@ export class EventController {
         private readonly getEventByIdUseCase: GetEventByIdUseCase,
         private readonly getEventBySlugUseCase: GetEventBySlugUseCase,
         private readonly listEventsUseCase: ListEventsUseCase,
-        private readonly getEventStatisticsUseCase: GetEventStatisticsUseCase
+        private readonly getEventStatisticsUseCase: GetEventStatisticsUseCase,
+        private readonly incrementRoleFilledUseCase: IncrementRoleFilledUseCase,
     ) { }
 
     /**
@@ -327,6 +329,20 @@ export class EventController {
         };
     }
 
+
+    @Patch(':id/roles/:roleId/increment-filled')
+    // @UseGuards(JwtAuthGuard)
+    // @Roles('event_manager', 'admin')
+    async incrementRoleFilled(
+        @Param('id') eventId: string,
+        @Param('roleId') roleId: string
+    ) {
+        console.log('increment-filled', eventId, roleId);
+        await this.incrementRoleFilledUseCase.execute(eventId, roleId);
+        return { success: true, message: 'Role filled incremented' };
+    }
+
+
     /**
      * ADMIN: Get statistics
      * GET /api/events/admin/statistics
@@ -342,4 +358,5 @@ export class EventController {
             data: stats,
         };
     }
+
 }
