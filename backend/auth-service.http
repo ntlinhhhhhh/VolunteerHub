@@ -51,7 +51,7 @@ POST http://localhost:8000/auth/forgot-password
 Content-Type: application/json
 
 {
-    "email": "nguyenthuylinh26012005@gmail.com"
+    "email": "zmint2254@gmail.com"
 }
 
 ### reset password
@@ -59,8 +59,8 @@ POST http://localhost:8000/auth/reset-password
 Content-Type: application/json
 
 {
-    "email": "nguyenthuylinh26012005@gmail.com",
-    "token": "9a7c73de8013b52b94bd189d3b42dcbee64b854b0c70918ca433ad2c1df7a206",
+    "email": "zmint2254@gmail.com",
+    "token": "f5e05d76a8ef211514176e75e3c12a941a71d4a6476ded2455c1d452ee8ce2c5",
     "newPassword": "12345678"
 }
 
@@ -82,3 +82,6 @@ Accept: application/json
 {
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NjQ5NjY5NjAsImV4cCI6MTc2NTU3MTc2MCwic3ViIjoiNjkzMzM1ZjZiMTdhOTJlNGI3NjFhOWExIn0.bCCu8ZNv6wTnNKpauRlfXhRrZ6J4bJA7VcA5dk3D3to" 
 }
+
+POST http://localhost:8000/users/me
+
