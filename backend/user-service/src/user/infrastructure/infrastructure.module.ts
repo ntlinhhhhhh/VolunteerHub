@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './database/schemas/user.schema';
 import { UserRepository } from './repositories/user.repository';
-import { IUserRepository } from 'user/domain/repositories/user.repository.interface';
+import { IUserRepository } from '../domain/repositories/user.repository.interface';
 
 @Module({
     imports: [

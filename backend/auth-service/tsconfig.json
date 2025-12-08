@@ -13,9 +13,11 @@
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "src",
+    "baseUrl": "./",
     "paths": {
-      "auth/*": ["auth/*"]
+        "auth/*": ["auth/*"],
+        "@share/*": ["../share/src/*"]
+        
     },
     "incremental": true,
     "skipLibCheck": true,
@@ -24,5 +26,5 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
-  }
+  },
 }

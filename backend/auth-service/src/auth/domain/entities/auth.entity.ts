@@ -1,3 +1,4 @@
+import { Role } from "src/auth/infrastructure/database/schemas/role.schema";
 import { Permission } from "./permission.enum";
 import { UserRole } from "./user-role.entity";
 

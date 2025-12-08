@@ -6,10 +6,9 @@ import { AllExceptionsFilter } from './auth/presentation/filters/http-exception.
 
 async function bootstrap() {
     const logger = new Logger('AuthService');
-
     try {
-        const app = await NestFactory.create(AppModule);
 
+        const app = await NestFactory.create(AppModule);
         app.useGlobalPipes(
             new ValidationPipe({
                 whitelist: true,

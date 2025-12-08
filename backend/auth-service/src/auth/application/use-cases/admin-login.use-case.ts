@@ -1,26 +1,31 @@
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from 'bcryptjs';
-import type { Cache } from 'cache-manager';
-import { IAuthRepository } from "auth/domain/repositories/auth.repository.interface";
-import { IRoleRepository } from "auth/domain/repositories/role.repository.interface";
-import { AuthRepository } from "auth/infrastructure/repositories/auth.repository";
+
+import * as cacheManager from '@nestjs/cache-manager';
+import { Token } from "src/auth/domain/entities/token.entity";
+import { AUTH_REPOSITORY } from "../../domain/repositories/auth.repository.interface";
+import type { IAuthRepository } from "../../domain/repositories/auth.repository.interface";
+import { ROLE_REPOSITORY } from "../../domain/repositories/role.repository.interface";
+import type { IRoleRepository } from "../../domain/repositories/role.repository.interface";
+import { ClientProxy } from "@nestjs/microservices";
+import { firstValueFrom } from "rxjs";
 
 @Injectable()
-export class AdminLoginUseCase{
+export class AdminLoginUseCase {
     constructor(
-        @Inject(AuthRepository)
+        @Inject('USER_SERVICE') private userClient: ClientProxy,
+        @Inject(AUTH_REPOSITORY)
         private readonly authRepository: IAuthRepository,
-
-        @Inject(IRoleRepository)
+        @Inject(ROLE_REPOSITORY)
         private readonly roleRepository: IRoleRepository,
-
         private readonly jwtService: JwtService,
-
-        @Inject(CACHE_MANAGER) 
-        private readonly cacheManager: Cache,
-    ) {}
+        @Inject(CACHE_MANAGER)
+        private readonly cache: cacheManager.Cache,
+        private readonly configService: ConfigService,
+    ) { console.log('✅ AdminLoginUseCase constructor called'); }
 
     async execute(email: string, password: string) {
         const admin = await this.authRepository.findByEmail(email);
@@ -34,32 +39,44 @@ export class AdminLoginUseCase{
             throw new UnauthorizedException('Access denied');
         }
 
-        const isMatch = await bcrypt.compare(password, admin.passwordHash);
-        if (isMatch) {
+        const isPasswordValid = await bcrypt.compare(password, admin?.passwordHash);
+
+        if (!isPasswordValid) {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        const payload = { 
-            userId: admin.id, 
-            email: admin.email, 
-            roleId: role.id, 
-            roleName: role.name, 
-            permissions: role.permissions, 
-        };
+        const admin_profile = await firstValueFrom(
+            this.userClient.send('user.findByEmail', {
+                email: email,
+            }));
 
-        const accessToken = this.jwtService.sign(payload, {expiresIn: '15m'});
-        const refreshToken = this.jwtService.sign(
-            { sub: admin.id, type: 'refresh' },
-            { expiresIn: '7d' }
+
+        const accessToken = this.jwtService.sign(
+            {
+                userId: admin.id,
+                email: admin.email,
+                name: admin_profile.fullName,
+                phoneNumber: admin_profile.phoneNumber,
+                roleId: admin.roleId,
+                roleName: role.name,
+                permissions: admin.role?.permissions || [],
+            },
+            {
+                secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+                expiresIn: '15m',
+            }
         );
 
-        await this.cacheManager.set(`refresh:${admin.id}`, refreshToken);
+        const refreshToken = this.jwtService.sign(
+            { email: admin.email, type: 'refresh' },
+            {
+                secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+                expiresIn: '7d',
+                subject: admin.id.toString(),
+            }
+        );
 
-        return {
-            accessToken,
-            refreshToken,
-            expiresIn: 900,
-            userId: admin.id,
-        };
+        await this.cache.set(`refresh:${admin.id}`, refreshToken, 7 * 24 * 60 * 60);
+        return new Token(accessToken, refreshToken, 900);
     }
 }

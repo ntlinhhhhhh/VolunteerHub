@@ -1,8 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleTokenResponseDto } from 'auth/application/dto/google-token-response.dto';
-import { GoogleUserProfileDto } from 'auth/application/dto/google-user-profile.dto';
 import axios from 'axios';
+import { GoogleTokenResponseDto } from 'src/auth/application/dto/google-token-response.dto';
+import { GoogleUserProfileDto } from 'src/auth/application/dto/google-user-profile.dto';
 
 @Injectable()
 export class GoogleAuthService {

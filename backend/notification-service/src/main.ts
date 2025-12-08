@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { RabbitMQService } from './notification/infrastructure/message-queue/rabbitmq.service';
+import { RabbitMQService } from './notification/infrastructure/message-bus/rabbitmq.service';
 import { getConnectionToken } from '@nestjs/mongoose';
 
 async function bootstrap() {

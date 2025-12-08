@@ -1,10 +1,12 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, Logger } from '@nestjs/common';
+import { ValidationPipe, Logger, BadRequestException, ValidationError } from '@nestjs/common';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './user/presentation/filters/http-exception.filter';
+import * as dotenv from 'dotenv';
 
 async function bootstrap() {
+    dotenv.config();
     const logger = new Logger('UserService');
 
     const app = await NestFactory.create(AppModule);
@@ -14,6 +16,16 @@ async function bootstrap() {
             whitelist: true,
             forbidNonWhitelisted: true,
             transform: true,
+            exceptionFactory: (errors: ValidationError[]) => {
+                const detailedErrors = errors.map(err => ({
+                    property: err.property,
+                    value: err.value,
+                    constraints: err.constraints,
+                    children: err.children,
+                }));
+                logger.error('Validation failed:', JSON.stringify(detailedErrors, null, 2));
+                return new BadRequestException(detailedErrors);
+            },
         }),
     );
 
@@ -36,11 +48,10 @@ async function bootstrap() {
             retryDelay: 3000,
         },
     };
-
     app.connectMicroservice(microserviceOptions);
     await app.startAllMicroservices();
 
-    const port = parseInt(process.env.PORT || '4002', 10);
+    const port = parseInt(process.env.PORT || '4006', 10);
     await app.listen(port);
 
     logger.log(`✅ User Service HTTP API running at http://localhost:${port}/api`);

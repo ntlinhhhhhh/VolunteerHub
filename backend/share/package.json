@@ -1,0 +1,33 @@
+{
+    "name": "share",
+    "version": "1.0.0",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "nest build"
+    },
+    "devDependencies": {
+        "@types/handlebars": "^4.0.40",
+        "@types/node": "^24.10.1",
+        "@types/nodemailer": "^7.0.4",
+        "@types/passport": "^1.0.17",
+        "@types/passport-jwt": "^4.0.1",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.3"
+    },
+    "dependencies": {
+        "@nestjs/common": "^11.1.9",
+        "@nestjs/config": "^4.0.2",
+        "@nestjs/core": "^11.1.9",
+        "@nestjs/mapped-types": "^2.1.0",
+        "@nestjs/microservices": "^11.1.9",
+        "@nestjs/passport": "^11.0.5",
+        "amqp-connection-manager": "^5.0.0",
+        "amqplib": "^0.10.9",
+        "handlebars": "^4.7.8",
+        "nodemailer": "^7.0.11",
+        "passport": "^0.7.0",
+        "passport-jwt": "^4.0.1",
+        "reflect-metadata": "^0.2.2",
+        "rxjs": "^7.8.2"
+    }
+}
