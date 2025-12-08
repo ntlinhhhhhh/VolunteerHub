@@ -21,6 +21,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Inject } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { GetUser } from '@share/auth/get-user.decorator';
+import { UserStatus } from 'src/user/domain/entities/user.entity';
 
 
 @Controller('users')
@@ -68,8 +69,13 @@ export class UserController {
     @Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Get()
-    async findAll() {
-        const users = await this.getUserProfileUseCase.executeAll();
+    async findAll(
+        filters?: {
+            status?: UserStatus;
+            page?: number;
+            limit?: number;
+        }) {
+        const users = await this.getUserProfileUseCase.executeAll(filters);
         return {
             success: true,
             data: users || [],
