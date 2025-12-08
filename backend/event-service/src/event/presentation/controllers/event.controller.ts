@@ -33,7 +33,7 @@ import { Public } from '@share/auth/public.decorator';
 import { Roles } from '@share/auth/roles.decorator';
 import { GetUser } from '@share/auth/get-user.decorator';
 import { JwtAuthGuard } from '@share/auth/jwt-auth.guard'
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { IncrementRoleFilledUseCase } from 'src/event/application/use-cases/increment-role-filled-use-case';
 
@@ -329,20 +329,14 @@ export class EventController {
         };
     }
 
-
-    @Patch(':id/roles/:roleId/increment-filled')
-    // @UseGuards(JwtAuthGuard)
-    // @Roles('event_manager', 'admin')
-    async incrementRoleFilled(
-        @Param('id') eventId: string,
-        @Param('roleId') roleId: string
-    ) {
-        console.log('increment-filled', eventId, roleId);
-        await this.incrementRoleFilledUseCase.execute(eventId, roleId);
+    @MessagePattern('event.incrementRoleFilled')
+    async incrementRoleFilled(@Payload() data: { eventId: string, roleId: string }) {
+        console.log("connect to event-service");
+        console.log('increment-filled', data.eventId, data.roleId);
+        await this.incrementRoleFilledUseCase.execute(data.eventId, data.roleId);
         return { success: true, message: 'Role filled incremented' };
     }
-
-
+    
     /**
      * ADMIN: Get statistics
      * GET /api/events/admin/statistics

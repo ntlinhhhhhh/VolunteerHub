@@ -11,6 +11,8 @@ import { Registration } from '../../domain/entities/registration.entity';
 import { RegistrationStatus } from '../../domain/entities/registration-status.enum';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
+import { ClientProxy } from '@nestjs/microservices/client/client-proxy';
+import { firstValueFrom } from 'rxjs';
 /**
  * USE CASE #5: Volunteer xác nhận sẽ tham dự
  * Flow: ACCEPTED → CONFIRMED
@@ -23,10 +25,11 @@ export class ConfirmAttendanceUseCase {
         @Inject(IRegistrationRepository)
         private readonly registrationRepository: IRegistrationRepository,
         private readonly configService: ConfigService,
+        @Inject('EVENT_SERVICE')
+        private readonly eventClient: ClientProxy,
     ) { }
 
     async execute(registrationId: string, volunteerId: string): Promise<Registration> {
-        const EVENT_SERVICE_URL = `http://localhost:4006`
         const registration = await this.registrationRepository.findById(registrationId);
         if (!registration) {
             throw new NotFoundException('Registration not found');
@@ -52,12 +55,11 @@ export class ConfirmAttendanceUseCase {
 
         this.logger.log(`Registration confirmed: ${registrationId}`);
 
-        const eventServiceUrl = this.configService.get('EVENT_SERVICE_URL');
-        try {
-            await axios.patch(`${eventServiceUrl}/events/${registration.eventId}/roles/${registration.roleId}/increment-filled`);
-        } catch (error) {
-            console.error('Failed to increment filled for event role:', error.message);
-        }
+        this.eventClient.send('event.incrementRoleFilled', {
+            eventId: registration.eventId,
+            roleId: registration.roleId,
+        })
+
 
 
         const updated = await this.registrationRepository.findById(registrationId);

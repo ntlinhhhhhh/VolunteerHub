@@ -70,11 +70,15 @@ export class UserController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Get()
     async findAll(
+        @Query()
         filters?: {
             status?: UserStatus;
             page?: number;
             limit?: number;
         }) {
+
+        console.log('filters', filters);
+
         const users = await this.getUserProfileUseCase.executeAll(filters);
         return {
             success: true,
@@ -117,17 +121,30 @@ export class UserController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Put(':id/lock')
     async lockUser(@Param('id') id: string, @Body('reason') reason: string) {
-        await firstValueFrom(
-            this.userClient.send('auth.lock', {
-                userId: id,
-                reason: reason || 'Locked by admin',
-            }),
-        );
 
-        return {
-            success: true,
-            message: `User ${id} locked`,
-        };
+        try {
+
+            await firstValueFrom(
+                this.userClient.send('auth.lock', {
+                    userId: id,
+                    reason: reason || 'Locked by admin',
+                }),
+            );
+
+            await this.updateUserProfileUseCase.execute(
+                id,
+                { status: UserStatus.INACTIVE }
+            );
+            return {
+                success: true,
+                message: `User ${id} locked`,
+            };
+        } catch (err) {
+            console.log(err);
+        }
+
+
+
     }
 
     @Roles('admin')
@@ -136,6 +153,11 @@ export class UserController {
     async unlockUser(@Param('id') id: string) {
         await firstValueFrom(
             this.userClient.send('auth.unlock', { userId: id })
+        );
+
+        await this.updateUserProfileUseCase.execute(
+            id,
+            { status: UserStatus.ACTIVE }
         );
 
         return {

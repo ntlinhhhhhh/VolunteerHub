@@ -3,13 +3,14 @@ import { AppModule } from './app.module';
 import { ValidationPipe, BadRequestException, ValidationError } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import { EventCategorySeeder } from './event/infrastructure/database/seed/event-category.seed';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
     dotenv.config();
     const app = await NestFactory.create(AppModule);
 
-    const seeder = app.get(EventCategorySeeder);
-    await seeder.seed();
+    // const seeder = app.get(EventCategorySeeder);
+    // await seeder.seed();
 
     app.enableCors({ origin: process.env.CORS_ORIGIN || '*' });
 
@@ -24,6 +25,23 @@ async function bootstrap() {
             },
         }),
     );
+
+    const redisHost = process.env.REDIS_HOST || 'redis';
+    const redisPort = parseInt(process.env.REDIS_PORT || '6379', 10);
+
+
+    const microserviceOptions: MicroserviceOptions = {
+        transport: Transport.REDIS,
+        options: {
+            host: redisHost,
+            port: redisPort,
+            retryAttempts: 5,
+            retryDelay: 3000,
+        },
+    };
+    app.connectMicroservice(microserviceOptions);
+    await app.startAllMicroservices();
+
 
     const port = parseInt(process.env.PORT || '4006', 10);
     await app.listen(port);

@@ -69,6 +69,14 @@ import { ConfirmAttendanceUseCase } from './event-registration/application/use-c
                     options: { host: 'redis', port: 6379 },
                 }),
         },
+        {
+            provide: 'EVENT_SERVICE',
+            useFactory: () =>
+                ClientProxyFactory.create({
+                    transport: Transport.REDIS,
+                    options: { host: 'redis', port: 6379 },
+                }),
+        },
 
         { provide: IRegistrationRepository, useClass: RegistrationRepository },
 
