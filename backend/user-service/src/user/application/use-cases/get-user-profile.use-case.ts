@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { IUserRepository } from '../../domain/repositories/user.repository.interface';
-import { User } from '../../domain/entities/user.entity';
+import { User, UserStatus } from '../../domain/entities/user.entity';
 
 @Injectable()
 export class GetUserProfileUseCase {
@@ -33,8 +33,13 @@ export class GetUserProfileUseCase {
         return user;
     }
 
-    async executeAll(): Promise<{ users: User[]; total: number }> {
-        const user = await this.userRepository.findAll();
+    async executeAll(
+        filters?: {
+            status?: UserStatus;
+            page?: number;
+            limit?: number;
+        }): Promise<{ users: User[]; total: number }> {
+        const user = await this.userRepository.findAll(filters);
         if (!user) {
             throw new NotFoundException('User not found');
         }

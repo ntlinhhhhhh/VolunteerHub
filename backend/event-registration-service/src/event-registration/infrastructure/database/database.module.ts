@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Registration, RegistrationSchema } from './schemas/registration.schema';
+import { Registration, RegistrationSchema } from './schema/registration.schema';
 
 @Module({
   imports: [

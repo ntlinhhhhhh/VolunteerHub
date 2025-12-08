@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import * as bcrypt from 'bcryptjs';  // ✅ Thêm import để hash password
+import * as bcrypt from 'bcryptjs';
 import { GoogleTokenResponseDto } from '../dto/google-token-response.dto';
 import { GoogleUserProfileDto } from '../dto/google-user-profile.dto';
 import { GoogleLoginResultDto } from '../dto/google-login-result.dto';
@@ -12,6 +12,7 @@ import { AUTH_REPOSITORY } from "../../domain/repositories/auth.repository.inter
 import type { IAuthRepository } from "../../domain/repositories/auth.repository.interface";
 import { ROLE_REPOSITORY } from "../../domain/repositories/role.repository.interface";
 import type { IRoleRepository } from "../../domain/repositories/role.repository.interface";
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class GoogleLoginUseCase {
@@ -19,6 +20,7 @@ export class GoogleLoginUseCase {
         @Inject(AUTH_REPOSITORY) private readonly authRepository: IAuthRepository,
         @Inject(ROLE_REPOSITORY) private readonly roleRepository: IRoleRepository,
         @Inject('USER_SERVICE') private readonly userClient: ClientProxy,
+        private readonly rabbitmq: AmqpConnection,
         private readonly googleAuthService: GoogleAuthService,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
@@ -61,6 +63,19 @@ export class GoogleLoginUseCase {
                         avatar: profile.picture,
                     })
                 );
+
+                await this.rabbitmq.publish(
+                    'notification_exchange',
+                    'user.registered',
+                    {
+                        type: 'user_registered',
+                        userId: auth.id,
+                        recipient: profile.email,
+                        fullName: profile.name,
+                        data: {}
+                    }
+                );
+
             } else {
                 user = await firstValueFrom(
                     this.userClient.send('user.findByAuthId', { authId: auth.id })

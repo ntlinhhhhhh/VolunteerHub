@@ -133,7 +133,7 @@ export class ApplyForEventUseCase {
     private async getEventDetails(eventId: string): Promise<any> {
         try {
             const eventServiceUrl = this.configService.get('EVENT_SERVICE_URL');
-            const response = await axios.get(`${eventServiceUrl}/api/events/${eventId}`);
+            const response = await axios.get(`${eventServiceUrl}/events/${eventId}`);
             return response.data.data;
         } catch (error) {
             this.logger.error(`Failed to get event details: ${eventId}`, error);

@@ -43,6 +43,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from '@share/auth/jwt.strategy'; // import strategy từ share
 import { JwtAuthGuard } from '@share/auth/jwt-auth.guard'; // import guard từ share
 import { EventCategorySeeder } from './event/infrastructure/database/seed/event-category.seed';
+import { IncrementRoleFilledUseCase } from './event/application/use-cases/increment-role-filled-use-case';
 
 @Module({
     imports: [
@@ -104,8 +105,9 @@ import { EventCategorySeeder } from './event/infrastructure/database/seed/event-
         CreateCategoryUseCase,
         ListCategoriesUseCase,
         EventCategorySeeder,
+        IncrementRoleFilledUseCase,
 
-        // ⬅ Thêm chiến lược JWT và guard để @GetUser() hoạt động
+        EventRepository,   
         JwtStrategy,
         JwtAuthGuard,
     ],
