@@ -2,7 +2,7 @@ import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
 import { IPostRepository } from '../../domain/repositories/post.repository.interface';
 import { Comment } from '../../domain/entities/post.entity';
 import { CreateCommentDto } from '../dto/create-comment.dto';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { MessagePublisherService } from '../../infrastructure/messaging/message-publisher.service';
 
 @Injectable()
 export class AddCommentUseCase {
@@ -11,7 +11,7 @@ export class AddCommentUseCase {
     constructor(
         @Inject(IPostRepository)
         private readonly postRepository: IPostRepository,
-        private readonly amqp: AmqpConnection,
+        private readonly messagePublisher: MessagePublisherService,
     ) {}
 
     async execute(
@@ -37,14 +37,12 @@ export class AddCommentUseCase {
         });
 
         // Notify post author
-        await this.amqp.publish('notification_exchange', 'comment.created', {
-            type: 'new_comment',
+        await this.messagePublisher.publishCommentAdded({
             postId,
-            postAuthorId: post.author.userId,
             commentId: comment.id,
-            commentAuthorId: userId,
-            commentAuthorName: userName,
-            content: dto.content.substring(0, 100),
+            authorId: userId,
+            content: dto.content,
+            createdAt: comment.createdAt,
         });
 
         this.logger.log(`Comment added: ${comment.id} on post: ${postId}`);

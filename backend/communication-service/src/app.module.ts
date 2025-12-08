@@ -16,6 +16,7 @@ import { DatabaseService } from './communication/infrastructure/config/database.
 
 import { PostRepository } from './communication/infrastructure/repositories/post.repository';
 import { IPostRepository } from './communication/domain/repositories/post.repository.interface';
+import { MessagePublisherService } from './communication/infrastructure/messaging/message-publisher.service';
 
 import { CreatePostUseCase } from './communication/application/use-cases/create-post.use-case';
 import { UpdatePostUseCase } from './communication/application/use-cases/update-post.use-case';
@@ -93,7 +94,10 @@ import { Post } from './communication/domain/entities/post.entity';
 
         // Repository
         PostRepository,
-        
+
+        // Messaging
+        MessagePublisherService,
+
         // Auth
         JwtStrategy,
         JwtAuthGuard,

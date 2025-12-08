@@ -4,7 +4,7 @@ import { Post } from '../../domain/entities/post.entity';
 import { CreatePostDto } from '../dto/create-post.dto';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { MessagePublisherService } from '../../infrastructure/messaging/message-publisher.service';
 
 interface CreatePostParams {
     dto: CreatePostDto;
@@ -23,7 +23,7 @@ export class CreatePostUseCase {
         private readonly postRepository: IPostRepository,
         @Inject('EVENT_SERVICE')
         private readonly eventClient: ClientProxy,
-        private readonly amqp: AmqpConnection,
+        private readonly messagePublisher: MessagePublisherService,
     ) {}
 
     async execute(params: CreatePostParams): Promise<Post> {
@@ -65,13 +65,12 @@ export class CreatePostUseCase {
         const post = await this.postRepository.create(postData as any);
 
         // 3. Publish event to message bus
-        await this.amqp.publish('notification_exchange', 'post.created', {
-            type: 'new_post',
-            eventId,
+        await this.messagePublisher.publishPostCreated({
             postId: post.id,
+            eventId,
             authorId: userId,
-            authorName: userName,
-            content: dto.content.substring(0, 100),
+            content: dto.content,
+            createdAt: post.createdAt,
         });
 
         this.logger.log(`Post created: ${post.id} in event: ${eventId}`);

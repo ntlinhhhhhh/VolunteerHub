@@ -1,8 +1,7 @@
-
+// src/communication/infrastructure/repositories/post.repository.ts
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, FilterQuery } from 'mongoose';
-import { randomUUID } from 'crypto'; 
 import {
     IPostRepository,
     PostFilterOptions,
@@ -10,6 +9,7 @@ import {
 } from '../../domain/repositories/post.repository.interface';
 import { Post as PostEntity, Comment } from '../../domain/entities/post.entity';
 import { Post as PostSchema, PostDocument } from '../database/schemas/post.schema';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class PostRepository implements IPostRepository {
@@ -176,7 +176,7 @@ export class PostRepository implements IPostRepository {
         comment: Omit<Comment, 'id' | 'createdAt' | 'updatedAt'>
     ): Promise<Comment> {
         const newComment: Comment = {
-            id: randomUUID(),
+            id: uuidv4(),
             ...comment,
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -252,10 +252,12 @@ export class PostRepository implements IPostRepository {
     }
 
     async pinPost(eventId: string, postId: string): Promise<void> {
+        // Unpin all posts in the event first
         await this.postModel
             .updateMany({ eventId }, { $set: { isPinned: false } })
             .exec();
 
+        // Pin the specified post
         await this.postModel
             .updateOne({ _id: postId }, { $set: { isPinned: true } })
             .exec();

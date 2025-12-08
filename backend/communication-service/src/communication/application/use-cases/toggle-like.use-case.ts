@@ -1,11 +1,13 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { IPostRepository } from '../../domain/repositories/post.repository.interface';
+import { MessagePublisherService } from '../../infrastructure/messaging/message-publisher.service';
 
 @Injectable()
 export class ToggleLikeUseCase {
     constructor(
         @Inject(IPostRepository)
-        private readonly postRepository: IPostRepository
+        private readonly postRepository: IPostRepository,
+        private readonly messagePublisher: MessagePublisherService,
     ) {}
 
     async execute(postId: string, userId: string, userName: string): Promise<boolean> {
@@ -19,9 +21,21 @@ export class ToggleLikeUseCase {
 
         if (hasLiked) {
             await this.postRepository.removeLike(postId, userId);
+            await this.messagePublisher.publishLikeToggled({
+                postId,
+                userId,
+                action: 'unlike',
+                createdAt: new Date(),
+            });
             return false; // unliked
         } else {
             await this.postRepository.addLike(postId, userId, userName);
+            await this.messagePublisher.publishLikeToggled({
+                postId,
+                userId,
+                action: 'like',
+                createdAt: new Date(),
+            });
             return true; // liked
         }
     }
