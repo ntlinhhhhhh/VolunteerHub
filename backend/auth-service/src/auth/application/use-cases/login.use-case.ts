@@ -62,8 +62,8 @@ export class LoginUseCase {
         }
 
         await this.authRepository.updateLastLogin(auth.id);
-        
-       const volunteer_profile = await firstValueFrom(
+
+        const volunteer_profile = await firstValueFrom(
             this.userClient.send('user.findByEmail', {
                 email: email,
             }));

@@ -7,6 +7,11 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home/Home';
 import Register from './pages/Register/Register';
 import LoginSuccess from './pages/Login/LoginSuccess';
+import ForgotPassword from './pages/Password/ForgotPassword';
+import ResetPassword from './pages/Password/ResetPassword';
+import LoginAdmin from './pages/Login/LoginAdmin';
+import LoginManager from './pages/Login/LoginManager';
+import AdminDashboard from './pages/Dashboard/AdminDashboard';
 
 function App() {
   return (
@@ -20,6 +25,11 @@ function App() {
         {/* <Route path="/dashboard" element={ <Dashboard />}/> */}
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/auth/admin/login" element={<LoginAdmin />} />
+        <Route path="/auth/manager/login" element={<LoginManager />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard/>} />
 
         <Route path="/auth/google/callback" element={<GoogleCallback />} />
       </Routes>

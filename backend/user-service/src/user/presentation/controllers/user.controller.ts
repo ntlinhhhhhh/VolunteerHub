@@ -21,6 +21,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Inject } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { GetUser } from '@share/auth/get-user.decorator';
+import { UserStatus } from 'src/user/domain/entities/user.entity';
 
 
 @Controller('users')
@@ -68,8 +69,17 @@ export class UserController {
     @Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Get()
-    async findAll() {
-        const users = await this.getUserProfileUseCase.executeAll();
+    async findAll(
+        @Query()
+        filters?: {
+            status?: UserStatus;
+            page?: number;
+            limit?: number;
+        }) {
+
+        console.log('filters', filters);
+
+        const users = await this.getUserProfileUseCase.executeAll(filters);
         return {
             success: true,
             data: users || [],
@@ -111,31 +121,49 @@ export class UserController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Put(':id/lock')
     async lockUser(@Param('id') id: string, @Body('reason') reason: string) {
-        await firstValueFrom(
-            this.userClient.send('auth.lock', {
-                userId: id,
-                reason: reason || 'Locked by admin',
-            }),
-        );
+        try {
 
-        return {
-            success: true,
-            message: `User ${id} locked`,
-        };
+            await firstValueFrom(
+                this.userClient.send('auth.lock', {
+                    userId: id,
+                    reason: reason || 'Locked by admin',
+                }),
+            );
+
+            await this.updateUserProfileUseCase.execute(
+                id,
+                { status: UserStatus.INACTIVE }
+            );
+            return {
+                success: true,
+                message: `User ${id} locked`,
+            };
+        } catch (err) {
+            console.log(err);
+        }
     }
 
     @Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Put(':id/unlock')
     async unlockUser(@Param('id') id: string) {
-        await firstValueFrom(
-            this.userClient.send('auth.unlock', { userId: id })
-        );
+        try {
+            await firstValueFrom(
+                this.userClient.send('auth.unlock', { userId: id })
+            );
 
-        return {
-            success: true,
-            message: `User ${id} unlocked`,
-        };
+            await this.updateUserProfileUseCase.execute(
+                id,
+                { status: UserStatus.ACTIVE }
+            );
+
+            return {
+                success: true,
+                message: `User ${id} unlocked`,
+            };
+        } catch (err) {
+            console.log(err);
+        }
     }
 
     @MessagePattern('user.create')

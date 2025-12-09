@@ -89,29 +89,45 @@ export class UserRepository implements IUserRepository {
         await this.userModel.deleteOne({ _id: id }).exec();
     }
 
-    async findAll(filters?: {
-        status?: UserStatus;
-        page?: number;
-        limit?: number;
-    }): Promise<{ users: UserEntity[]; total: number }> {
+    async findAll
+        (filters?: {
+            status?: UserStatus;
+            page?: number;
+            limit?: number;
+        }): Promise<{ users: UserEntity[]; total: number }> {
         const query: any = {};
 
         if (filters?.status) {
             query.status = filters.status;
         }
 
-        const page = filters?.page || 1;
-        const limit = filters?.limit || 10;
-        const skip = (page - 1) * limit;
+        const hasPagination =
+            filters?.page !== undefined &&
+            filters?.limit !== undefined;
 
-        const [docs, total] = await Promise.all([
-            this.userModel.find(query).skip(skip).limit(limit).exec(),
-            this.userModel.countDocuments(query).exec(),
-        ]);
+        let docs: any[];
+        let total: number;
+
+        if (hasPagination) {
+            const page = filters.page!;
+            const limit = filters.limit!;
+            const skip = (page - 1) * limit;
+
+            [docs, total] = await Promise.all([
+                this.userModel.find(query).skip(skip).limit(limit).exec(),
+                this.userModel.countDocuments(query).exec(),
+            ]);
+        } else {
+            [docs, total] = await Promise.all([
+                this.userModel.find(query).exec(),
+                this.userModel.countDocuments(query).exec(),
+            ]);
+        }
 
         return {
             users: docs.map(doc => this.toEntity(doc)),
             total,
         };
     }
+
 }

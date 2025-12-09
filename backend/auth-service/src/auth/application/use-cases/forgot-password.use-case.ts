@@ -32,7 +32,7 @@ export class ForgotPasswordUseCase {
                 recipient: email,
                 data: {
                     username: 'tlinh',
-                    resetUrl: `https://frontend.com/reset-password?token=${token}&email=${email}`,
+                    resetUrl: `http://localhost:5173/reset-password?token=${token}&email=${email}`,
                     title: 'Reset Password',
                     message: 'Click link để đổi mật khẩu của bạn.',
                 }
