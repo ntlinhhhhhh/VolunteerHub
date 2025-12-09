@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'; // <<< THÊM useMemo
-import { FaUsers, FaCalendarAlt, FaTicketAlt, FaShieldAlt, FaFilter, FaLock, FaUnlock, FaSearch, FaChevronRight, FaSync } from 'react-icons/fa';
-
+import { FaUsers, FaCalendarAlt, FaTicketAlt, FaShieldAlt, FaFilter, FaLock, FaUnlock, FaSearch, FaChevronRight, FaSync, FaArrowAltCircleLeft } from 'react-icons/fa';
+import { useNavigate } from "react-router-dom";
 // --- BẢNG MÀU TỐI GIẢN (GOOGLE-LIKE) ---
 const COLORS = {
     PRIMARY: '#1A73E8', 
@@ -51,6 +51,17 @@ const AdminDashboard: React.FC = () => {
         { title: "Managers Count", value: "18", icon: FaShieldAlt, color: COLORS.DANGER },
     ];
 
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('role'); 
+        
+        navigate("/auth/admin/login");
+        
+        // Hoặc dùng: window.location.href = '/auth/admin/login'; nếu bạn muốn tải lại toàn bộ trang
+    };
     const handleRefresh = useCallback(() => {
         setRefreshKey(prevKey => prevKey + 1);
         setLoading(true);
@@ -312,7 +323,7 @@ const AdminDashboard: React.FC = () => {
             
             {/* Sidebar */}
             <div style={styles.sidebar}>
-                <h2 style={styles.logo}>Admin</h2>
+                <h2 style={styles.logo}>Kindle</h2>
                 <div style={styles.navSectionTitle}>MENU</div>
                 
                 <div style={styles.navItemActive}>
@@ -332,7 +343,16 @@ const AdminDashboard: React.FC = () => {
                     <FaShieldAlt size={14} style={{ marginRight: '15px' }} />
                     System Settings
                 </div>
+                <div 
+                    // Dùng spread operator để kế thừa style navItem và thêm style mới
+                    style={{...styles.navItem, marginTop: '30px', color: COLORS.DARK_NAVY, fontWeight: '600'}}
+                    onClick={handleLogout} // Gắn hàm xử lý
+                >
+                    <FaArrowAltCircleLeft size={14} style={{ marginRight: '15px' }} /> 
+                    Log Out
+                </div>
             </div>
+
 
             {/* Main Content */}
             <div style={styles.mainContent}>
@@ -519,7 +539,7 @@ const styles: DashboardStyles = {
         position: 'relative', width: '400px',
     },
     searchBar: {
-        padding: '10px 15px 10px 40px', width: '100%', border: `1px solid ${COLORS.BORDER}`, borderRadius: '4px', fontSize: '14px', boxSizing: 'border-box',backgroundColor: COLORS.WHITE,
+        padding: '10px 15px 10px 40px', width: '100%', border: `1px solid ${COLORS.BORDER}`, borderRadius: '4px', fontSize: '14px', boxSizing: 'border-box',backgroundColor: COLORS.WHITE,color: COLORS.DARK_NAVY,
     },
     searchIcon: {
         position: 'absolute', top: '50%', left: '15px', transform: 'translateY(-50%)', color: COLORS.TEXT_SECONDARY, fontSize: '14px',
