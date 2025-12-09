@@ -69,6 +69,14 @@ import { ConfirmAttendanceUseCase } from './event-registration/application/use-c
                     options: { host: 'redis', port: 6379 },
                 }),
         },
+        {
+            provide: 'EVENT_SERVICE',
+            useFactory: () =>
+                ClientProxyFactory.create({
+                    transport: Transport.REDIS,
+                    options: { host: 'redis', port: 6379 },
+                }),
+        },
 
         { provide: IRegistrationRepository, useClass: RegistrationRepository },
 
@@ -94,6 +102,11 @@ import { ConfirmAttendanceUseCase } from './event-registration/application/use-c
         JwtStrategy,
         JwtAuthGuard,
     ],
-    exports: [RabbitMQModule, CacheModule],
+    exports: [
+        'EVENT_SERVICE',
+        'USER_SERVICE',
+        RabbitMQModule, 
+        CacheModule
+    ],
 })
 export class AppModule { }

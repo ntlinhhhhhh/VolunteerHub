@@ -89,11 +89,12 @@ export class UserRepository implements IUserRepository {
         await this.userModel.deleteOne({ _id: id }).exec();
     }
 
-    async findAll(filters?: {
-        status?: UserStatus;
-        page?: number;
-        limit?: number;
-    }): Promise<{ users: UserEntity[]; total: number }> {
+    async findAll
+        (filters?: {
+            status?: UserStatus;
+            page?: number;
+            limit?: number;
+        }): Promise<{ users: UserEntity[]; total: number }> {
         const query: any = {};
 
         if (filters?.status) {
