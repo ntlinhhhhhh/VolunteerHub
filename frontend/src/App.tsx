@@ -14,27 +14,27 @@ import LoginManager from './pages/Login/LoginManager';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
 
 function App() {
-  return (
-    <Router>
-      <Routes>
-        {/* <Route path="/" element={<GoogleLoginButton />} /> */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/login-success" element={<LoginSuccess />} />
+    return (
+        <Router>
+            <Routes>
+                {/* <Route path="/" element={<GoogleLoginButton />} /> */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/login-success" element={<LoginSuccess />} />
 
-        <Route path="/dashboard" element={ <ProtectedRoute> <Dashboard /></ProtectedRoute>}/>
-        {/* <Route path="/dashboard" element={ <Dashboard />}/> */}
-        <Route path="/" element={<Home />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/auth/admin/login" element={<LoginAdmin />} />
-        <Route path="/auth/manager/login" element={<LoginManager />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard/>} />
+                <Route path="/dashboard" element={<ProtectedRoute> <Dashboard /></ProtectedRoute>} />
+                {/* <Route path="/dashboard" element={ <Dashboard />}/> */}
+                <Route path="/" element={<Home />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/admin/login" element={<LoginAdmin />} />
+                <Route path="/manager/login" element={<LoginManager />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
-        <Route path="/auth/google/callback" element={<GoogleCallback />} />
-      </Routes>
-    </Router>
-  );
+                <Route path="/google/callback" element={<GoogleCallback />} />
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;
