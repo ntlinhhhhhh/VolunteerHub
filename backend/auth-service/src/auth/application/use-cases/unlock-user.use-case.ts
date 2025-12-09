@@ -26,24 +26,10 @@ export class UnlockUserUseCase {
         await this.authRepository.unlockAccount(authId);
 
         const user_profile = await firstValueFrom(
-            this.userClient.send('user.findByAuthId', {
-                authId: authId,
+            this.userClient.send('user.findByEmail', {
+                email: user.email,
             }));
 
         await this.messagePublisherService.publishUnlockUser(authId, user.email, user_profile.fullName);
-
-
-        // await this.rabbitmq.publish(
-        //     'notification_exchange',
-        //     'user.unlocked',
-        //     {
-        //         type: 'user_unlocked',
-        //         userId: userId,
-        //         recipient: user.email,
-        //         data: {
-        //             message: 'Your account has been unlocked',
-        //         }
-        //     }
-        // );
     }
 }

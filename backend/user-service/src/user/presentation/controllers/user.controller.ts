@@ -115,59 +115,6 @@ export class UserController {
     //     return { success: true, data: users };
     // }
 
-
-
-    // @Roles('admin')
-    // @UseGuards(JwtAuthGuard, RolesGuard)
-    // @Put(':id/lock')
-    // async lockUser(@Param('id') id: string, @Body('reason') reason: string) {
-    //     try {
-
-    //         await firstValueFrom(
-    //             this.userClient.send('auth.lock', {
-    //                 userId: id,
-    //                 reason: reason || 'Locked by admin',
-    //             }),
-    //         );
-
-    //         await this.updateUserProfileUseCase.execute(
-    //             id,
-    //             { status: UserStatus.INACTIVE }
-    //         );
-    //         return {
-    //             success: true,
-    //             message: `User ${id} locked`,
-    //         };
-    //     } catch (err) {
-    //         console.log(err);
-    //     }
-    // }
-
-    // @Roles('admin')
-    // @UseGuards(JwtAuthGuard, RolesGuard)
-    // @Put(':id/unlock')
-    // async unlockUser(@Param('id') id: string) {
-    //     try {
-    //         await firstValueFrom(
-    //             this.userClient.send('auth.unlock', { userId: id })
-    //         );
-
-    //         await this.updateUserProfileUseCase.execute(
-    //             id,
-    //             { status: UserStatus.ACTIVE }
-    //         );
-
-    //         return {
-    //             success: true,
-    //             message: `User ${id} unlocked`,
-    //         };
-    //     } catch (err) {
-    //         console.log(err);
-    //     }
-    // }
-
-
-
     @MessagePattern('user.create')
     async createUser(@Payload() data: CreateUserDto) {
         console.log('Received user.create payload:', data);

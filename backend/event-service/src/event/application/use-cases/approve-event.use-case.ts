@@ -58,7 +58,7 @@ export class ApproveEventUseCase {
             approvalNote: dto.note || '',
         }
 
-        await this.messagePublisherService.notifyAdminsEventPending(event.organizerId, event.organizerEmail, data);
+        await this.messagePublisherService.notifyEventManagerEventApproved(event.organizerId, event.organizerEmail, data);
 
         this.logger.log(`Event approved: ${eventId} by admin: ${adminId}`);
 

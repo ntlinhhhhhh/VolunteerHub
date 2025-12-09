@@ -203,24 +203,21 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     @Put(':id/lock')
     async lockUser(@Param('id') id: string, @Body('reason') reason: string) {
-        try {
-            await this.lockUserUseCase.execute(id, reason || 'Locked by admin');
+        await this.lockUserUseCase.execute(id, reason || 'Locked by admin');
 
 
-            await firstValueFrom(
-                this.userClient.send('user.update', {
-                    authId: id,
-                    profileData: {
-                        status: 'inactive',
-                    }
-                }));
+        await firstValueFrom(
+            this.userClient.send('user.update', {
+                authId: id,
+                profileData: {
+                    status: 'inactive',
+                }
+            }));
 
-            return {
-                success: true,
-                message: `User ${id} locked`,
-            };
-        } catch (err) {
-            console.log(err);
+        return {
+            success: true,
+            message: `User ${id} locked`,
+
         }
     }
 
@@ -228,25 +225,23 @@ export class AuthController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Put(':id/unlock')
     async unlockUser(@Param('id') id: string) {
-        try {
-            await this.unlockUserUseCase.execute(id);
+        await this.unlockUserUseCase.execute(id);
 
-            await firstValueFrom(
-                this.userClient.send('user.update', {
-                    authId: id,
-                    profileData: {
-                        status: 'active',
-                    }
-                }));
+        await firstValueFrom(
+            this.userClient.send('user.update', {
+                authId: id,
+                profileData: {
+                    status: 'active',
+                }
+            })
+        );
 
-            return {
-                success: true,
-                message: `User ${id} unlocked`,
-            };
-        } catch (err) {
-            console.log(err);
-        }
+        return {
+            success: true,
+            message: `User ${id} unlocked`,
+        };
     }
+
 
     @MessagePattern('auth.validate')
     async validateToken(@Payload() data: { token: string }) {
