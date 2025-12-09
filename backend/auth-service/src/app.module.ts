@@ -41,6 +41,7 @@ import { DeleteUserUseCase } from './auth/application/use-cases/delete-user.use-
 import { GetUsersByRoleUseCase } from './auth/application/use-cases/get-users-by-role.use-case';
 import { SearchUsersUseCase } from './auth/application/use-cases/search-users.use-case';
 import { UpdateUserRoleUseCase } from './auth/application/use-cases/update-role.use-case';
+import { MessagePublisherService } from './auth/infrastructure/messaging/message-publisher.service';
 
 
 @Module({
@@ -106,6 +107,7 @@ import { UpdateUserRoleUseCase } from './auth/application/use-cases/update-role.
         GetUsersByRoleUseCase,
         SearchUsersUseCase,
         UpdateUserRoleUseCase,
+        MessagePublisherService,
 
         // Services
         DatabaseService,
@@ -146,6 +148,7 @@ import { UpdateUserRoleUseCase } from './auth/application/use-cases/update-role.
         GetUsersByRoleUseCase,
         SearchUsersUseCase,
         UpdateUserRoleUseCase,
+        MessagePublisherService,
     ],
 })
 export class AppModule { }

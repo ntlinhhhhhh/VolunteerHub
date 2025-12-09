@@ -3,9 +3,9 @@ POST http://localhost:8000/auth/register
 Content-Type: application/json
 
 {
-    "email": "hh@gmail.com",
+    "email": "duonghoangg261@gmail.com",
     "username": "hehe",
-    "fullName": "Nguyen Thuy Linh",
+    "fullName": "Duong Hoang",
     "password": "123456"
 }
 
@@ -14,7 +14,7 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "hh@gmail.com",
+    "email": "duonghoangg261@gmail.com",
     "password": "123456"
 }
 
@@ -70,7 +70,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNzc2xsMmxzQGdtYWlsLmNvbSIsInR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzY0OTY2ODc2LCJleHAiOjE3NjU1NzE2NzYsInN1YiI6IjY5MzM0MWJkYWQ2MDhiNzllMjdlNDU3YiJ9.P5Tx1VSC86-tmxJXebY6Vti7WKrf2CmXlkP-jek6Ng4"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsInR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzY1MjcxMTc5LCJleHAiOjE3NjU4NzU5NzksInN1YiI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyOSJ9.CFL_Z3toXizt5I7JDrV2Q5NGsGxTjrT_vyy0Ha6NjOI"
 }
 
 
@@ -82,3 +82,19 @@ Accept: application/json
 {
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NjQ5NjY5NjAsImV4cCI6MTc2NTU3MTc2MCwic3ViIjoiNjkzMzM1ZjZiMTdhOTJlNGI3NjFhOWExIn0.bCCu8ZNv6wTnNKpauRlfXhRrZ6J4bJA7VcA5dk3D3to" 
 }
+
+### khóa user - role: admin
+PUT http://localhost:8000/auth/6937a7c4943e987bafa9564c/lock
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTU2NSwiZXhwIjoxNzY1MjcyNDY1fQ.zyI02fK3iHg6uuUePw-tsGBxoMCZwIx6GniyTc3RwXs
+Content-Type: application/json
+
+{
+  "reason": "spam comment"
+}
+
+
+
+### khóa user - role: admin
+PUT http://localhost:8000/auth/6937a7c4943e987bafa9564c/unlock
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTU2NSwiZXhwIjoxNzY1MjcyNDY1fQ.zyI02fK3iHg6uuUePw-tsGBxoMCZwIx6GniyTc3RwXs
+Content-Type: application/json

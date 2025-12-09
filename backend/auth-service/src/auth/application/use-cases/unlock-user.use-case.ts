@@ -1,17 +1,20 @@
-import { AmqpConnection } from "@golevelup/nestjs-rabbitmq";
 import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { AUTH_REPOSITORY } from "../../domain/repositories/auth.repository.interface";
 import type { IAuthRepository } from "../../domain/repositories/auth.repository.interface";
+import { MessagePublisherService } from "src/auth/infrastructure/messaging/message-publisher.service";
+import { ClientProxy } from "@nestjs/microservices";
+import { firstValueFrom } from "rxjs";
 
 @Injectable()
 export class UnlockUserUseCase {
     constructor(
         @Inject(AUTH_REPOSITORY) private readonly authRepository: IAuthRepository,
-        private readonly rabbitmq: AmqpConnection,
+        private readonly messagePublisherService: MessagePublisherService,
+        @Inject('USER_SERVICE') private userClient: ClientProxy,
     ) { console.log('✅ UnlockUserUseCase constructor called'); }
 
-    async execute(userId: string): Promise<void> {
-        const user = await this.authRepository.findById(userId);
+    async execute(authId: string): Promise<void> {
+        const user = await this.authRepository.findById(authId);
         if (!user) {
             throw new NotFoundException('User not found');
         }
@@ -20,19 +23,27 @@ export class UnlockUserUseCase {
             throw new ConflictException('The account is not locked');
         }
 
-        await this.authRepository.unlockAccount(userId);
+        await this.authRepository.unlockAccount(authId);
 
-        await this.rabbitmq.publish(
-            'notification_exchange',
-            'user.unlocked',
-            {
-                type: 'user_unlocked',
-                userId: userId,
-                recipient: user.email,
-                data: {
-                    message: 'Your account has been unlocked',
-                }
-            }
-        );
+        const user_profile = await firstValueFrom(
+            this.userClient.send('user.findByAuthId', {
+                authId: authId,
+            }));
+
+        await this.messagePublisherService.publishUnlockUser(authId, user.email, user_profile.fullName);
+
+
+        // await this.rabbitmq.publish(
+        //     'notification_exchange',
+        //     'user.unlocked',
+        //     {
+        //         type: 'user_unlocked',
+        //         userId: userId,
+        //         recipient: user.email,
+        //         data: {
+        //             message: 'Your account has been unlocked',
+        //         }
+        //     }
+        // );
     }
 }

@@ -21,7 +21,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Inject } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { GetUser } from '@share/auth/get-user.decorator';
-import { UserStatus } from 'src/user/domain/entities/user.entity';
+import { User, UserStatus } from 'src/user/domain/entities/user.entity';
 
 
 @Controller('users')
@@ -117,54 +117,56 @@ export class UserController {
 
 
 
-    @Roles('admin')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Put(':id/lock')
-    async lockUser(@Param('id') id: string, @Body('reason') reason: string) {
-        try {
+    // @Roles('admin')
+    // @UseGuards(JwtAuthGuard, RolesGuard)
+    // @Put(':id/lock')
+    // async lockUser(@Param('id') id: string, @Body('reason') reason: string) {
+    //     try {
 
-            await firstValueFrom(
-                this.userClient.send('auth.lock', {
-                    userId: id,
-                    reason: reason || 'Locked by admin',
-                }),
-            );
+    //         await firstValueFrom(
+    //             this.userClient.send('auth.lock', {
+    //                 userId: id,
+    //                 reason: reason || 'Locked by admin',
+    //             }),
+    //         );
 
-            await this.updateUserProfileUseCase.execute(
-                id,
-                { status: UserStatus.INACTIVE }
-            );
-            return {
-                success: true,
-                message: `User ${id} locked`,
-            };
-        } catch (err) {
-            console.log(err);
-        }
-    }
+    //         await this.updateUserProfileUseCase.execute(
+    //             id,
+    //             { status: UserStatus.INACTIVE }
+    //         );
+    //         return {
+    //             success: true,
+    //             message: `User ${id} locked`,
+    //         };
+    //     } catch (err) {
+    //         console.log(err);
+    //     }
+    // }
 
-    @Roles('admin')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Put(':id/unlock')
-    async unlockUser(@Param('id') id: string) {
-        try {
-            await firstValueFrom(
-                this.userClient.send('auth.unlock', { userId: id })
-            );
+    // @Roles('admin')
+    // @UseGuards(JwtAuthGuard, RolesGuard)
+    // @Put(':id/unlock')
+    // async unlockUser(@Param('id') id: string) {
+    //     try {
+    //         await firstValueFrom(
+    //             this.userClient.send('auth.unlock', { userId: id })
+    //         );
 
-            await this.updateUserProfileUseCase.execute(
-                id,
-                { status: UserStatus.ACTIVE }
-            );
+    //         await this.updateUserProfileUseCase.execute(
+    //             id,
+    //             { status: UserStatus.ACTIVE }
+    //         );
 
-            return {
-                success: true,
-                message: `User ${id} unlocked`,
-            };
-        } catch (err) {
-            console.log(err);
-        }
-    }
+    //         return {
+    //             success: true,
+    //             message: `User ${id} unlocked`,
+    //         };
+    //     } catch (err) {
+    //         console.log(err);
+    //     }
+    // }
+
+
 
     @MessagePattern('user.create')
     async createUser(@Payload() data: CreateUserDto) {
@@ -187,9 +189,21 @@ export class UserController {
         }
     }
 
+    @MessagePattern('user.update')
+    async updateUser(
+        @Payload() data: { authId: string; profileData: Partial<User> }
+    ): Promise<User> {
+        const { authId, profileData } = data;
+
+        // gọi use-case
+        return await this.updateUserProfileUseCase.execute(authId, profileData);
+    }
+
+
 
     @MessagePattern('user.findByAuthId')
     async findByAuthId(@Payload() data: { authId: string }) {
+        console.log('call user.findByAuthId');
         const user = await this.getUserProfileUseCase.executeByAuthId(
             data.authId
         );
@@ -198,6 +212,8 @@ export class UserController {
 
     @MessagePattern('user.findByEmail')
     async findByEmail(@Payload() data: { email: string }) {
+        console.log('call user.email');
+
         const user = await this.getUserProfileUseCase.executeByEmail(
             data.email
         );

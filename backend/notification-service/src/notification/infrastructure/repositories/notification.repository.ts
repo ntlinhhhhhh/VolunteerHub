@@ -20,25 +20,46 @@ export class NotificationRepository implements INotificationRepository {
     private readonly notificationModel: Model<NotificationDocument>
   ) {}
 
+//   private toEntity(doc: NotificationDocument): NotificationEntity {
+//     return new NotificationEntity(
+//       doc._id.toString(),
+//       doc.userId,
+//       doc.type,
+//       doc.channel,
+//       doc.channel,
+//       doc.status,
+//       doc.recipient,
+//       doc.subject,
+//       doc.content,
+//       doc.data,
+//       doc.sentAt,
+//       doc.readAt,
+//       doc.errorMessage,
+//       doc.retryCount,
+//       doc.createdAt,
+//       doc.updatedAt
+//     );
+//   }
+
   private toEntity(doc: NotificationDocument): NotificationEntity {
-    return new NotificationEntity(
-      doc._id.toString(),
-      doc.userId,
-      doc.type,
-      doc.channel,
-      doc.status,
-      doc.recipient,
-      doc.subject,
-      doc.content,
-      doc.data,
-      doc.sentAt,
-      doc.readAt,
-      doc.errorMessage,
-      doc.retryCount,
-      doc.createdAt,
-      doc.updatedAt
-    );
-  }
+  return new NotificationEntity(
+    doc._id.toString(),
+    doc.userId,
+    doc.type,
+    doc.channel,      // NotificationChannel
+    doc.channels,     // { inApp?: boolean, email?: string, push?: string }
+    doc.status,       // NotificationStatus
+    doc.subject,
+    doc.content,
+    doc.data,
+    doc.sentAt,
+    doc.readAt,
+    doc.errorMessage,
+    doc.retryCount,
+    doc.createdAt,
+    doc.updatedAt
+  );
+}
 
   async findById(id: string): Promise<NotificationEntity | null> {
     const doc = await this.notificationModel.findById(id).exec();

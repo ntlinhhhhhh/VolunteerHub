@@ -47,6 +47,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
         await this.channel.assertExchange(this.exchangeName, 'topic', { durable: true });
         await this.channel.assertQueue(this.queueName, { durable: true });
         await this.channel.assertQueue(this.dlqName, { durable: true });
+        await this.channel.bindQueue(this.queueName, this.exchangeName, 'auth.*');
         await this.channel.bindQueue(this.queueName, this.exchangeName, 'user.*');
         await this.channel.bindQueue(this.queueName, this.exchangeName, 'event.*');
         await this.channel.bindQueue(this.queueName, this.exchangeName, 'registration.*');
