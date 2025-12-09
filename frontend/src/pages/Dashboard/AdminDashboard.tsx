@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'; // <<< THÊM useMemo
-import { FaUsers, FaCalendarAlt, FaTicketAlt, FaShieldAlt, FaFilter, FaLock, FaUnlock, FaSearch, FaChevronRight, FaSync, FaArrowAltCircleLeft } from 'react-icons/fa';
+import { FaUsers, FaCalendarAlt, FaTicketAlt, FaShieldAlt, FaFilter, FaLock, FaUnlock, FaSearch, FaChevronRight, FaSync, FaArrowAltCircleLeft, FaInfoCircle, FaClipboardList } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
+import AdminViewInfo from './Admin-Crud/AdminViewInfo';
+
 // --- BẢNG MÀU TỐI GIẢN (GOOGLE-LIKE) ---
 const COLORS = {
     PRIMARY: '#1A73E8', 
@@ -232,6 +234,21 @@ const AdminDashboard: React.FC = () => {
         }
     };
 
+    const [isViewInfoOpen, setIsViewInfoOpen] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+    // Hàm mở Modal
+    const handleViewInfo = (userId: string) => {
+        setSelectedUserId(userId);
+        setIsViewInfoOpen(true);
+    };
+
+    // Hàm đóng Modal
+    const handleCloseViewInfo = () => {
+        setIsViewInfoOpen(false);
+        setSelectedUserId(null);
+    };
+
     // HÀM HELPER ĐỂ TẠO STYLE CHO ROLE BADGE
     const getRoleStyle = (role: User['role']) => {
         if (role === 'admin') return styles.roleAdmin;
@@ -290,6 +307,13 @@ const AdminDashboard: React.FC = () => {
                                     </span>
                                 </td>
                                 <td style={{...styles.td, textAlign: 'center'}}>
+                                    <button 
+                                        onClick={() => handleViewInfo(user.id)} // Gọi hàm mở Modal với userId
+                                        title="View User Info"
+                                        style={{...styles.actionButton, color: COLORS.DARK_NAVY, marginRight: '10px'}}
+                                    >
+                                        <FaInfoCircle size={14} /> 
+                                    </button>
                                     <button 
                                         // LOGIC HIỂN THỊ MÀU BUTTON: active -> Đỏ (lockButton); locked -> Xanh lá (unlockButton)
                                         style={user.status === 'active' ? styles.lockButton : styles.unlockButton}
@@ -444,6 +468,12 @@ const AdminDashboard: React.FC = () => {
                 </div>
                 
             </div>
+          {isViewInfoOpen && selectedUserId && (
+                <AdminViewInfo 
+                    userId={selectedUserId}
+                    onClose={handleCloseViewInfo}
+                />
+            )}
         </div>
     );
 };
@@ -596,7 +626,16 @@ const styles: DashboardStyles = {
     },
     unlockButton: {
         padding: '8px', border: 'none', borderRadius: '4px', cursor: 'pointer', backgroundColor: COLORS.SUCCESS_ACCENT, color: COLORS.WHITE, transition: 'background-color 0.2s', marginRight: '5px',
-    }
+    },
+    actionButton: {
+        backgroundColor: COLORS.CARD_BG, // Hoặc COLORS.WHITE
+        border: `1px solid ${COLORS.BORDER}`, 
+        borderRadius: '4px', // Bo góc nhẹ
+        padding: '8px',
+        
+        cursor: 'pointer',
+        transition: 'opacity 0.2s, background-color 0.2s',
+    },
 };
 
 export default AdminDashboard;
