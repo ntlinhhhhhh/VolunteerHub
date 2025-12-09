@@ -43,6 +43,7 @@ export class ApproveEventUseCase {
             },
         } as any);
 
+        console.log('event', event);
         // 4. Publish event to message bus (notify organizer)
         const data = {
             eventId: event.id,
@@ -57,7 +58,7 @@ export class ApproveEventUseCase {
             approvalNote: dto.note || '',
         }
 
-        await this.messagePublisherService.notifyAdminsEventPending(event.organizerId,event.organizerEmail, data);
+        await this.messagePublisherService.notifyAdminsEventPending(event.organizerId, event.organizerEmail, data);
 
         this.logger.log(`Event approved: ${eventId} by admin: ${adminId}`);
 

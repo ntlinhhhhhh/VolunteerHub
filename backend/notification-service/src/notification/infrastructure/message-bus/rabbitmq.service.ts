@@ -15,7 +15,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     private readonly maxRetries = 3;
     private readonly retryDelayMs = 5000;
 
-    constructor(private configService: ConfigService) {}
+    constructor(private configService: ConfigService) { }
 
     async onModuleInit() {
         await this.connect();
@@ -102,11 +102,19 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
         );
     }
 
-    async publishMessage(data: any, routingKey = 'user.registered') {
+    // async publishMessage(data: any, routingKey = 'user.registered') {
+    //     const buffer = Buffer.from(JSON.stringify(data));
+    //     this.channel.publish(this.exchangeName, routingKey, buffer, { persistent: true });
+    //     this.logger.log(`Published message to "${this.queueName}" with routingKey "${routingKey}"`);
+    // }
+
+    async publishMessage(data: any, routingKey: string) {
+        if (!this.channel) throw new Error('RabbitMQ channel not ready');
         const buffer = Buffer.from(JSON.stringify(data));
-        this.channel.publish(this.exchangeName, routingKey, buffer, { persistent: true });
-        this.logger.log(`Published message to "${this.queueName}" with routingKey "${routingKey}"`);
+        await this.channel.publish(this.exchangeName, routingKey, buffer, { persistent: true });
+        this.logger.log(`Published message with routingKey: ${routingKey}`);
     }
+
 
     private delay(ms: number) {
         return new Promise((resolve) => setTimeout(resolve, ms));

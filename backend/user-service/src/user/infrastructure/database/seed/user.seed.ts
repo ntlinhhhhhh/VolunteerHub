@@ -22,14 +22,14 @@ async function seed() {
 }
 
 async function seedAdmin(UserModel: mongoose.Model<User>) {
-    const existing = await UserModel.findOne({ email: 'tlinh@gmail.com' });
+    const existing = await UserModel.findOne({ email: 'nguyenthuylinh26012005@gmail.com' });
     if (existing) {
         console.log('Admin profile already exists');
         return;
     }
 
     const newUser = await UserModel.create({
-        email: 'tlinh@gmail.com',
+        email: 'nguyenthuylinh26012005@gmail.com',
         fullName: 'Thuy Linh',
         username: 'admin',
         authId: '69345f459debb104835c38e9',
@@ -47,14 +47,14 @@ async function seedAdmin(UserModel: mongoose.Model<User>) {
 }
 
 async function seedEventManager(UserModel: mongoose.Model<User>) {
-    const existing = await UserModel.findOne({ email: 'tlinh_manager@gmail.com' });
+    const existing = await UserModel.findOne({ email: 'duonghoangg261@gmail.com' });
     if (existing) {
         console.log('Event manager profile already exists');
         return;
     }
 
     const newUser = await UserModel.create({
-        email: 'tlinh_manager@gmail.com',
+        email: 'duonghoangg261@gmail.com',
         fullName: 'Thuy Linh Manager',
         username: 'event_manager',
         authId: '69345f459debb104835c38ed',

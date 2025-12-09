@@ -106,7 +106,7 @@ async function seedAdmin(
     AuthModel: mongoose.Model<Auth>
 ) {
     try {
-        const exists = await AuthModel.findOne({ email: 'tlinh@gmail.com' });
+        const exists = await AuthModel.findOne({ email: 'nguyenthuylinh26012005@gmail.com' });
         if (exists) {
             console.log('Admin already exists');
             return;
@@ -121,13 +121,13 @@ async function seedAdmin(
         const passwordHash = await bcrypt.hash('tlinh123', 10);
 
         await AuthModel.create({
-            email: 'tlinh@gmail.com',
+            email: 'nguyenthuylinh26012005@gmail.com',
             passwordHash,
             roleId: role._id,
             isLocked: false,
         });
 
-        console.log('Admin created: email=tlinh@gmail.com / pass=tlinh123');
+        console.log('Admin created: email=nguyenthuylinh26012005@gmail.com / pass=tlinh123');
     } catch (err) {
         console.error('Error seeding admin:', err);
     }
@@ -142,7 +142,7 @@ async function seedEventManager(
 ) {
     try {
         const exists = await AuthModel.findOne({
-            email: 'tlinh_manager@gmail.com',
+            email: 'duonghoangg261@gmail.com',
         });
         if (exists) {
             console.log('Event manager already exists');
@@ -158,14 +158,14 @@ async function seedEventManager(
         const passwordHash = await bcrypt.hash('tlinh123', 10);
 
         await AuthModel.create({
-            email: 'tlinh_manager@gmail.com',
+            email: 'duonghoangg261@gmail.com',
             passwordHash,
             roleId: role._id,
             isLocked: false,
         });
 
         console.log(
-            'Event manager created: email=tlinh_manager@gmail.com / pass=tlinh123'
+            'Event manager created: email=duonghoangg261@gmail.com / pass=tlinh123'
         );
     } catch (err) {
         console.error('Error seeding event manager:', err);
