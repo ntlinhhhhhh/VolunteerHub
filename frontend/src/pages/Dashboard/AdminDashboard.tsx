@@ -27,7 +27,7 @@ interface User {
     username: string;
     fullName: string;
     role: 'admin' | 'event_manager' | 'user'; 
-    status: 'active' | 'locked'; // Trạng thái chuẩn hóa cho Frontend
+    status: 'active' | 'inactive'; // Trạng thái chuẩn hóa cho Frontend
     createdAt: string;
 }
 
@@ -84,11 +84,11 @@ const AdminDashboard: React.FC = () => {
                         
                         // 1. Ưu tiên kiểm tra trường 'isLocked' (boolean) từ Backend
                         if (typeof user.isLocked === 'boolean') {
-                            determinedStatus = user.isLocked ? 'locked' : 'active';
+                            determinedStatus = user.isLocked ? 'inactive' : 'active';
                         } 
                         // 2. Nếu không có 'isLocked', fallback về trường 'status' (string)
                         else if (user.status) {
-                            determinedStatus = user.status.toLowerCase() === 'active' ? 'active' : 'locked';
+                            determinedStatus = user.status.toLowerCase() === 'active' ? 'active' : 'inactive';
                         }
 
                         return {
@@ -166,7 +166,7 @@ const AdminDashboard: React.FC = () => {
                 setUsers(prevUsers => 
                     prevUsers.map(u => 
                         u.authId === userAuthId 
-                            ? { ...u, status: action === 'lock' ? 'locked' : 'active' } 
+                            ? { ...u, status: action === 'lock' ? 'inactive' : 'active' } 
                             : u
                     )
                 );
