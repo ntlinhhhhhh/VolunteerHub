@@ -9,7 +9,7 @@ import { IEventRepository } from '../../domain/repositories/event.repository.int
 import { Event } from '../../domain/entities/event.entity';
 import { EventStatus } from '../../domain/entities/event-status.enum';
 import { ApproveEventDto } from '../dto/approve-event.dto';
-import { AmqpConnection, RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
+import { MessagePublisherService } from 'src/event/infrastructure/messaging/message-publisher.service';
 
 
 @Injectable()
@@ -18,7 +18,7 @@ export class ApproveEventUseCase {
 
     constructor(
         @Inject(IEventRepository) private readonly eventRepository: IEventRepository,
-        private readonly amqp: AmqpConnection,
+        private readonly messagePublisherService: MessagePublisherService,
     ) { }
 
     async execute(eventId: string, adminId: string, dto: ApproveEventDto): Promise<Event> {
@@ -44,24 +44,20 @@ export class ApproveEventUseCase {
         } as any);
 
         // 4. Publish event to message bus (notify organizer)
-        await this.amqp.publish(
-            'notification_exchange',
-            'event.approved',
-            {
-                type: 'event_approved',
-                recipient: event.organizerEmail,
-                userId: event.organizerId,
-                eventId: event.id,
-                eventTitle: event.title,
-                eventSlug: event.slug,
-                organizerId: event.organizerId,
-                organizerName: event.organizerName,
-                organizerEmail: event.organizerEmail,
-                eventDate: event.schedule.startDate.toISOString(),
-                eventLocation: `${event.location.address}, ${event.location.district}, ${event.location.city}`,
-                maxVolunteers: event.capacity.maxVolunteers,
-                approvalNote: dto.note || '',
-            });
+        const data = {
+            eventId: event.id,
+            eventTitle: event.title,
+            eventSlug: event.slug,
+            organizerId: event.organizerId,
+            organizerName: event.organizerName,
+            organizerEmail: event.organizerEmail,
+            eventDate: event.schedule.startDate.toISOString(),
+            eventLocation: `${event.location.address}, ${event.location.district}, ${event.location.city}`,
+            maxVolunteers: event.capacity.maxVolunteers,
+            approvalNote: dto.note || '',
+        }
+
+        await this.messagePublisherService.notifyAdminsEventPending(event.organizerId,event.organizerEmail, data);
 
         this.logger.log(`Event approved: ${eventId} by admin: ${adminId}`);
 

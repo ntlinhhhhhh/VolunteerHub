@@ -12,7 +12,13 @@ export class User {
     @Prop({ required: true, unique: true, lowercase: true, trim: true })
     email: string;
 
-    @Prop({ required: true})
+    // @Prop({ type: String, enum: ['admin', 'event_manager', 'volunteer'], default: 'volunteer' })
+    // role: string;
+
+    // @Prop({ default: true })
+    // isActive: boolean;
+
+    @Prop({ required: true })
     username: string;
 
     @Prop({ required: true })

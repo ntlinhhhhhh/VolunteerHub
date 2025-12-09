@@ -248,30 +248,6 @@ export class AuthController {
         }
     }
 
-    // @Roles('admin')
-    // @Post(':id/lock')
-    // @HttpCode(HttpStatus.OK)
-    // @MessagePattern('auth.lock')
-    // async lockUser(@Payload() data: { userId: string; reason: string }) {
-    //     await this.lockUserUseCase.execute(data.userId, data.reason);
-
-    //     return {
-    //         success: true,
-    //         message: `${data.userId} is locked`,
-    //         reason: data.reason || 'No reason provided'
-    //     };
-    // }
-
-    // @MessagePattern('auth.unlock')
-    // async unlockUser(@Payload() data: { userId: string }) {
-    //     await this.unlockUserUseCase.execute(data.userId);
-
-    //     return {
-    //         success: true,
-    //         message: `${data.userId} is unlocked`,
-    //     };
-    // }
-
     @MessagePattern('auth.validate')
     async validateToken(@Payload() data: { token: string }) {
         return await this.validateTokenUseCase.execute(data.token);
@@ -346,9 +322,10 @@ export class AuthController {
         const result = await this.searchUsersUseCase.execute(
             data.keyword,
             data.role,
-            data.page,
-            data.limit
+            Number(data.page),
+            Number(data.limit)
         );
+
         return {
             success: true,
             data: result,

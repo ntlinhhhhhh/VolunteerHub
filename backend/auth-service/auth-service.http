@@ -3,7 +3,7 @@ POST http://localhost:8000/auth/register
 Content-Type: application/json
 
 {
-    "email": "duonghoangg261@gmail.com",
+    "email": "5@gmail.com",
     "username": "hehe",
     "fullName": "Duong Hoang",
     "password": "123456"
@@ -14,7 +14,7 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "duonghoangg261@gmail.com",
+    "email": "4@gmail.com",
     "password": "123456"
 }
 
@@ -98,3 +98,8 @@ Content-Type: application/json
 PUT http://localhost:8000/auth/6937a7c4943e987bafa9564c/unlock
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTU2NSwiZXhwIjoxNzY1MjcyNDY1fQ.zyI02fK3iHg6uuUePw-tsGBxoMCZwIx6GniyTc3RwXs
 Content-Type: application/json
+
+
+### khóa user - role: admin
+GET http://localhost:8000/auth/search?role=volunteer
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM4MjU0NjhmNTUxMDBjOWMzYTZkNWYiLCJlbWFpbCI6IjRAZ21haWwuY29tIiwibmFtZSI6IkR1b25nIEhvYW5nIiwicGhvbmVOdW1iZXIiOm51bGwsInJvbGVJZCI6IjY5MzgyNTMwMGMwOWE4YTBjZjlkZGYxMiIsInJvbGVOYW1lIjoidm9sdW50ZWVyIiwicGVybWlzc2lvbnMiOlsiZXZlbnQ6cmVhZCIsInJlZ2lzdHJhdGlvbjpjcmVhdGUiLCJyZWdpc3RyYXRpb246cmVhZCIsInJlZ2lzdHJhdGlvbjpjYW5jZWwiLCJwb3N0OnJlYWQiLCJwb3N0OmNyZWF0ZSIsInBvc3Q6dXBkYXRlOm93biIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiZGFzaGJvYXJkOnZpZXciXSwiaWF0IjoxNzY1Mjg3MjQzLCJleHAiOjE3NjUyODgxNDN9.xMI5OTEynKcXyq01Nf9ctMJOKYhk8CZpoSNdx2zsXqI

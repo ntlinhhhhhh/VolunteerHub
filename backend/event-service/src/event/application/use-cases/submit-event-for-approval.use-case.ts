@@ -9,7 +9,9 @@ import {
 import { IEventRepository } from '../../domain/repositories/event.repository.interface';
 import { Event } from '../../domain/entities/event.entity';
 import { EventStatus } from '../../domain/entities/event-status.enum';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { MessagePublisherService } from 'src/event/infrastructure/messaging/message-publisher.service';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class SubmitEventForApprovalUseCase {
@@ -18,8 +20,8 @@ export class SubmitEventForApprovalUseCase {
     constructor(
         @Inject(IEventRepository)
         private readonly eventRepository: IEventRepository,
-        private readonly amqp: AmqpConnection,
-
+        private readonly messagePublisherService: MessagePublisherService,
+        @Inject('AUTH_SERVICE') private authClient: ClientProxy,
     ) { }
 
     async execute(eventId: string, userId: string, email: string): Promise<Event> {
@@ -45,24 +47,26 @@ export class SubmitEventForApprovalUseCase {
         // 5. Update status to PENDING_APPROVAL
         await this.eventRepository.updateStatus(eventId, EventStatus.PENDING_APPROVAL);
 
-        // 6. Publish event to message bus (notify admin)
-        await this.amqp.publish(
-            'notification_exchange',
-            'event.new_event_pending',
-            {
-                type: "new_event_pending",
-                userId: userId,
-                recipient: email,
-                eventId: event.id,
-                eventTitle: event.title,
-                organizerId: event.organizerId,
-                organizerName: event.organizerName,
-                organizerEmail: event.organizerEmail,
-                categoryName: event.categoryName,
-                startDate: event.schedule.startDate.toISOString(),
-                location: `${event.location.district}, ${event.location.city}`,
-                maxVolunteers: event.capacity.maxVolunteers,
-            });
+        const data = {
+            eventTitle: event.title,
+            organizerName: event.organizerName,
+            organizerEmail: event.organizerEmail,
+            categoryName: event.categoryName,
+            startDate: event.schedule.startDate.toISOString(),
+            location: `${event.location.district}, ${event.location.city}`,
+            maxVolunteers: event.capacity.maxVolunteers,
+        }
+
+        const result = await firstValueFrom(
+            this.authClient.send('auth.search', { role: 'admin' })
+        );
+
+        const admins = result?.data?.users || [];
+        console.log('admin', admins)
+
+        await Promise.all(admins.map(admin =>
+            this.messagePublisherService.notifyAdminsEventPending(admin.id, admin.email, data)
+        ));
 
         this.logger.log(`Event submitted for approval: ${eventId}`);
 
