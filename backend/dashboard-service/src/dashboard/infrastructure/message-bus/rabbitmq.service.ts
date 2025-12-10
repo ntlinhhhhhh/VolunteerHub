@@ -45,7 +45,9 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     // Bind to multiple routing keys
     await this.channel.bindQueue(this.queueName, this.exchangeName, 'event.*');
     await this.channel.bindQueue(this.queueName, this.exchangeName, 'registration.*');
-    await this.channel.bindQueue(this.queueName, this.exchangeName, 'communication.*');
+    await this.channel.bindQueue(this.queueName, this.exchangeName, 'post.created');
+    await this.channel.bindQueue(this.queueName, this.exchangeName, 'comment.added');
+    await this.channel.bindQueue(this.queueName, this.exchangeName, 'like.toggled');
 
     this.logger.log(`Queue "${this.queueName}" bound to exchange "${this.exchangeName}"`);
   }
