@@ -1,10 +1,4 @@
-/**
- * REGISTRATION STATUS LIFECYCLE
- * 
- * PENDING → ACCEPTED → CONFIRMED → CHECKED_IN → CHECKED_OUT → COMPLETED → RATED
- *   ↓         ↓                        ↓
- * REJECTED  CANCELLED          NO_SHOW
- */
+
 export enum RegistrationStatus {
     // Initial state
     PENDING = 'pending',                    // Waiting for organizer approval

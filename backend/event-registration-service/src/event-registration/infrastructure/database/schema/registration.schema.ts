@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { RegistrationStatus } from '../../../domain/entities/registration-status.enum';
+import { CHECK_METHODS } from 'src/event-registration/domain/entities/registration.entity';
 
 export type RegistrationDocument = Registration & Document;
 
@@ -55,7 +56,7 @@ class Attendance {
         lng: number;
     };
 
-    @Prop({ type: String, enum: ['manual', 'qr_code', 'self'] })
+    @Prop({ type: String, enum: CHECK_METHODS })
     checkInMethod?: string;
 
     @Prop({ type: Date })
@@ -64,7 +65,7 @@ class Attendance {
     @Prop()
     checkOutBy?: string;
 
-    @Prop({ type: String, enum: ['manual', 'qr_code', 'self'] })
+    @Prop({ type: String, enum: CHECK_METHODS })
     checkOutMethod?: string;
 
     @Prop({ type: Number })

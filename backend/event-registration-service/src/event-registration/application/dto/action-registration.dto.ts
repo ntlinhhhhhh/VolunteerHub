@@ -48,12 +48,6 @@ class LocationDto {
 }
 
 export class CheckInDto {
-    @IsObject()
-    @IsOptional()
-    @ValidateNested()
-    @Type(() => LocationDto)
-    location?: LocationDto;
-
     @IsString()
     @IsOptional()
     notes?: string;
