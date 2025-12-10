@@ -15,7 +15,7 @@ export class SearchUsersUseCase  {
     ) { }
 
     async execute(
-        keyword: string,
+        keyword: string = '',
         roleName?: string,
         page: number = 1,
         limit: number = 20

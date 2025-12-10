@@ -1,0 +1,104 @@
+### Tạo tài khoản với auth-service - chỉ có 1 trang register cho volunteer
+POST http://localhost:8000/auth/register
+Content-Type: application/json
+
+{
+    "email": "5@gmail.com",
+    "username": "hehe",
+    "fullName": "Duong Hoang",
+    "password": "123456"
+}
+
+### login - đăng nhập cho tình nguyện viên
+POST http://localhost:8000/auth/login
+Content-Type: application/json
+
+{
+    "email": "4@gmail.com",
+    "password": "123456"
+}
+
+### login-admin: tạo một trang login cho admin với đường dấn /auth/admin/login
+POST http://localhost:8000/auth/admin/login
+Content-Type: application/json
+
+{
+    "email": "nguyenthuylinh26012005@gmail.com",
+    "password": "tlinh123"
+}
+
+### login-manager tương tự tạo 1 cái login cho quản lý sự kiện
+POST http://localhost:8000/auth/event-manager/login
+Content-Type: application/json
+
+{
+    "email": "duonghoangg261@gmail.com",
+    "password": "tlinh123"
+}
+
+### gg login
+POST https://oauth2.googleapis.com/token
+Content-Type: application/x-www-form-urlencoded
+
+code=4%2F0Ab32j9271_Gmz0sHwgAqCIjUZ1mEcGy7hgQctbkZTkOXEJ_o2FiVjJrAGNfXoVl4XtoioA
+&client_id=407408718192.apps.googleusercontent.com
+&client_secret=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
+&redirect_uri=https%3A%2F%2Fdevelopers.google.com%2Foauthplayground
+&grant_type=authorization_code
+
+### quyên mật khẩu, sau khi tạo nó sẽ gửi mail cho bạn để reset (tạo frontend từ giống link mà nó trả về)
+POST http://localhost:8000/auth/forgot-password
+Content-Type: application/json
+
+{
+    "email": "nguyenthuylinh26012005@gmail.com"
+}
+
+### reset password
+POST http://localhost:8000/auth/reset-password
+Content-Type: application/json
+
+{
+    "email": "nguyenthuylinh26012005@gmail.com",
+    "token": "9a7c73de8013b52b94bd189d3b42dcbee64b854b0c70918ca433ad2c1df7a206",
+    "newPassword": "12345678"
+}
+
+### refresh-token
+POST http://localhost:8000/auth/refresh
+Content-Type: application/json
+Accept: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsInR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzY1MjcxMTc5LCJleHAiOjE3NjU4NzU5NzksInN1YiI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyOSJ9.CFL_Z3toXizt5I7JDrV2Q5NGsGxTjrT_vyy0Ha6NjOI"
+}
+
+
+### logout
+POST http://localhost:8000/auth/logout
+Content-Type: application/json
+Accept: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NjQ5NjY5NjAsImV4cCI6MTc2NTU3MTc2MCwic3ViIjoiNjkzMzM1ZjZiMTdhOTJlNGI3NjFhOWExIn0.bCCu8ZNv6wTnNKpauRlfXhRrZ6J4bJA7VcA5dk3D3to" 
+}
+
+### khóa user - role: admin
+PUT http://localhost:8000/auth/693859da1ae30077e80844a4/lock
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM4M2QyY2EwNDY1Mjc3YjcyNWFmZTciLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCIsInBob25lTnVtYmVyIjoiKzg0OTAxMjM0NTY3Iiwicm9sZUlkIjoiNjkzODNkMmNhMDQ2NTI3N2I3MjVhZmRiIiwicm9sZU5hbWUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbIioiXSwiaWF0IjoxNzY1MzA1Mzc0LCJleHAiOjE3NjUzMDYyNzR9.8WQtvft-coQcwYx8jhnUQlGwA31Y_B2Mp-qZDtRbagM
+
+{
+  "reason": "spam comment"
+}
+
+
+
+### khóa user - role: admin
+PUT http://localhost:8000/auth/693859da1ae30077e80844a4/unlock
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM4M2QyY2EwNDY1Mjc3YjcyNWFmZTciLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCIsInBob25lTnVtYmVyIjoiKzg0OTAxMjM0NTY3Iiwicm9sZUlkIjoiNjkzODNkMmNhMDQ2NTI3N2I3MjVhZmRiIiwicm9sZU5hbWUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbIioiXSwiaWF0IjoxNzY1MzA1Mzc0LCJleHAiOjE3NjUzMDYyNzR9.8WQtvft-coQcwYx8jhnUQlGwA31Y_B2Mp-qZDtRbagM
+Content-Type: application/json
+
+
+### khóa user - role: admin
+GET http://localhost:8000/auth/search?role=volunteer
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM4MjU0NjhmNTUxMDBjOWMzYTZkNWYiLCJlbWFpbCI6IjRAZ21haWwuY29tIiwibmFtZSI6IkR1b25nIEhvYW5nIiwicGhvbmVOdW1iZXIiOm51bGwsInJvbGVJZCI6IjY5MzgyNTMwMGMwOWE4YTBjZjlkZGYxMiIsInJvbGVOYW1lIjoidm9sdW50ZWVyIiwicGVybWlzc2lvbnMiOlsiZXZlbnQ6cmVhZCIsInJlZ2lzdHJhdGlvbjpjcmVhdGUiLCJyZWdpc3RyYXRpb246cmVhZCIsInJlZ2lzdHJhdGlvbjpjYW5jZWwiLCJwb3N0OnJlYWQiLCJwb3N0OmNyZWF0ZSIsInBvc3Q6dXBkYXRlOm93biIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiZGFzaGJvYXJkOnZpZXciXSwiaWF0IjoxNzY1Mjg3MjQzLCJleHAiOjE3NjUyODgxNDN9.xMI5OTEynKcXyq01Nf9ctMJOKYhk8CZpoSNdx2zsXqI

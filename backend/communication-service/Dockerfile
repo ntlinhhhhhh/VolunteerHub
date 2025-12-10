@@ -39,6 +39,6 @@ COPY --from=builder /app/share/dist ./share/dist
 COPY wait-for-services.sh ./
 RUN chmod +x wait-for-services.sh
 
-EXPOSE 4008
+EXPOSE 4010
 
 CMD ["./wait-for-services.sh", "node", "dist/communication-service/src/main.js"]

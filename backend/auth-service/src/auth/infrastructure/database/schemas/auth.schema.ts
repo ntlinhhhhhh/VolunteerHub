@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 
 export type AuthDocument = Auth & Document;
 
@@ -11,8 +11,9 @@ export class Auth {
     @Prop({ required: true, select: false })
     passwordHash: string;
 
-    @Prop({ type: Types.ObjectId, ref: "Role", required: true, index: true })
-    roleId: Types.ObjectId;
+
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true })
+    roleId: mongoose.Types.ObjectId;
 
     @Prop({ default: false, index: true })
     isLocked: boolean;

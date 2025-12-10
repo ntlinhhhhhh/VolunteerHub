@@ -12,44 +12,44 @@ export type NotificationDocument = Notification & Document;
 
 @Schema({ collection: 'notifications', timestamps: true })
 export class Notification {
-  @Prop({ required: true})
-  userId: string;
+    @Prop({ required: true })
+    userId: string;
 
-  @Prop({ type: String, enum: NotificationType, required: true })
-  type: NotificationType;
+    @Prop({ type: String, enum: NotificationType, required: true })
+    type: NotificationType;
 
-  @Prop({ type: String, enum: NotificationChannel, required: true })
-  channel: NotificationChannel;
+    @Prop({ type: String, enum: NotificationChannel, required: true })
+    channel: NotificationChannel;
 
-  @Prop({ type: String, enum: NotificationStatus, default: NotificationStatus.PENDING})
-  status: NotificationStatus;
+    @Prop({ type: Object, default: {} })
+    channels: { inApp?: boolean; email?: string; push?: string };
 
-  @Prop({ required: true })
-  recipient: string;
+    @Prop({ type: String, enum: NotificationStatus, default: NotificationStatus.PENDING })
+    status: NotificationStatus;
 
-  @Prop({ required: true })
-  subject: string;
+    @Prop({ required: true })
+    subject: string;
 
-  @Prop({ required: true })
-  content: string;
+    @Prop({ required: true })
+    content: string;
 
-  @Prop({ type: Object, default: {} })
-  data: Record<string, any>;
+    @Prop({ type: Object, default: {} })
+    data: Record<string, any>;
 
-  @Prop({ default: null })
-  sentAt: Date;
+    @Prop({ default: null })
+    sentAt: Date;
 
-  @Prop({ default: null })
-  readAt: Date;
+    @Prop({ default: null })
+    readAt: Date;
 
-  @Prop({ default: null })
-  errorMessage: string;
+    @Prop({ default: null })
+    errorMessage: string;
 
-  @Prop({ default: 0 })
-  retryCount: number;
+    @Prop({ default: 0 })
+    retryCount: number;
 
-  createdAt: Date;
-  updatedAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export const NotificationSchema = SchemaFactory.createForClass(Notification);

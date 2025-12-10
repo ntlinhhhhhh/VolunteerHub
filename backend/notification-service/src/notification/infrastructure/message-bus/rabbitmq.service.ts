@@ -15,7 +15,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     private readonly maxRetries = 3;
     private readonly retryDelayMs = 5000;
 
-    constructor(private configService: ConfigService) {}
+    constructor(private configService: ConfigService) { }
 
     async onModuleInit() {
         await this.connect();
@@ -47,8 +47,11 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
         await this.channel.assertExchange(this.exchangeName, 'topic', { durable: true });
         await this.channel.assertQueue(this.queueName, { durable: true });
         await this.channel.assertQueue(this.dlqName, { durable: true });
+        await this.channel.bindQueue(this.queueName, this.exchangeName, 'auth.*');
         await this.channel.bindQueue(this.queueName, this.exchangeName, 'user.*');
         await this.channel.bindQueue(this.queueName, this.exchangeName, 'event.*');
+        await this.channel.bindQueue(this.queueName, this.exchangeName, 'registration.*');
+        await this.channel.bindQueue(this.queueName, this.exchangeName, 'admin.*');
 
         this.logger.log(`Queue "${this.queueName}" bound to exchange "${this.exchangeName}" with user.* & event.*`);
     }
@@ -99,11 +102,19 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
         );
     }
 
-    async publishMessage(data: any, routingKey = 'user.registered') {
+    // async publishMessage(data: any, routingKey = 'user.registered') {
+    //     const buffer = Buffer.from(JSON.stringify(data));
+    //     this.channel.publish(this.exchangeName, routingKey, buffer, { persistent: true });
+    //     this.logger.log(`Published message to "${this.queueName}" with routingKey "${routingKey}"`);
+    // }
+
+    async publishMessage(data: any, routingKey: string) {
+        if (!this.channel) throw new Error('RabbitMQ channel not ready');
         const buffer = Buffer.from(JSON.stringify(data));
-        this.channel.publish(this.exchangeName, routingKey, buffer, { persistent: true });
-        this.logger.log(`Published message to "${this.queueName}" with routingKey "${routingKey}"`);
+        await this.channel.publish(this.exchangeName, routingKey, buffer, { persistent: true });
+        this.logger.log(`Published message with routingKey: ${routingKey}`);
     }
+
 
     private delay(ms: number) {
         return new Promise((resolve) => setTimeout(resolve, ms));

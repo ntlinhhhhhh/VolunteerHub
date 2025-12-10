@@ -104,13 +104,13 @@ export class RegistrationController {
     @Roles('volunteer')
     @UseGuards(JwtAuthGuard)
     async checkIn(
-        @Request() req,
+        @GetUser() user: any,
         @Param('id') id: string,
         @Body() dto: CheckInDto,
     ) {
         const registration = await this.checkInRegistrationUseCase.execute(
             id,
-            req.user.userId,
+            user.userId,
             dto,
             false,
         );
@@ -126,13 +126,13 @@ export class RegistrationController {
     @Roles('volunteer')
     @UseGuards(JwtAuthGuard)
     async checkOut(
-        @Request() req,
+        @GetUser() user: any,
         @Param('id') id: string,
         @Body() dto: CheckOutDto,
     ) {
         const registration = await this.checkOutRegistrationUseCase.execute(
             id,
-            req.user.userId,
+            user.userId,
             dto,
             false,
         );
@@ -148,13 +148,13 @@ export class RegistrationController {
     @Roles('volunteer')
     @UseGuards(JwtAuthGuard)
     async rateEvent(
-        @Request() req,
+        @GetUser() user: any,
         @Param('id') id: string,
         @Body() dto: RateEventDto,
     ) {
         const registration = await this.rateEventUseCase.execute(
             id,
-            req.user.userId,
+            user.userId,
             dto,
         );
 
@@ -196,14 +196,14 @@ export class RegistrationController {
     @Roles('organizer')
     @UseGuards(JwtAuthGuard)
     async acceptRegistration(
-        @Request() req,
+        @GetUser() user: any,
         @Param('id') id: string,
         @Body() dto: AcceptRegistrationDto,
     ) {
-        console.log('event-maanger-id', req.user.userId)
+        console.log('event-maanger-id', user.userId)
         const registration = await this.acceptRegistrationUseCase.execute(
             id,
-            req.user.userId,
+            user.userId,
             dto,
         );
 
@@ -218,13 +218,13 @@ export class RegistrationController {
     @Roles('organizer')
     @UseGuards(JwtAuthGuard)
     async rejectRegistration(
-        @Request() req,
+        @GetUser() user: any,
         @Param('id') id: string,
         @Body() dto: RejectRegistrationDto,
     ) {
         const registration = await this.rejectRegistrationUseCase.execute(
             id,
-            req.user.userId,
+            user.userId,
             dto,
         );
 
@@ -237,16 +237,16 @@ export class RegistrationController {
 
     @Delete(':id/cancel-by-organizer')
     @Roles('organizer')
-    @UseGuards(RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async cancelByOrganizer(
-        @Request() req,
+        @GetUser() user: any,
         @Param('id') id: string,
         @Body() dto: CancelRegistrationDto,
     ) {
         const registration = await this.cancelRegistrationUseCase.execute(
             id,
-            req.user.userId,
+            user.userId,
             false,
             dto,
         );
@@ -260,14 +260,14 @@ export class RegistrationController {
 
     @Post('check-in-by-code')
     @Roles('organizer')
-    @UseGuards(RolesGuard)
+    @UseGuards(JwtAuthGuard)
     async checkInByCode(
-        @Request() req,
+        @GetUser() user: any,
         @Body() dto: { code: string } & CheckInDto,
     ) {
         const registration = await this.checkInRegistrationUseCase.executeByCode(
             dto.code,
-            req.user.userId,
+            user.userId,
             dto,
         );
 
@@ -280,14 +280,14 @@ export class RegistrationController {
 
     @Post('check-out-by-code')
     @Roles('organizer')
-    @UseGuards(RolesGuard)
+    @UseGuards(JwtAuthGuard)
     async checkOutByCode(
-        @Request() req,
+        @GetUser() user: any,
         @Body() dto: { code: string } & CheckOutDto,
     ) {
         const registration = await this.checkOutRegistrationUseCase.executeByCode(
             dto.code,
-            req.user.userId,
+            user.userId,
             dto,
         );
 
@@ -300,11 +300,11 @@ export class RegistrationController {
 
     @Put(':id/complete')
     @Roles('organizer')
-    @UseGuards(RolesGuard)
-    async completeRegistration(@Request() req, @Param('id') id: string) {
+    @UseGuards(JwtAuthGuard)
+    async completeRegistration(@GetUser() user: any, @Param('id') id: string) {
         const registration = await this.completeRegistrationUseCase.execute(
             id,
-            req.user.userId,
+            user.userId,
         );
 
         return {
@@ -316,15 +316,15 @@ export class RegistrationController {
 
     @Put(':id/rate-volunteer')
     @Roles('organizer')
-    @UseGuards(RolesGuard)
+    @UseGuards(JwtAuthGuard)
     async rateVolunteer(
-        @Request() req,
+        @GetUser() user: any,
         @Param('id') id: string,
         @Body() dto: RateVolunteerDto,
     ) {
         const registration = await this.rateVolunteerUseCase.execute(
             id,
-            req.user.userId,
+            user.userId,
             dto,
         );
 
@@ -357,14 +357,14 @@ export class RegistrationController {
 
     @Get('my-registrations')
     @Roles('volunteer')
-    @UseGuards(RolesGuard)
+    @UseGuards(JwtAuthGuard)
     async getMyRegistrations(
-        @Request() req,
+        @GetUser() user: any,
         @Query() filterDto: FilterRegistrationDto,
     ) {
         const result = await this.listRegistrationsUseCase.execute({
             ...filterDto,
-            volunteerId: req.user.userId,
+            volunteerId: user.userId,
         });
 
         return {
@@ -381,10 +381,10 @@ export class RegistrationController {
 
     @Get('my-statistics')
     @Roles('volunteer')
-    @UseGuards(RolesGuard)
-    async getMyStatistics(@Request() req) {
+    @UseGuards(JwtAuthGuard)
+    async getMyStatistics(@GetUser() user: any) {
         const statistics = await this.getVolunteerStatisticsUseCase.execute(
-            req.user.userId,
+            user.userId,
         );
 
         return {

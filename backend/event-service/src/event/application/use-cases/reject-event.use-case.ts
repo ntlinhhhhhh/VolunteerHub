@@ -9,7 +9,7 @@ import { IEventRepository } from '../../domain/repositories/event.repository.int
 import { Event } from '../../domain/entities/event.entity';
 import { EventStatus } from '../../domain/entities/event-status.enum';
 import { RejectEventDto } from '../dto/approve-event.dto';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { MessagePublisherService } from 'src/event/infrastructure/messaging/message-publisher.service';
 
 @Injectable()
 export class RejectEventUseCase {
@@ -18,7 +18,8 @@ export class RejectEventUseCase {
     constructor(
         @Inject(IEventRepository)
         private readonly eventRepository: IEventRepository,
-        private readonly amqp: AmqpConnection,
+        private readonly messagePublisherService: MessagePublisherService,
+        
 
     ) { }
 
@@ -44,23 +45,21 @@ export class RejectEventUseCase {
             },
         } as any);
 
-        // 4. Publish event to message bus (notify organizer)
-        await this.amqp.publish(
-            'notification_exchange',
-            'event.rejected',
-            {
-                type: "event_rejected",
-                userId: event.organizerId,
-                recipient: event.organizerEmail,
-                eventId: event.id,
-                eventTitle: event.title,
-                eventSlug: event.slug,
-                organizerId: event.organizerId,
-                organizerName: event.organizerName,
-                organizerEmail: event.organizerEmail,
-                rejectionReason: dto.rejectionReason,
-            });
+        const data = {
+            eventId: event.id,
+            eventTitle: event.title,
+            eventSlug: event.slug,
+            organizerId: event.organizerId,
+            organizerName: event.organizerName,
+            organizerEmail: event.organizerEmail,
+            eventDate: event.schedule.startDate.toISOString(),
+            eventLocation: `${event.location.address}, ${event.location.district}, ${event.location.city}`,
+            maxVolunteers: event.capacity.maxVolunteers,
+            rejectionReason: dto.rejectionReason,
+        }
 
+        await this.messagePublisherService.notifyEventManagerEventRejected(event.organizerId,event.organizerEmail, data)
+        
         this.logger.log(`Event rejected: ${eventId} by admin: ${adminId}`);
 
         const updatedEvent = await this.eventRepository.findById(eventId);

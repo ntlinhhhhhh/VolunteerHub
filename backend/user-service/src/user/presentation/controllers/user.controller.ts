@@ -21,6 +21,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Inject } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { GetUser } from '@share/auth/get-user.decorator';
+import { User, UserStatus } from 'src/user/domain/entities/user.entity';
 
 
 @Controller('users')
@@ -68,8 +69,17 @@ export class UserController {
     @Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Get()
-    async findAll() {
-        const users = await this.getUserProfileUseCase.executeAll();
+    async findAll(
+        @Query()
+        filters?: {
+            status?: UserStatus;
+            page?: number;
+            limit?: number;
+        }) {
+
+        console.log('filters', filters);
+
+        const users = await this.getUserProfileUseCase.executeAll(filters);
         return {
             success: true,
             data: users || [],
@@ -105,39 +115,6 @@ export class UserController {
     //     return { success: true, data: users };
     // }
 
-
-
-    @Roles('admin')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Put(':id/lock')
-    async lockUser(@Param('id') id: string, @Body('reason') reason: string) {
-        await firstValueFrom(
-            this.userClient.send('auth.lock', {
-                userId: id,
-                reason: reason || 'Locked by admin',
-            }),
-        );
-
-        return {
-            success: true,
-            message: `User ${id} locked`,
-        };
-    }
-
-    @Roles('admin')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Put(':id/unlock')
-    async unlockUser(@Param('id') id: string) {
-        await firstValueFrom(
-            this.userClient.send('auth.unlock', { userId: id })
-        );
-
-        return {
-            success: true,
-            message: `User ${id} unlocked`,
-        };
-    }
-
     @MessagePattern('user.create')
     async createUser(@Payload() data: CreateUserDto) {
         console.log('Received user.create payload:', data);
@@ -159,9 +136,21 @@ export class UserController {
         }
     }
 
+    @MessagePattern('user.update')
+    async updateUser(
+        @Payload() data: { authId: string; profileData: Partial<User> }
+    ): Promise<User> {
+        const { authId, profileData } = data;
+
+        // gọi use-case
+        return await this.updateUserProfileUseCase.execute(authId, profileData);
+    }
+
+
 
     @MessagePattern('user.findByAuthId')
     async findByAuthId(@Payload() data: { authId: string }) {
+        console.log('call user.findByAuthId');
         const user = await this.getUserProfileUseCase.executeByAuthId(
             data.authId
         );
@@ -170,6 +159,8 @@ export class UserController {
 
     @MessagePattern('user.findByEmail')
     async findByEmail(@Payload() data: { email: string }) {
+        console.log('call user.email');
+
         const user = await this.getUserProfileUseCase.executeByEmail(
             data.email
         );

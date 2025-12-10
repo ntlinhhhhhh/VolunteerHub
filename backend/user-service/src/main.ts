@@ -51,7 +51,7 @@ async function bootstrap() {
     app.connectMicroservice(microserviceOptions);
     await app.startAllMicroservices();
 
-    const port = parseInt(process.env.PORT || '4006', 10);
+    const port = parseInt(process.env.PORT || '4002', 10);
     await app.listen(port);
 
     logger.log(`✅ User Service HTTP API running at http://localhost:${port}/api`);

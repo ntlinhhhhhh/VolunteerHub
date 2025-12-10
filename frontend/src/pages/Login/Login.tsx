@@ -17,83 +17,9 @@ declare global {
     }
 }
 
-const GoogleLogin: React.FC = () => {
-    const [user, setUser] = useState<GoogleUser | null>(null);
-
-    const handleCredentialResponse = async (response: any) => {
-        const idToken = response.credential as string;
-        const base64Url = idToken.split(".")[1];
-        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-        const jsonPayload = decodeURIComponent(
-            atob(base64)
-                .split("")
-                .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-                .join("")
-        );
-        const userObject: GoogleUser = JSON.parse(jsonPayload);
-        setUser(userObject);
-
-        try {
-            const res = await fetch("http://localhost:8000/google", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ idToken }),
-            });
-            const data = await res.json();
-        } catch (err) {
-            console.error("Error calling backend:", err);
-        }
-    };
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            if (window.google) {
-                clearInterval(interval);
-                window.google.accounts.id.initialize({
-                    client_id: "546716717633-9ipq8qqrekc7rg9ha6dgtcu49okd67kt.apps.googleusercontent.com",
-                    callback: handleCredentialResponse,
-                });
-
-                // Sử dụng wrapper div cho nút
-                const buttonWrapper = document.getElementById("google-signin-btn-wrapper");
-
-                if (buttonWrapper) {
-                    // *** CĂN GIỮA NÚT GOOGLE ***
-                    // 1. Đặt chiều rộng cố định cho wrapper
-                    buttonWrapper.style.width = '300px';
-                    // 2. Căn giữa wrapper div bằng margin
-                    buttonWrapper.style.margin = '0 auto';
-                    
-                    window.google.accounts.id.renderButton(
-                        buttonWrapper,
-                        { theme: "outline", size: "large", width: '300', text: 'signin_with' }
-                    );
-                }
-
-                window.google.accounts.id.prompt();
-            }
-        }, 100);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    return (
-        <div style={{ width: '100%', textAlign: 'center' }}>
-            {/* Đảm bảo id này tồn tại */}
-            <div id="google-signin-btn-wrapper"></div>
-        </div>
-    );
-};
-
 interface UserCredentials {
     email: string;
     password: string;
-}
-
-interface LoginResponse {
-    accessToken?: string;
-    refreshToken?: string;
-    message?: string;
 }
 
 const Login: React.FC = () => {
@@ -106,12 +32,30 @@ const Login: React.FC = () => {
         setCredentials({ ...credentials, [e.target.name]: e.target.value });
     };
 
+    const handleGoogleLogin = () => {
+        const clientId = '546716717633-9ipq8qqrekc7rg9ha6dgtcu49okd67kt.apps.googleusercontent.com';
+        const redirectUri = 'http://localhost:8000/auth/google/callback';
+        const scope = 'email profile openid';
+        const responseType = 'code';
+        const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&prompt=consent`;
+
+        const googleUrl =
+            `https://accounts.google.com/o/oauth2/v2/auth` +
+            `?client_id=${clientId}` +
+            `&redirect_uri=${redirectUri}` +
+            `&response_type=code` +
+            `&scope=${scope}` +
+            `&prompt=consent`;
+
+        window.location.href = googleUrl;
+    };
+
     const handleEmailLogin = async () => {
         setLoading(true);
         setMessage("");
 
         try {
-            const res = await fetch("http://localhost:4000/auth/login", {
+            const res = await fetch("http://localhost:8000/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(credentials),
@@ -124,7 +68,7 @@ const Login: React.FC = () => {
                 localStorage.setItem("accessToken", result.data.accessToken);
                 localStorage.setItem("refreshToken", result.data.refreshToken);
 
-                window.location.href = "/dashboard";
+                navigate("/dashboard");
             } else {
                 setMessage(`Login failed: ${result.message || "Unknown error"}`);
             }
@@ -136,35 +80,39 @@ const Login: React.FC = () => {
         }
     };
 
-
     return (
         <div style={styles.fullPageContainer}>
             <div style={styles.cardContainer}>
-                
-                {/* ICON FA ARROW LEFT (Nút quay lại trang chủ) */}
+
+                {/* Back button */}
                 <div 
-                    onClick={() => navigate('/')} 
-                    style={{
-                        position: 'absolute',
-                        top: '20px',
-                        left: '20px',
-                        fontSize: '28px', // Kích thước icon
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        color: '#343a40', // Màu đen
-                        zIndex: 10,
-                        lineHeight: '1',
-                        padding: '5px'
-                    }}
-                >
-                    <FaArrowLeft /> {/* Sử dụng FaArrowLeft */}
-                </div>
+                                onClick={() => navigate('/')} 
+                                style={{
+                                    position: 'absolute',
+                                    top: '20px',
+                                    left: '20px',
+                                    fontSize: '28px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    color: '#343a40',
+                                    zIndex: 10,
+                                    lineHeight: '1',
+                                    padding: '5px'
+                                }}
+                            >
+                                <FaArrowLeft />
+                            </div>
 
                 <h1 style={styles.title}>Sign In to VolunteerHub</h1>
                 <p style={styles.subtitle}>Welcome back! Enter your credentials to continue.</p>
 
-                {/* Google Login */}
-                <GoogleLogin />
+                {/* 🔵 GOOGLE LOGIN BUTTON */}
+                <button 
+                    onClick={handleGoogleLogin}
+                    style={styles.googleButton}
+                >
+                    Login with Google
+                </button>
 
                 <div style={styles.divider}>
                     <span style={styles.dividerText}>OR</span>
@@ -180,6 +128,7 @@ const Login: React.FC = () => {
                         onChange={handleChange}
                         style={styles.input}
                     />
+
                     <input
                         type="password"
                         name="password"
@@ -188,6 +137,7 @@ const Login: React.FC = () => {
                         onChange={handleChange}
                         style={styles.input}
                     />
+
                     <button
                         onClick={handleEmailLogin}
                         style={styles.primaryButton}
@@ -196,12 +146,27 @@ const Login: React.FC = () => {
                         {loading ? "Logging in..." : "Login"}
                     </button>
 
-                    {message && <p style={message.includes("failed") ? styles.errorMessage : styles.successMessage}>{message}</p>}
+                    {message && (
+                        <p style={
+                            message.includes("failed") ? styles.errorMessage : styles.successMessage
+                        }>
+                            {message}
+                        </p>
+                    )}
                 </div>
 
-                {/* Link to Register Page */}
+                <div style={{ width: "100%", textAlign: "right", marginBottom: "10px" }}>
+                    <Link to="/forgot-password" style={styles.forgotPasswordLink}>
+                        Forgot password?
+                    </Link>
+                </div>
+
+                {/* Register */}
                 <div style={styles.linkText}>
-                    <p style={{ color: '#343a40' }}>Don't have an account? <Link to="/register" style={styles.registerLink}>Register Now</Link></p>
+                    <p style={{ color: '#343a40' }}>
+                        Don't have an account? 
+                        <Link to="/register" style={styles.registerLink}> Register Now</Link>
+                    </p>
                 </div>
             </div>
         </div>
