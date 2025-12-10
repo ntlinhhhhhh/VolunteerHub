@@ -60,7 +60,7 @@ const AdminDashboard: React.FC = () => {
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('role'); 
         
-        navigate("/auth/admin/login");
+        navigate("/admin/login");
         
         // Hoặc dùng: window.location.href = '/auth/admin/login'; nếu bạn muốn tải lại toàn bộ trang
     };
