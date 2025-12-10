@@ -308,7 +308,7 @@ export class AuthController {
     @MessagePattern('auth.search')
     async searchUsers(
         @Payload() data: {
-            keyword: string;
+            keyword?: string;
             role?: string;
             page?: number;
             limit?: number

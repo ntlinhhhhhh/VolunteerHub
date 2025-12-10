@@ -3,6 +3,7 @@ import { Document, Types } from 'mongoose';
 import { UserStatus } from '../../../domain/entities/user.entity';
 
 export type UserDocument = User & Document;
+export type UserRole = 'admin' | 'volunteer' | 'event_manager';
 
 @Schema({ collection: 'users', timestamps: true })
 export class User {
@@ -44,6 +45,9 @@ export class User {
 
     createdAt: Date;
     updatedAt: Date;
+
+    // @Prop({ default: 'volunteer' })
+    // role: UserRole;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

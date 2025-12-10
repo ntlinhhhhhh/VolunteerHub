@@ -34,6 +34,11 @@ export class AuthRepository implements IAuthRepository {
         );
     }
 
+    async findAll(): Promise<AuthEntity[] | null> {
+        const docs = await this.authModel.find().exec();
+        return await Promise.all(docs.map(doc => this.toEntity(doc)));
+    }
+
     async findByEmail(email: string): Promise<AuthEntity | null> {
         const doc = await this.authModel
             .findOne({ email: email.toLowerCase() })
@@ -79,7 +84,7 @@ export class AuthRepository implements IAuthRepository {
             { roleId }
         ).exec();
     }
-    
+
     async updateAuth(id: string, authData: Partial<AuthEntity>): Promise<void> {
         await this.authModel.findByIdAndUpdate(
             id,

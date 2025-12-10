@@ -79,6 +79,7 @@ export class UserController {
         @Query()
         filters?: {
             status?: UserStatus;
+            role?: string,
             page?: number;
             limit?: number;
         }) {
@@ -86,6 +87,8 @@ export class UserController {
         console.log('filters', filters);
 
         const users = await this.getUserProfileUseCase.executeAll(filters);
+        console.log('users-filter', users);
+
         return {
             success: true,
             data: users || [],
@@ -112,25 +115,6 @@ export class UserController {
         const avatarPath = await this.updateAvatarUseCase.execute(userId, file);
         return { success: true, avatar: avatarPath };
     }
-
-    // @Roles('admin')
-    // @UseGuards(JwtAuthGuard, RolesGuard)
-    // @Get('search')
-    // async searchUsers(
-    //     @Query('q') q: string,
-    //     @Query('role') role?: string,
-    //     @Query('page') page: number = 1,
-    //     @Query('limit') limit: number = 20,
-    // ) {
-    //     const users = await this.getUserProfileUseCase.search(
-    //         q,
-    //         role,
-    //         Number(page),
-    //         Number(limit),
-    //     );
-
-    //     return { success: true, data: users };
-    // }
 
     @MessagePattern('user.create')
     async createUser(@Payload() data: CreateUserDto) {
