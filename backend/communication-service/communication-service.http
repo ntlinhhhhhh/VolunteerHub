@@ -1,0 +1,66 @@
+### Lấy danh sách posts cho một event (public)
+GET http://localhost:8000/posts?eventId=some-event-id&page=1&limit=10
+
+### Lấy post theo ID (public)
+GET http://localhost:8000/posts/some-post-id
+
+### Tạo post mới (authenticated)
+POST http://localhost:8000/posts/event/some-event-id
+Authorization: Bearer your-jwt-token-here
+Content-Type: application/json
+
+{
+  "content": "Đây là nội dung bài post",
+  "images": ["https://example.com/image1.jpg"],
+  "videos": ["https://example.com/video1.mp4"]
+}
+
+### Cập nhật post (authenticated)
+PUT http://localhost:8000/posts/some-post-id
+Authorization: Bearer your-jwt-token-here
+Content-Type: application/json
+
+{
+  "content": "Nội dung đã cập nhật"
+}
+
+### Xóa post (authenticated)
+DELETE http://localhost:8000/posts/some-post-id
+Authorization: Bearer your-jwt-token-here
+
+### Thích/Bỏ thích post (authenticated)
+POST http://localhost:8000/posts/some-post-id/like
+Authorization: Bearer your-jwt-token-here
+
+### Thêm comment vào post (authenticated)
+POST http://localhost:8000/posts/some-post-id/comments
+Authorization: Bearer your-jwt-token-here
+Content-Type: application/json
+
+{
+  "content": "Đây là comment"
+}
+
+### Lấy comments của post (public)
+GET http://localhost:8000/posts/some-post-id/comments?page=1&limit=20
+
+### Cập nhật comment (authenticated)
+PUT http://localhost:8000/posts/some-post-id/comments/some-comment-id
+Authorization: Bearer your-jwt-token-here
+Content-Type: application/json
+
+{
+  "content": "Comment đã cập nhật"
+}
+
+### Xóa comment (authenticated)
+DELETE http://localhost:8000/posts/some-post-id/comments/some-comment-id
+Authorization: Bearer your-jwt-token-here
+
+### Ghim post (admin/event_manager)
+POST http://localhost:8000/posts/some-post-id/pin
+Authorization: Bearer your-admin-jwt-token-here
+
+### Bỏ ghim post (admin/event_manager)
+POST http://localhost:8000/posts/some-post-id/unpin
+Authorization: Bearer your-admin-jwt-token-here
