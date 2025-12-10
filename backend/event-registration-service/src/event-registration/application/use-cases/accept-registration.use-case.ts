@@ -11,6 +11,9 @@ import { Registration } from '../../domain/entities/registration.entity';
 import { RegistrationStatus } from '../../domain/entities/registration-status.enum';
 import { AcceptRegistrationDto } from '../dto/action-registration.dto';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { MessagePublisherService } from 'src/event-registration/infrastructure/messaging/message-publisher.service';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class AcceptRegistrationUseCase {
@@ -19,7 +22,8 @@ export class AcceptRegistrationUseCase {
     constructor(
         @Inject(IRegistrationRepository)
         private readonly registrationRepository: IRegistrationRepository,
-        private readonly amqp: AmqpConnection,
+        private readonly messagePublisherService: MessagePublisherService,
+        @Inject('EVENT_SERVICE') private eventClient: ClientProxy,
     ) { }
 
     async execute(
@@ -55,25 +59,21 @@ export class AcceptRegistrationUseCase {
 
         // 5. Publish events to message bus
         // Notify EVENT SERVICE to increment volunteer count
-        await this.amqp.publish(
-            'notification_exchange',
-            'registration.accepted',
-            {
-                type: 'registration_accepted',
-                userId: registration.volunteerId,
-                // recipient: registration.volunteerEmail,
-                recipient: 'nguyenthuylinh26012005@gmail.com',
-                registrationId: registration.id,
-                eventId: registration.eventId,
-                eventTitle: registration.eventTitle,
-                volunteerId: registration.volunteerId,
-                volunteerName: registration.volunteerName,
-                volunteerEmail: registration.volunteerEmail,
-                eventDate: registration.eventDate.toISOString(),
-                eventLocation: registration.eventLocation,
-                roleName: registration.roleName,
-                organizerPhone: registration.organizerEmail,
-            });
+
+        const data = {
+            registrationId: registration.id,
+            eventId: registration.eventId,
+            eventTitle: registration.eventTitle,
+            volunteerId: registration.volunteerId,
+            volunteerName: registration.volunteerName,
+            volunteerEmail: registration.volunteerEmail,
+            eventDate: registration.eventDate.toISOString(),
+            eventLocation: registration.eventLocation,
+            roleName: registration.roleName,
+            organizerPhone: registration.organizerEmail,
+        }
+
+        await this.messagePublisherService.notifyVolunteerRegistrationAccepted(registration.volunteerId, registration.volunteerEmail, data);
 
         this.logger.log(`Registration accepted: ${registrationId}`);
 

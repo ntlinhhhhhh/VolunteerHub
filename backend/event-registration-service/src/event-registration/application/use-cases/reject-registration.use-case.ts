@@ -10,7 +10,8 @@ import { IRegistrationRepository } from '../../domain/repositories/registration.
 import { Registration } from '../../domain/entities/registration.entity';
 import { RegistrationStatus } from '../../domain/entities/registration-status.enum';
 import { RejectRegistrationDto } from '../dto/action-registration.dto';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { MessagePublisherService } from 'src/event-registration/infrastructure/messaging/message-publisher.service';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class RejectRegistrationUseCase {
@@ -19,7 +20,8 @@ export class RejectRegistrationUseCase {
     constructor(
         @Inject(IRegistrationRepository)
         private readonly registrationRepository: IRegistrationRepository,
-        private readonly amqp: AmqpConnection,
+        private readonly messagePublisherService: MessagePublisherService,
+        @Inject('EVENT_SERVICE') private eventClient: ClientProxy,
     ) { }
 
     async execute(
@@ -49,21 +51,17 @@ export class RejectRegistrationUseCase {
             },
         } as any);
 
-        await this.amqp.publish(
-            'notification_exchange',
-            'registration.rejected',
-            {
-                type: 'registration_rejected',
-                userId: registration.volunteerId,
-                recipient: registration.volunteerEmail,
-                registrationId: registration.id,
+        const data = {
+            registrationId: registration.id,
                 eventId: registration.eventId,
                 eventTitle: registration.eventTitle,
                 volunteerId: registration.volunteerId,
                 volunteerName: registration.volunteerName,
                 volunteerEmail: registration.volunteerEmail,
                 rejectionReason: dto.rejectionReason,
-            });
+        }
+
+        await this.messagePublisherService.notifyVolunteerRegistrationRejected(registration.volunteerId, registration.volunteerEmail, data);
 
         this.logger.log(`Registration rejected: ${registrationId}`);
 

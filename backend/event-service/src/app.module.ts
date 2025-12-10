@@ -120,6 +120,6 @@ import { MessagePublisherService } from './event/infrastructure/messaging/messag
         MessagePublisherService,
 
     ],
-    exports: [RabbitMQModule, CacheModule, MessagePublisherService],
+    exports: [RabbitMQModule, CacheModule, MessagePublisherService, 'AUTH_SERVICE'],
 })
 export class AppModule { }

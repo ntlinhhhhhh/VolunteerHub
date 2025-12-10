@@ -54,8 +54,6 @@ services:
       - redis
       - rabbitmq
     restart: unless-stopped
-    volumes:
-      - D:/volunteer_hub/volunteerhub/media-storage:/app/uploads
 
   user-service:
     build:
@@ -150,7 +148,8 @@ services:
   #     - redis
   #     - rabbitmq
   #   restart: unless-stopped
-
+  # volumes:
+  #   - D:/volunteer_hub/volunteerhub/media-storage:/app/uploads
 
   kong:
     image: kong:3.5
