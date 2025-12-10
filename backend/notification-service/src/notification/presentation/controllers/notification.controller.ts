@@ -3,8 +3,9 @@ import { GetUserNotificationsUseCase } from '../../application/use-cases/get-use
 import { MarkNotificationAsReadUseCase } from '../../application/use-cases/mark-notification-as-read.use-case';
 import { SendEmailNotificationUseCase } from '../../application/use-cases/send-email-notification.use-case';
 import { CreateNotificationUseCase } from '../../application/use-cases/create-notification.use-case';
-import { SendNotificationDto } from '../../application/dto/send-notification.dto';
 import { NotificationType } from '../../domain/entities/notification-type.enum';
+import { CreateNotificationDto } from 'src/notification/application/dto/create-notification.dto';
+import { NotificationChannel } from 'src/notification/domain/entities/notification-channel.enum';
 
 @Controller('notifications')
 export class NotificationController {
@@ -13,20 +14,22 @@ export class NotificationController {
         private readonly markAsReadUseCase: MarkNotificationAsReadUseCase,
         private readonly sendEmailUseCase: SendEmailNotificationUseCase,
         private readonly createNotificationUseCase: CreateNotificationUseCase
-    ) {}
+    ) { }
 
     /**
-     * GET /notifications/:userId?limit=20
+     * GET /notifications/:userId?limit=20 inapp
      * Lấy danh sách notifications của user
      */
     @Get(':userId')
     async getUserNotifications(
         @Param('userId') userId: string,
-        @Query('limit') limit?: number
+        @Query('limit') limit?: number,
+        @Query('channel') channel?: NotificationChannel
     ) {
         const notifications = await this.getUserNotificationsUseCase.execute(
             userId,
-            limit ? parseInt(limit.toString()) : 20
+            limit ? parseInt(limit.toString()) : 20,
+            channel
         );
 
         return { success: true, data: notifications };
@@ -47,30 +50,36 @@ export class NotificationController {
      * Gửi notification thủ công (cả email + lưu DB)
      * Hỗ trợ multi-channel (inApp/email/push)
      */
-    // @Post('send')
-    // async sendNotification(@Body() dto: SendNotificationDto) {
-    //     // 1️⃣ Tạo notification trong DB
-    //     await this.createNotificationUseCase.execute({
-    //         userId: dto.userId,
-    //         type: dto.type as NotificationType,
-    //         channels: dto.channels || {}, // mới: support multi-channel
-    //         subject: dto.subject,
-    //         content: dto.content,
-    //         data: dto.data || {},
-    //     });
+    @Post('sendInApp')
+    async sendInAppNotification(@Body() dto: CreateNotificationDto) {
+        return this.createNotificationUseCase.execute({
+            userId: dto.userId,
+            type: dto.type,
+            channel: NotificationChannel.IN_APP,
+            channels: {
+                inApp: true,
+            },
+            subject: dto.subject,
+            content: dto.content,
+            data: dto.data ?? {},
+        });
+    }
 
-    //     // 2️⃣ Nếu có email, gửi luôn
-    //     if (dto.channels?.email) {
-    //         await this.sendEmailUseCase.execute(
-    //             dto.userId,
-    //             dto.channels.email,
-    //             dto.type as NotificationType,
-    //             dto.data || {}
-    //         );
-    //     }
-
-    //     return { success: true, message: 'Notification sent successfully' };
-    // }
+    @Post('sendEmail')
+    async sendEmailNotification(@Body() dto: CreateNotificationDto) {
+        return this.createNotificationUseCase.execute({
+            userId: dto.userId,
+            type: dto.type,
+            channel: NotificationChannel.EMAIL,
+            channels: {
+                inApp: false,
+                email: dto.channels?.email,
+            },
+            subject: dto.subject,
+            content: dto.content,
+            data: dto.data ?? {},
+        });
+    }
 
     /**
      * POST /notifications/test-email

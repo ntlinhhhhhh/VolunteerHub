@@ -32,6 +32,7 @@ import { RegistrationController } from './event-registration/presentation/contro
 import { IRegistrationRepository } from './event-registration/domain/repositories/registration.repository.interface';
 import { RegistrationRepository } from './event-registration/infrastructure/repositories/registration.repository';
 import { ConfirmAttendanceUseCase } from './event-registration/application/use-cases/confirm-attendance.use-case';
+import { MessagePublisherService } from './event-registration/infrastructure/messaging/message-publisher.service';
 
 @Module({
     imports: [
@@ -101,12 +102,15 @@ import { ConfirmAttendanceUseCase } from './event-registration/application/use-c
         ConfirmAttendanceUseCase,
         JwtStrategy,
         JwtAuthGuard,
+        MessagePublisherService,
     ],
     exports: [
         'EVENT_SERVICE',
         'USER_SERVICE',
         RabbitMQModule, 
-        CacheModule
+        CacheModule,
+        MessagePublisherService,
+        ApplyForEventUseCase,
     ],
 })
 export class AppModule { }

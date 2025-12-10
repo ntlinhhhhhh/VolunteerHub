@@ -12,6 +12,8 @@ export class CreateNotificationUseCase {
     ) { }
 
     async execute(dto: CreateNotificationDto): Promise<Notification> {
+
+        console.log('called CreateNotificationUseCase')
         const now = new Date();
 
         const notificationData = new Notification(

@@ -34,7 +34,7 @@ export class NotificationConsumerService implements OnModuleInit {
         if (channels?.inApp) {
             let notificationInApp;
             try {
-                const notificationInApp = await this.createNotificationUseCase.execute({
+                notificationInApp = await this.createNotificationUseCase.execute({
                     userId,
                     type: mappedType,
                     channel: NotificationChannel.IN_APP,
@@ -59,18 +59,6 @@ export class NotificationConsumerService implements OnModuleInit {
             let emailNotification;
 
             try {
-                // Tạo notification trước
-                emailNotification = await this.createNotificationUseCase.execute({
-                    userId,
-                    type: mappedType,
-                    channel: NotificationChannel.EMAIL,
-                    channels,
-                    subject: `Thông báo: ${mappedType}`,
-                    content: `Bạn có thông báo mới: ${mappedType}`,
-                    data,
-                });
-
-                // Gửi email
                 await this.sendEmailUseCase.execute(userId, channels.email, mappedType, data);
 
                 // Mark sent

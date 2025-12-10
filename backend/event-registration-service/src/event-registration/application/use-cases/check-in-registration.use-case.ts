@@ -9,7 +9,6 @@ import {
 import { IRegistrationRepository } from '../../domain/repositories/registration.repository.interface';
 import { Registration } from '../../domain/entities/registration.entity';
 import { RegistrationStatus } from '../../domain/entities/registration-status.enum';
-import { CheckInDto } from '../dto/action-registration.dto';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -20,31 +19,31 @@ export class CheckInRegistrationUseCase {
         @Inject(IRegistrationRepository)
         private readonly registrationRepository: IRegistrationRepository,
         private readonly configService: ConfigService
-    ) { }
+    ) {}
 
     async execute(
         registrationId: string,
-        checkInBy: string,
-        dto: CheckInDto,
-        isOrganizer: boolean = false
+        organizerId: string,
+        isOrganizer: boolean
     ): Promise<Registration> {
+        
         // 1. Find registration
         const registration = await this.registrationRepository.findById(registrationId);
         if (!registration) {
             throw new NotFoundException('Registration not found');
         }
 
-        // 2. Check permission (organizer hoặc chính volunteer đó)
-        if (!isOrganizer && registration.volunteerId !== checkInBy) {
-            throw new ForbiddenException('You can only check-in for yourself');
+        // 2. Only organizer can check-in
+        if (!isOrganizer) {
+            throw new ForbiddenException('Only organizers can check-in volunteers');
         }
 
-        // 3. Check if can check-in
+        // 3. Validate status
         if (!registration.canCheckIn()) {
             throw new BadRequestException(`Cannot check-in with status: ${registration.status}`);
         }
 
-        // 4. Validate check-in time window
+        // 4. Validate time window
         this.validateCheckInTime(registration.eventDate);
 
         // 5. Update registration
@@ -52,14 +51,12 @@ export class CheckInRegistrationUseCase {
             status: RegistrationStatus.CHECKED_IN,
             attendance: {
                 checkInTime: new Date(),
-                checkInBy,
-                checkInLocation: dto.location,
-                checkInMethod: isOrganizer ? 'manual' : 'self',
-                notes: dto.notes,
-            },
+                checkInBy: organizerId,
+                checkInMethod: 'manual'
+            }
         } as any);
 
-        this.logger.log(`Registration checked-in: ${registrationId}`);
+        this.logger.log(`Organizer ${organizerId} checked-in registration ${registrationId}`);
 
         const updated = await this.registrationRepository.findById(registrationId);
         return updated!;
@@ -67,34 +64,35 @@ export class CheckInRegistrationUseCase {
 
     async executeByCode(
         registrationCode: string,
-        checkInBy: string,
-        dto: CheckInDto
+        organizerId: string
     ): Promise<Registration> {
         const registration = await this.registrationRepository.findByCode(registrationCode);
         if (!registration) {
             throw new NotFoundException('Registration not found with this code');
         }
 
-        return this.execute(registration.id, checkInBy, dto, true);
+        return this.execute(registration.id, organizerId, true);
     }
 
     private validateCheckInTime(eventDate: Date): void {
         const now = new Date();
-        const windowBeforeMinutes = this.configService.get('CHECK_IN_WINDOW_BEFORE_MINUTES') || 60;
-        const windowAfterMinutes = this.configService.get('CHECK_IN_WINDOW_AFTER_MINUTES') || 30;
+        const windowBeforeMinutes =
+            this.configService.get<number>('CHECK_IN_WINDOW_BEFORE_MINUTES') ?? 60;
+        const windowAfterMinutes =
+            this.configService.get<number>('CHECK_IN_WINDOW_AFTER_MINUTES') ?? 30;
 
-        const earliestCheckIn = new Date(eventDate.getTime() - windowBeforeMinutes * 60 * 1000);
-        const latestCheckIn = new Date(eventDate.getTime() + windowAfterMinutes * 60 * 1000);
+        const earliest = new Date(eventDate.getTime() - windowBeforeMinutes * 60 * 1000);
+        const latest = new Date(eventDate.getTime() + windowAfterMinutes * 60 * 1000);
 
-        if (now < earliestCheckIn) {
+        if (now < earliest) {
             throw new BadRequestException(
                 `Check-in opens ${windowBeforeMinutes} minutes before event start`
             );
         }
 
-        if (now > latestCheckIn) {
+        if (now > latest) {
             throw new BadRequestException(
-                `Check-in window closed ${windowAfterMinutes} minutes after event start`
+                `Check-in closed ${windowAfterMinutes} minutes after event start`
             );
         }
     }

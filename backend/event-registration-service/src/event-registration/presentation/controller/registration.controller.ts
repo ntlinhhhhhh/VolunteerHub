@@ -19,17 +19,13 @@ import {
     AcceptRegistrationDto,
     RejectRegistrationDto,
     CancelRegistrationDto,
-    CheckInDto,
-    CheckOutDto,
     RateEventDto,
     RateVolunteerDto,
 } from '../../application/dto/action-registration.dto';
 
-import { Public } from '@share/auth/public.decorator';
 import { Roles } from '@share/auth/roles.decorator';
 import { GetUser } from '@share/auth/get-user.decorator';
 import { JwtAuthGuard } from '@share/auth/jwt-auth.guard'
-import { RolesGuard } from '@share/auth/roles.guard';
 
 
 import { ApplyForEventUseCase } from '../../application/use-cases/apply-for-event.use-case';
@@ -97,50 +93,6 @@ export class RegistrationController {
             success: true,
             message: 'Attendance confirmed',
             data: registration
-        };
-    }
-
-    @Put(':id/check-in')
-    @Roles('volunteer')
-    @UseGuards(JwtAuthGuard)
-    async checkIn(
-        @GetUser() user: any,
-        @Param('id') id: string,
-        @Body() dto: CheckInDto,
-    ) {
-        const registration = await this.checkInRegistrationUseCase.execute(
-            id,
-            user.userId,
-            dto,
-            false,
-        );
-
-        return {
-            success: true,
-            message: 'Checked in successfully',
-            data: registration,
-        };
-    }
-
-    @Put(':id/check-out')
-    @Roles('volunteer')
-    @UseGuards(JwtAuthGuard)
-    async checkOut(
-        @GetUser() user: any,
-        @Param('id') id: string,
-        @Body() dto: CheckOutDto,
-    ) {
-        const registration = await this.checkOutRegistrationUseCase.execute(
-            id,
-            user.userId,
-            dto,
-            false,
-        );
-
-        return {
-            success: true,
-            message: 'Checked out successfully',
-            data: registration,
         };
     }
 
@@ -258,17 +210,59 @@ export class RegistrationController {
         };
     }
 
+    @Put(':id/check-in')
+    @Roles('organizer')
+    async organizerCheckIn(
+        @Param('id') registrationId: string,
+        @GetUser() user: any,
+    ) {
+        const organizerId = user?.id;
+
+        const result = await this.checkInRegistrationUseCase.execute(
+            registrationId,
+            organizerId,
+            true // isOrganizer
+        );
+
+        return {
+            success: true,
+            message: 'Volunteer checked-in successfully',
+            data: result,
+        };
+    }
+
+    @Put(':id/check-out')
+    @Roles('organizer')
+    async organizerCheckOut(
+        @Param('id') registrationId: string,
+        @GetUser() user: any,
+    ) {
+        const organizerId = user?.id;
+
+        const result = await this.checkOutRegistrationUseCase.execute(
+            registrationId,
+            organizerId,
+            true // isOrganizer
+        );
+
+        return {
+            success: true,
+            message: 'Volunteer checked-out successfully',
+            data: result,
+        };
+    }
+
+
     @Post('check-in-by-code')
     @Roles('organizer')
     @UseGuards(JwtAuthGuard)
     async checkInByCode(
         @GetUser() user: any,
-        @Body() dto: { code: string } & CheckInDto,
+        @Body('code') code: string,
     ) {
         const registration = await this.checkInRegistrationUseCase.executeByCode(
-            dto.code,
+            code,
             user.userId,
-            dto,
         );
 
         return {
@@ -283,12 +277,11 @@ export class RegistrationController {
     @UseGuards(JwtAuthGuard)
     async checkOutByCode(
         @GetUser() user: any,
-        @Body() dto: { code: string } & CheckOutDto,
+        @Body('code') code: string,
     ) {
         const registration = await this.checkOutRegistrationUseCase.executeByCode(
-            dto.code,
+            code,
             user.userId,
-            dto,
         );
 
         return {

@@ -9,7 +9,6 @@ import {
 import { IRegistrationRepository } from '../../domain/repositories/registration.repository.interface';
 import { Registration } from '../../domain/entities/registration.entity';
 import { RegistrationStatus } from '../../domain/entities/registration-status.enum';
-import { CheckOutDto } from '../dto/action-registration.dto';
 
 @Injectable()
 export class CheckOutRegistrationUseCase {
@@ -22,19 +21,19 @@ export class CheckOutRegistrationUseCase {
 
     async execute(
         registrationId: string,
-        checkOutBy: string,
-        dto: CheckOutDto,
-        isOrganizer: boolean = false
+        organizerId: string,
+        isOrganizer: boolean
     ): Promise<Registration> {
+
         // 1. Find registration
         const registration = await this.registrationRepository.findById(registrationId);
         if (!registration) {
             throw new NotFoundException('Registration not found');
         }
 
-        // 2. Check permission
-        if (!isOrganizer && registration.volunteerId !== checkOutBy) {
-            throw new ForbiddenException('You can only check-out for yourself');
+        // 2. Only organizer is allowed
+        if (!isOrganizer) {
+            throw new ForbiddenException('Only organizers can check-out volunteers');
         }
 
         // 3. Check if can check-out
@@ -43,7 +42,11 @@ export class CheckOutRegistrationUseCase {
         }
 
         // 4. Calculate hours
-        const checkInTime = registration.attendance.checkInTime!;
+        const checkInTime = registration.attendance?.checkInTime;
+        if (!checkInTime) {
+            throw new BadRequestException('Cannot check-out because check-in time is missing');
+        }
+
         const checkOutTime = new Date();
         const actualHours = this.calculateHours(checkInTime, checkOutTime);
 
@@ -53,14 +56,15 @@ export class CheckOutRegistrationUseCase {
             attendance: {
                 ...registration.attendance,
                 checkOutTime,
-                checkOutBy,
-                checkOutMethod: isOrganizer ? 'manual' : 'self',
-                actualHours,
-                notes: dto.notes || registration.attendance.notes,
-            },
+                checkOutBy: organizerId,
+                checkOutMethod: 'manual',
+                actualHours
+            }
         } as any);
 
-        this.logger.log(`Registration checked-out: ${registrationId}, hours: ${actualHours}`);
+        this.logger.log(
+            `Organizer ${organizerId} checked-out registration ${registrationId}, hours: ${actualHours}`
+        );
 
         const updated = await this.registrationRepository.findById(registrationId);
         return updated!;
@@ -68,19 +72,18 @@ export class CheckOutRegistrationUseCase {
 
     async executeByCode(
         registrationCode: string,
-        checkOutBy: string,
-        dto: CheckOutDto
+        organizerId: string
     ): Promise<Registration> {
         const registration = await this.registrationRepository.findByCode(registrationCode);
         if (!registration) {
             throw new NotFoundException('Registration not found with this code');
         }
 
-        return this.execute(registration.id, checkOutBy, dto, true);
+        return this.execute(registration.id, organizerId, true);
     }
 
     private calculateHours(checkInTime: Date, checkOutTime: Date): number {
         const diff = checkOutTime.getTime() - checkInTime.getTime();
-        return Math.round((diff / (1000 * 60 * 60)) * 10) / 10; // Round to 1 decimal
+        return Math.round((diff / (1000 * 60 * 60)) * 10) / 10;
     }
 }

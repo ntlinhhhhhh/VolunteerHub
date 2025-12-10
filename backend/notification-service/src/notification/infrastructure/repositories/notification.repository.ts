@@ -9,6 +9,7 @@ import { INotificationRepository } from '../../domain/repositories/notification.
 import { Notification as NotificationEntity } from '../../domain/entities/notification.entity';
 import { NotificationStatus } from '../../domain/entities/notification-status.enum';
 import { Notification, NotificationSchema } from '../database/schemas/notification.schema';
+import { NotificationChannel } from 'src/notification/domain/entities/notification-channel.enum';
 
 // Mongoose Document type
 export type NotificationDocument = Notification & Document;
@@ -45,14 +46,25 @@ export class NotificationRepository implements INotificationRepository {
         return doc ? this.toEntity(doc) : null;
     }
 
-    async findByUserId(userId: string, limit: number = 20): Promise<NotificationEntity[]> {
+    async findByUserId(
+        userId: string,
+        limit: number = 20,
+        channel?: NotificationChannel
+    ): Promise<NotificationEntity[]> {
+
+        const filter: any = { userId };
+        if (channel) {
+            filter.channel = channel;
+        }
+
         const docs = await this.notificationModel
-            .find({ userId })
+            .find(filter)
             .sort({ createdAt: -1 })
             .limit(limit)
             .exec();
         return docs.map(doc => this.toEntity(doc));
     }
+
 
     async create(data: Partial<NotificationEntity>): Promise<NotificationEntity> {
         const doc = new this.notificationModel(data);
