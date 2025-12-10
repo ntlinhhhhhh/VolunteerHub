@@ -1,0 +1,66 @@
+### Lấy danh sách posts cho một event (public)
+GET http://localhost:8000/posts?eventId=some-event-id&page=1&limit=10
+
+### Lấy post theo ID (public)
+GET http://localhost:8000/posts/some-post-id
+
+### Tạo post mới (authenticated)
+POST http://localhost:8000/posts/event/some-event-id
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
+Content-Type: application/json
+
+{
+  "content": "Đây là nội dung bài post",
+  "images": ["https://example.com/image1.jpg"],
+  "videos": ["https://example.com/video1.mp4"]
+}
+
+### Cập nhật post (authenticated)
+PUT http://localhost:8000/posts/some-post-id
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
+Content-Type: application/json
+
+{
+  "content": "Nội dung đã cập nhật"
+}
+
+### Xóa post (authenticated)
+DELETE http://localhost:8000/posts/some-post-id
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
+
+### Thích/Bỏ thích post (authenticated)
+POST http://localhost:8000/posts/some-post-id/like
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
+
+### Thêm comment vào post (authenticated)
+POST http://localhost:8000/posts/some-post-id/comments
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
+Content-Type: application/json
+
+{
+  "content": "Đây là comment"
+}
+
+### Lấy comments của post (public)
+GET http://localhost:8000/posts/some-post-id/comments?page=1&limit=20
+
+### Cập nhật comment (authenticated)
+PUT http://localhost:8000/posts/some-post-id/comments/some-comment-id
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
+Content-Type: application/json
+
+{
+  "content": "Comment đã cập nhật"
+}
+
+### Xóa comment (authenticated)
+DELETE http://localhost:8000/posts/some-post-id/comments/some-comment-id
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
+
+### Ghim post (admin/event_manager)
+POST http://localhost:8000/posts/some-post-id/pin
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
+
+### Bỏ ghim post (admin/event_manager)
+POST http://localhost:8000/posts/some-post-id/unpin
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
