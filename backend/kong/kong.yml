@@ -45,3 +45,11 @@ services:
           - /registrations
         strip_path: false
 
+  - name: communication-service
+    url: http://communication-service:4010
+    routes:
+      - name: communication-route
+        paths:
+          - /posts
+        strip_path: false
+

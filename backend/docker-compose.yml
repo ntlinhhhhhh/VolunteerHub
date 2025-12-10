@@ -122,22 +122,22 @@ services:
       - rabbitmq
     restart: unless-stopped
   
-  # communication-service:
-  #   build:
-  #     context: .
-  #     dockerfile: communication-service/Dockerfile
-  #   container_name: communication-service
-  #   env_file:
-  #     - ./communication-service/.env
-  #   networks:
-  #     - volunteerhub-net
-  #   ports:
-  #     - "4010:4010"
-  #   depends_on:
-  #     - mongo
-  #     - redis
-  #     - rabbitmq
-  #   restart: unless-stopped
+  communication-service:
+    build:
+      context: .
+      dockerfile: communication-service/Dockerfile
+    container_name: communication-service
+    env_file:
+      - ./communication-service/.env
+    networks:
+      - volunteerhub-net
+    ports:
+      - "4010:4010"
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    restart: unless-stopped
 
 
   kong:
@@ -148,6 +148,7 @@ services:
     depends_on:
       - auth-service
       - user-service
+      - communication-service
     ports:
       - "8000:8000"
       - "8001:8001"
