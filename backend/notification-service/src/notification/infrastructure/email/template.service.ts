@@ -296,7 +296,7 @@ export class TemplateService {
                             <h2>✅ Sự kiện đã được phê duyệt!</h2>
                         </div>
                         <div class="content">
-                            <p>Xin chào <strong>{{managerName}}</strong>,</p>
+                            <p>Xin chào <strong>{{organizerName}}</strong>,</p>
                             <p>Chúc mừng! Sự kiện của bạn đã được Admin phê duyệt và công khai.</p>
                             <div class="event-box">
                                 <h3>{{eventName}}</h3>
@@ -315,7 +315,7 @@ export class TemplateService {
             },
 
             [NotificationType.EVENT_REJECTED]: {
-                subject: '❌ Sự kiện "{{eventName}}" không được phê duyệt',
+                subject: '❌ Sự kiện "{{eventTitle}}" không được phê duyệt',
                 html: `
                 <!DOCTYPE html>
                 <html>
@@ -337,7 +337,7 @@ export class TemplateService {
                         </div>
                         <div class="content">
                             <p>Xin chào <strong>{{managerName}}</strong>,</p>
-                            <p>Rất tiếc, sự kiện <strong>"{{eventName}}"</strong> của bạn chưa được phê duyệt.</p>
+                            <p>Rất tiếc, sự kiện <strong>"{{eventTitle}}"</strong> của bạn chưa được phê duyệt.</p>
                             <div class="event-box">
                                 <p><strong>Lý do:</strong> {{rejectionReason}}</p>
                             </div>
@@ -350,7 +350,7 @@ export class TemplateService {
             },
 
             [NotificationType.EVENT_CANCELLED]: {
-                subject: '⚠️ Sự kiện "{{eventName}}" đã bị hủy',
+                subject: '⚠️ Sự kiện "{{eventTitle}}" đã bị hủy',
                 html: `
                 <!DOCTYPE html>
                 <html>
@@ -686,11 +686,11 @@ export class TemplateService {
                             <h2>🔔 Sự kiện mới cần phê duyệt</h2>
                         </div>
                         <div class="content">
-                            <p>Xin chào Admin / Event Manager,</p>
+                            <p>Xin chào Admin Nguyen Thuy Linh,</p>
                             <p>Có sự kiện mới cần phê duyệt:</p>
                             <div class="alert-box">
-                                <p><strong>Tên sự kiện:</strong> {{eventName}}</p>
-                                <p><strong>Người tạo:</strong> {{managerName}}</p>
+                                <p><strong>Tên sự kiện:</strong> {{eventId}}</p>
+                                <p><strong>Người tạo:</strong> {{organizerName}}</p>
                                 <p><strong>Thời gian:</strong> {{eventDate}}</p>
                             </div>
                             <center>

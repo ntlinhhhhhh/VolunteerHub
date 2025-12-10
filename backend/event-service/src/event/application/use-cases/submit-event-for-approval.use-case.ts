@@ -47,15 +47,7 @@ export class SubmitEventForApprovalUseCase {
         // 5. Update status to PENDING_APPROVAL
         await this.eventRepository.updateStatus(eventId, EventStatus.PENDING_APPROVAL);
 
-        const data = {
-            eventTitle: event.title,
-            organizerName: event.organizerName,
-            organizerEmail: event.organizerEmail,
-            categoryName: event.categoryName,
-            startDate: event.schedule.startDate.toISOString(),
-            location: `${event.location.district}, ${event.location.city}`,
-            maxVolunteers: event.capacity.maxVolunteers,
-        }
+
 
         const result = await firstValueFrom(
             this.authClient.send('auth.search', { role: 'admin' })
@@ -63,6 +55,20 @@ export class SubmitEventForApprovalUseCase {
 
         const admins = result?.data?.users || [];
         console.log('admin', admins)
+
+
+        const data = {
+            eventId: event.id,
+            eventTitle: event.title,
+            eventSlug: event.slug,
+            organizerId: event.organizerId,
+            organizerName: event.organizerName,
+            organizerEmail: event.organizerEmail,
+            eventDate: event.schedule.startDate.toISOString(),
+            eventLocation: `${event.location.address}, ${event.location.district}, ${event.location.city}`,
+            maxVolunteers: event.capacity.maxVolunteers,
+        }
+
 
         await Promise.all(admins.map(admin =>
             this.messagePublisherService.notifyAdminsEventPending(admin.id, admin.email, data)

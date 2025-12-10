@@ -1,11 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
+
 export interface NotificationMessage {
-    type: string;
+    type: NotificationType;
     userId: string;
-    recipient: string;
+    channels: {
+        inApp?: boolean;
+        email?: string;
+        push?: string;
+    };
     data: Record<string, any>;
+}
+
+
+export enum NotificationType {
+    // Communication events
+    NEW_POST_ON_EVENT = 'new_post_on_event',
+    NEW_COMMENT_ON_POST = 'new_comment_on_post',
+    LIKE = 'like',
+    POST_LIKE = 'post_liked',
+    POST_UNLIKE = 'post_unliked',
+
+    // Admin alerts
+    NEW_EVENT_PENDING = 'new_event_pending',
+    NEW_VOLUNTEER_REGISTERED = 'new_volunteer_registered',
 }
 
 @Injectable()
@@ -15,9 +34,11 @@ export class MessagePublisherService {
     async publishPostCreated(postId: string, eventId: string, authorId: string, authorName: string, content: string): Promise<void> {
         // Send to notification service
         const notificationMessage: NotificationMessage = {
-            type: 'new_post_on_event',
+            type: NotificationType.NEW_POST_ON_EVENT,
             userId: authorId,
-            recipient: '', // Will be determined by notification service based on event participants
+            channels: {
+                inApp: true,
+            },
             data: {
                 postId,
                 eventId,
@@ -28,6 +49,7 @@ export class MessagePublisherService {
         await this.amqpConnection.publish('notification_exchange', 'post.created', notificationMessage);
 
         // Send to dashboard service
+        // chi An xử lý
         const dashboardMessage = {
             type: 'new_post_on_event',
             userId: authorId,
@@ -46,9 +68,11 @@ export class MessagePublisherService {
     async publishCommentAdded(postId: string, commentId: string, authorId: string, authorName: string, eventId: string, content: string): Promise<void> {
         // Send to notification service
         const notificationMessage: NotificationMessage = {
-            type: 'new_comment_on_post',
+            type: NotificationType.NEW_COMMENT_ON_POST,
             userId: authorId,
-            recipient: '', // Will be determined by notification service based on post author
+            channels: {
+                inApp: true,
+            },
             data: {
                 postId,
                 commentId,
@@ -59,6 +83,7 @@ export class MessagePublisherService {
         await this.amqpConnection.publish('notification_exchange', 'comment.added', notificationMessage);
 
         // Send to dashboard service
+        // cái này c An xử lý cùng dashboard-service nhé
         const dashboardMessage = {
             type: 'new_comment_on_post',
             userId: authorId,
@@ -75,9 +100,11 @@ export class MessagePublisherService {
 
     async publishLikeToggled(postId: string, userId: string, action: 'like' | 'unlike'): Promise<void> {
         const message: NotificationMessage = {
-            type: action === 'like' ? 'post_liked' : 'post_unliked',
+            type: action === NotificationType.LIKE ? NotificationType.POST_LIKE : NotificationType.POST_UNLIKE,
             userId,
-            recipient: '', // Will be determined by notification service based on post author
+            channels: {
+                inApp: true,
+            },
             data: {
                 postId,
                 action,
