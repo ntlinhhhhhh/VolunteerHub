@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { FaCalendarCheck, FaChartLine, FaClipboardList, FaUsers, FaUser, FaPlus, FaSignOutAlt, FaEye, FaEdit, FaTrash, FaCheckCircle } from 'react-icons/fa';
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { FaCalendarCheck, FaChartLine, FaClipboardList, FaUsers, FaUser, FaPlus, FaSignOutAlt, FaEye, FaEdit, FaTrash, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 
 // --- BẢNG MÀU ĐỒNG BỘ VỚI LOGIN ---
@@ -13,8 +13,17 @@ const COLORS = {
     DANGER: '#EA4335', // Đỏ (Error)
     SUCCESS_ACCENT: '#34A853', // Xanh Lá (Success)
     WARNING: '#FBC02D', // Vàng (Warning)
-    WHITE: '#FFFFFF', 
+    WHITE: '#FFFFFF',
 };
+
+// --- Định nghĩa Interface Category ---
+interface Category {
+    id: string;
+    name: string;
+    icon: string;
+    color: string;
+    description: string;
+}
 
 // --- Dữ liệu mô phỏng Sự kiện QUẢN LÝ ---
 interface ManagerEvent {
@@ -25,14 +34,8 @@ interface ManagerEvent {
     capacity: number;
     startDate: string;
     endDate: string;
+    categoryId: string; // Thêm ID Category
 }
-
-const mockManagerEvents: ManagerEvent[] = [
-    { id: 101, title: 'Annual Tech Summit', status: 'Published', registrations: 150, capacity: 200, startDate: '2026-03-10', endDate: '2026-03-12' },
-    { id: 102, title: 'Local Cleanup Drive', status: 'Draft', registrations: 0, capacity: 50, startDate: '2026-04-05', endDate: '2026-04-05' },
-    { id: 103, title: 'Charity Run 5K', status: 'Published', registrations: 450, capacity: 500, startDate: '2026-05-20', endDate: '2026-05-20' },
-    { id: 104, title: 'Art Workshop Series', status: 'Archived', registrations: 30, capacity: 30, startDate: '2025-11-01', endDate: '2025-11-30' },
-];
 
 interface UserData {
     id: string;
@@ -46,11 +49,21 @@ interface UserData {
     dateOfBirth: string | null;
 }
 
+// Dữ liệu mock được cập nhật để sử dụng Category ID từ API bạn cung cấp
+const mockManagerEvents: ManagerEvent[] = [
+    { id: 101, title: 'Annual Tech Summit (Mock)', status: 'Published', registrations: 150, capacity: 200, startDate: '2026-03-10', endDate: '2026-03-12', categoryId: '6935a50f1a51c72418085e9e' }, // Education
+    { id: 102, title: 'Local Cleanup Drive (Mock)', status: 'Draft', registrations: 0, capacity: 50, startDate: '2026-04-05', endDate: '2026-04-05', categoryId: '6935a50f1a51c72418085e99' }, // Environment
+    { id: 103, title: 'Charity Run 5K (Mock)', status: 'Published', registrations: 450, capacity: 500, startDate: '2026-05-20', endDate: '2026-05-20', categoryId: '6935a50f1a51c72418085ea3' }, // Healthcare
+    { id: 104, title: 'Animal Shelter Day (Mock)', status: 'Archived', registrations: 30, capacity: 30, startDate: '2025-11-01', endDate: '2025-11-30', categoryId: '6935a50f1a51c72418085eb0' }, // Animal Welfare
+];
+
+
 // --- Component Chính Dashboard ---
 const ManagerDashboard: React.FC = () => {
     const navigate = useNavigate();
     const [activeSection, setActiveSection] = useState<'overview' | 'my_events' | 'profile'>('my_events');
     const [user, setUser] = useState<UserData | null>(null);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [showMenu, setShowMenu] = useState(false);
 
     // STATE CHO PROFILE UPDATE
@@ -58,7 +71,32 @@ const ManagerDashboard: React.FC = () => {
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateMessage, setUpdateMessage] = useState<string | null>(null);
 
-    // --- HÀM FETCH USER PROFILE (Dùng chung cho cả Manager và User) ---
+    // Dùng useMemo để tạo Map Categories giúp tra cứu nhanh
+    const categoryMap = useMemo(() => {
+        return categories.reduce((map, category) => {
+            map.set(category.id, category);
+            return map;
+        }, new Map<string, Category>());
+    }, [categories]);
+
+
+    // --- HÀM FETCH CATEGORIES ---
+    const fetchCategories = useCallback(async () => {
+        try {
+            const res = await fetch("http://localhost:8000/categories?activeOnly=true");
+            const result = await res.json();
+            
+            if (res.ok && result.success && result.data) {
+                setCategories(result.data as Category[]);
+            } else {
+                console.error("Failed to fetch categories:", result.message);
+            }
+        } catch (err) {
+            console.error("Network error fetching categories:", err);
+        }
+    }, []);
+
+    // --- HÀM FETCH USER PROFILE ---
     const fetchUserProfile = useCallback(async () => {
         const token = localStorage.getItem("accessToken");
         const defaultAvatarUrl = 'http://localhost:8000/uploads/avatars/default.png';
@@ -69,7 +107,6 @@ const ManagerDashboard: React.FC = () => {
         }
         
         try {
-            // Manager cũng sử dụng endpoint /users/me để lấy hồ sơ của mình
             const res = await fetch("http://localhost:8000/users/me", { headers: { Authorization: `Bearer ${token}` } });
             
             if (res.status === 401) {
@@ -108,10 +145,11 @@ const ManagerDashboard: React.FC = () => {
 
     useEffect(() => {
         fetchUserProfile();
-    }, [fetchUserProfile]);
+        fetchCategories(); // Gọi API lấy Categories khi component mount
+    }, [fetchUserProfile, fetchCategories]);
 
 
-    // --- HÀM XỬ LÝ UPDATE PROFILE (Dùng chung) ---
+    // --- HÀM XỬ LÝ UPDATE PROFILE ---
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({
             ...formData,
@@ -183,7 +221,7 @@ const ManagerDashboard: React.FC = () => {
     const handleLogout = () => {
         localStorage.removeItem("accessToken"); 
         localStorage.removeItem("refreshToken"); 
-        localStorage.removeItem("role"); // Xóa cả role
+        localStorage.removeItem("role"); 
         navigate("/manager/login");
     };
 
@@ -198,6 +236,34 @@ const ManagerDashboard: React.FC = () => {
     const handleCreateEvent = () => alert("Redirecting to Create New Event page...");
     
 
+    // Hàm lấy style cho Status tag
+    const getStatusStyle = (status: ManagerEvent['status']): React.CSSProperties => {
+        switch (status) {
+            case 'Published':
+                return { ...styles.statusTag, backgroundColor: '#E6F4EA', color: COLORS.SUCCESS_ACCENT, border: `1px solid ${COLORS.SUCCESS_ACCENT}` };
+            case 'Draft':
+                return { ...styles.statusTag, backgroundColor: '#F0F7FF', color: COLORS.PRIMARY, border: `1px solid ${COLORS.PRIMARY}` };
+            case 'Archived':
+                return { ...styles.statusTag, backgroundColor: '#FCE8E6', color: COLORS.DANGER, border: `1px solid ${COLORS.DANGER}` };
+            default:
+                return styles.statusTag;
+        }
+    };
+
+    // Hàm lấy Category Icon và Name
+    const getCategoryInfo = (categoryId: string) => {
+        const category = categoryMap.get(categoryId);
+        if (category) {
+            return (
+                <span style={{ color: category.color, fontWeight: '500', display: 'flex', alignItems: 'center' }}>
+                    {category.icon} {category.name}
+                </span>
+            );
+        }
+        return <span style={{ color: COLORS.TEXT_SECONDARY }}>? Unknown Category</span>;
+    };
+
+
     // --- RENDER CONTENT DỰA TRÊN activeSection ---
     const renderContent = () => {
         switch (activeSection) {
@@ -210,22 +276,43 @@ const ManagerDashboard: React.FC = () => {
                             <div style={styles.kpiCard}>
                                 <FaCalendarCheck size={30} style={{ color: COLORS.PRIMARY }} />
                                 <h3 style={styles.kpiTitle}>Total Events</h3>
-                                <p style={styles.kpiValue}>4</p>
+                                <p style={styles.kpiValue}>{mockManagerEvents.length}</p>
                             </div>
                             <div style={styles.kpiCard}>
                                 <FaUsers size={30} style={{ color: COLORS.SUCCESS_ACCENT }} />
                                 <h3 style={styles.kpiTitle}>Total Registrations</h3>
-                                <p style={styles.kpiValue}>630</p>
+                                <p style={styles.kpiValue}>
+                                    {mockManagerEvents.reduce((sum, event) => sum + event.registrations, 0)}
+                                </p>
                             </div>
                             <div style={styles.kpiCard}>
                                 <FaChartLine size={30} style={{ color: COLORS.WARNING }} />
                                 <h3 style={styles.kpiTitle}>Published Events</h3>
-                                <p style={styles.kpiValue}>2</p>
+                                <p style={styles.kpiValue}>
+                                    {mockManagerEvents.filter(e => e.status === 'Published').length}
+                                </p>
                             </div>
                         </div>
                         <div style={{...styles.profileFormCard, marginTop: '30px'}}>
-                            <h2 style={{...styles.contentTitle, fontSize: '20px', marginBottom: '15px'}}>Latest Activity</h2>
-                            <p style={styles.contentSubtitle}>No new notifications.</p>
+                            <h2 style={{...styles.contentTitle, fontSize: '20px', marginBottom: '15px'}}>Event Categories List</h2>
+                            <p style={styles.contentSubtitle}>Active categories fetched from API:</p>
+                            
+                            {categories.length > 0 ? (
+                                <ul style={styles.categoryList}>
+                                    {categories.map(cat => (
+                                        <li key={cat.id} style={{...styles.categoryListItem, borderLeft: `5px solid ${cat.color}`}}>
+                                            <span style={{ fontSize: '20px', marginRight: '10px' }}>{cat.icon}</span>
+                                            <div>
+                                                <span style={{ fontWeight: '600', color: cat.color }}>{cat.name}</span> 
+                                                <span style={{ color: COLORS.TEXT_SECONDARY, fontSize: '12px', marginLeft: '10px' }}>({cat.id})</span>
+                                                <p style={{ margin: '0', fontSize: '13px', color: COLORS.DARK_NAVY, opacity: 0.8 }}>{cat.description}</p>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p style={{ color: COLORS.DANGER }}>Loading categories or none found...</p>
+                            )}
                         </div>
                     </>
                 );
@@ -248,6 +335,7 @@ const ManagerDashboard: React.FC = () => {
                                 <thead>
                                     <tr>
                                         <th style={styles.tableHeader}>Title</th>
+                                        <th style={styles.tableHeader}>Category</th> {/* Thêm cột Category */}
                                         <th style={styles.tableHeader}>Status</th>
                                         <th style={styles.tableHeader}>Dates</th>
                                         <th style={styles.tableHeader}>Registrations</th>
@@ -259,20 +347,20 @@ const ManagerDashboard: React.FC = () => {
                                         <tr key={event.id} style={styles.tableRow}>
                                             <td style={styles.tableCell}>{event.title}</td>
                                             <td style={styles.tableCell}>
+                                                {getCategoryInfo(event.categoryId)}
+                                            </td> {/* Hiển thị Category */}
+                                            <td style={styles.tableCell}>
                                                 <span style={getStatusStyle(event.status)}>{event.status}</span>
                                             </td>
                                             <td style={styles.tableCell}>{event.startDate} to {event.endDate}</td>
                                             <td style={styles.tableCell}>{event.registrations} / {event.capacity}</td>
                                             <td style={styles.tableCellActions}>
-                                                {/* View Button */}
                                                 <button onClick={() => handleViewEvent(event.id)} title="View Details" style={{...styles.actionButton, color: COLORS.PRIMARY, marginRight: '8px'}}>
                                                     <FaEye size={14} />
                                                 </button>
-                                                {/* Edit Button */}
                                                 <button onClick={() => handleEditEvent(event.id)} title="Edit Event" style={{...styles.actionButton, color: COLORS.WARNING, marginRight: '8px'}}>
                                                     <FaEdit size={14} />
                                                 </button>
-                                                {/* Delete Button */}
                                                 <button onClick={() => handleDeleteEvent(event.id)} title="Delete Event" style={{...styles.actionButton, color: COLORS.DANGER}}>
                                                     <FaTrash size={14} />
                                                 </button>
@@ -371,8 +459,10 @@ const ManagerDashboard: React.FC = () => {
                                 <p style={{
                                     ...styles.messageStyle,
                                     color: updateMessage.includes("successfully") ? COLORS.SUCCESS_ACCENT : COLORS.DANGER, 
+                                    backgroundColor: updateMessage.includes("successfully") ? '#E6F4EA' : '#FCE8E6',
+                                    border: `1px solid ${updateMessage.includes("successfully") ? COLORS.SUCCESS_ACCENT : COLORS.DANGER}`,
                                 }}>
-                                    {updateMessage.includes("successfully") ? <FaCheckCircle style={{marginRight: '8px'}}/> : <FaSignOutAlt style={{marginRight: '8px'}}/> }
+                                    {updateMessage.includes("successfully") ? <FaCheckCircle style={{marginRight: '8px'}}/> : <FaExclamationTriangle style={{marginRight: '8px'}}/> }
                                     {updateMessage.replace("🚀 ", "")}
                                 </p>
                             )}
@@ -393,20 +483,6 @@ const ManagerDashboard: React.FC = () => {
         }
     };
     
-    // Hàm lấy style cho Status tag
-    const getStatusStyle = (status: ManagerEvent['status']): React.CSSProperties => {
-        switch (status) {
-            case 'Published':
-                return { ...styles.statusTag, backgroundColor: '#E6F4EA', color: COLORS.SUCCESS_ACCENT, border: `1px solid ${COLORS.SUCCESS_ACCENT}` };
-            case 'Draft':
-                return { ...styles.statusTag, backgroundColor: '#F0F7FF', color: COLORS.PRIMARY, border: `1px solid ${COLORS.PRIMARY}` };
-            case 'Archived':
-                return { ...styles.statusTag, backgroundColor: '#FCE8E6', color: COLORS.DANGER, border: `1px solid ${COLORS.DANGER}` };
-            default:
-                return styles.statusTag;
-        }
-    };
-
     return (
         <div style={styles.dashboardContainer}>
             {/* --- SIDEBAR --- */}
@@ -437,7 +513,7 @@ const ManagerDashboard: React.FC = () => {
                     <div></div> 
                     {user && (
                         <div style={styles.userBox} onClick={() => setShowMenu(!showMenu)}>
-                            <img src={user.avatar || 'http://localhost:8000/uploads/avatars/default.png'} alt="avatar" style={styles.avatar} />
+                            <img src={formData.avatar || 'http://localhost:8000/uploads/avatars/default.png'} alt="avatar" style={styles.avatar} />
                             <span style={styles.userName}>{user.email}</span>
                             {showMenu && (
                                 <div style={styles.dropdown}>
@@ -471,7 +547,7 @@ const styles: { [key: string]: React.CSSProperties } = {
 
     // Sidebar
     sidebar: {
-        width: '280px', // Rộng hơn một chút cho Manager
+        width: '280px', 
         minWidth: '280px',
         backgroundColor: COLORS.WHITE,
         padding: '30px 0',
@@ -483,7 +559,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     },
     sidebarTitle: {
         fontSize: '24px',
-        fontWeight: '500', // Đẹp hơn
+        fontWeight: '500', 
         color: COLORS.DARK_NAVY,
         padding: '0 30px',
         marginBottom: '5px',
@@ -529,7 +605,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     topBar: {
         width: "100%",
         display: "flex",
-        justifyContent: "flex-end", // Chỉ căn phải
+        justifyContent: "flex-end", 
         marginBottom: 30,
         height: '40px',
         alignItems: 'center',
@@ -570,7 +646,6 @@ const styles: { [key: string]: React.CSSProperties } = {
         fontSize: "14px",
         borderRadius: "6px",
         transition: "0.2s",
-        // ':hover': { backgroundColor: '#f5f5f5' }
     },
 
     contentTitle: { fontSize: '26px', fontWeight: '500', color: COLORS.DARK_NAVY, marginBottom: '8px', marginTop: 0 },
@@ -588,6 +663,25 @@ const styles: { [key: string]: React.CSSProperties } = {
     },
     kpiTitle: { fontSize: '15px', color: COLORS.TEXT_SECONDARY, margin: '15px 0 5px 0', fontWeight: '500' },
     kpiValue: { fontSize: '32px', fontWeight: '700', color: COLORS.DARK_NAVY, margin: 0 },
+
+    // Category List Styles
+    categoryList: {
+        listStyle: 'none',
+        padding: '0',
+        margin: '0',
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '15px'
+    },
+    categoryListItem: {
+        padding: '15px',
+        backgroundColor: COLORS.BACKGROUND,
+        borderRadius: '8px',
+        border: `1px solid ${COLORS.BORDER}`,
+        display: 'flex',
+        alignItems: 'center',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+    },
 
     // Header Actions
     headerWithButton: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px' },
@@ -620,7 +714,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     tableRow: {
         borderBottom: `1px solid ${COLORS.BORDER}`,
         transition: 'background-color 0.1s',
-        // ':hover': { backgroundColor: '#f9f9f9' }
     },
     tableCell: {
         padding: '15px 20px', fontSize: '14px', color: COLORS.DARK_NAVY,
@@ -651,7 +744,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         fontWeight: '600',
     },
 
-    // PROFILE STYLES (Được kế thừa)
+    // PROFILE STYLES
     profileContainer: {
         maxWidth: '700px', 
         paddingBottom: '50px',
@@ -725,8 +818,8 @@ const styles: { [key: string]: React.CSSProperties } = {
         padding: '10px 15px',
         borderRadius: '8px',
         fontWeight: '500',
-        backgroundColor: COLORS.BACKGROUND,
         marginBottom: '15px',
+        fontSize: '14px',
     }
 };
 
