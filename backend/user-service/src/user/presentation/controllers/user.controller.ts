@@ -7,6 +7,10 @@ import {
     Request,
     UseGuards,
     Query,
+    Patch,
+    UseInterceptors,
+    Post,
+    UploadedFile,
 } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
@@ -19,9 +23,10 @@ import { RolesGuard } from '@share/auth/roles.guard';
 import { Roles } from '@share/auth/roles.decorator';
 import { ClientProxy } from '@nestjs/microservices';
 import { Inject } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
 import { GetUser } from '@share/auth/get-user.decorator';
 import { User, UserStatus } from 'src/user/domain/entities/user.entity';
+import { UpdateAvatarUseCase } from 'src/user/application/use-cases/update-avatar.use-case';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 
 @Controller('users')
@@ -32,6 +37,7 @@ export class UserController {
         private readonly createUserUseCase: CreateUserUseCase,
         private readonly getUserProfileUseCase: GetUserProfileUseCase,
         private readonly updateUserProfileUseCase: UpdateUserProfileUseCase,
+        private readonly updateAvatarUseCase: UpdateAvatarUseCase,
     ) { }
 
     // volunteer 
@@ -96,6 +102,17 @@ export class UserController {
             data: user?.toSafeObject() || null,
         };
     }
+
+    @Post(':id/avatar')
+    @UseInterceptors(FileInterceptor('file'))
+    async updateAvatar(
+        @Param('id') userId: string,
+        @UploadedFile() file: Express.Multer.File,
+    ) {
+        const avatarPath = await this.updateAvatarUseCase.execute(userId, file);
+        return { success: true, avatar: avatarPath };
+    }
+
     // @Roles('admin')
     // @UseGuards(JwtAuthGuard, RolesGuard)
     // @Get('search')

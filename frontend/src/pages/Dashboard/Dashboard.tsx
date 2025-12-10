@@ -73,47 +73,50 @@ const Dashboard: React.FC = () => {
     //     .then((res) => res.json())
     //     .then((data) => setUser(data))
     //     .catch((err) => console.error(err));
-        
+
     // }, []);
     useEffect(() => {
         const token = localStorage.getItem("accessToken");
-        const defaultAvatarUrl = 'https://via.placeholder.com/32/343a40/ffffff?text=U'; // Avatar mặc định
+        const defaultAvatarUrl = 'http://localhost:8000/uploads/avatars/default.png';
 
         if (!token) {
-            navigate("/login"); 
+            navigate("/login");
             return;
         }
 
         fetch("http://localhost:8000/users/me", { headers: { Authorization: `Bearer ${token}` } })
-        .then((res) => {
-            if (res.status === 401) {
-                localStorage.removeItem("accessToken");
-                localStorage.removeItem("refreshToken");
-                navigate("/login");
-                return null;
-            }
-            return res.json();
-        })
-        .then((result) => {
-            if (!result || !result.success || !result.data) return;
+            .then((res) => {
+                if (res.status === 401) {
+                    localStorage.removeItem("accessToken");
+                    localStorage.removeItem("refreshToken");
+                    navigate("/login");
+                    return null;
+                }
+                return res.json();
+            })
+            .then((result) => {
+                if (!result || !result.success || !result.data) return;
 
-            // --- SỬA ĐỔI QUAN TRỌNG: Lấy user data từ result.data ---
-            const userData = result.data;
+                // --- SỬA ĐỔI QUAN TRỌNG: Lấy user data từ result.data ---
+                const userData = result.data;
 
-            // Xử lý avatar: Gán URL mặc định nếu avatar là null
-            userData.avatar = userData.avatar || defaultAvatarUrl; 
+                // Xử lý avatar: Gán URL mặc định nếu avatar là null
 
-            // Xử lý các trường null khác (đảm bảo chúng không phải là null khi gán)
-            // Đây chỉ là ví dụ để đảm bảo các trường profile có giá trị chuỗi rỗng thay vì null
-            userData.fullName = userData.fullName || '';
-            userData.username = userData.username || '';
-            userData.phoneNumber = userData.phoneNumber || '';
-            userData.bio = userData.bio || '';
-            
-            setUser(userData); // Gán dữ liệu user đã được xử lý
-        })
-        .catch((err) => console.error("Failed to fetch user:", err));
-        
+                userData.avatar = userData.avatar
+                    ? `http://localhost:8000${userData.avatar}` // path lưu trong DB, ví dụ /uploads/avatars/user123.png
+                    : defaultAvatarUrl;
+
+                // Xử lý các trường null khác (đảm bảo chúng không phải là null khi gán)
+                // Đây chỉ là ví dụ để đảm bảo các trường profile có giá trị chuỗi rỗng thay vì null
+                userData.fullName = userData.fullName || '';
+                userData.username = userData.username || '';
+                userData.phoneNumber = userData.phoneNumber || '';
+                userData.bio = userData.bio || '';
+
+                setUser(userData); // Gán dữ liệu user đã được xử lý
+            })
+            .catch((err) => console.error("Failed to fetch user:", err));
+
     }, [navigate]);
 
     const handleLogout = () => {
@@ -127,7 +130,7 @@ const Dashboard: React.FC = () => {
             <div style={styles.sidebar}>
                 <div style={styles.sidebarTitle}>VolunteerHub</div>
                 <div style={styles.sidebarSubtitle}>Event Management</div>
-                
+
                 <div style={styles.navItemContainer}>
                     <div style={{ ...styles.navItem, ...(activeSection === 'overview' ? styles.navItemSelected : {}) }} onClick={() => setActiveSection('overview')}>
                         <FaCompass style={styles.navIcon} /> Overview
@@ -171,7 +174,7 @@ const Dashboard: React.FC = () => {
                     <>
                         <h1 style={styles.contentTitle}>Browse Events</h1>
                         <p style={styles.contentSubtitle}>Discover volunteering events you love</p>
-                        
+
                         <div style={styles.searchBarWrapper}>
                             <div style={styles.searchInputGroup}>
                                 <FaSearch style={styles.searchIcon} />
@@ -197,7 +200,7 @@ const Dashboard: React.FC = () => {
                         <div style={styles.profileFormCard}>
                             <div style={styles.formGroup}>
                                 <label style={styles.label}>Email</label>
-                                <input value={user?.email || ''} disabled style={{...styles.input, background: "#e9ecef"}} />
+                                <input value={user?.email || ''} disabled style={{ ...styles.input, background: "#e9ecef" }} />
                             </div>
 
                             <div style={styles.formGroup}>
@@ -226,8 +229,8 @@ const Dashboard: React.FC = () => {
                 )}
 
                 {/* Các section khác */}
-                {activeSection === 'overview' && <div style={{padding: '20px'}}><h2>Overview Content</h2></div>}
-                {activeSection === 'insights' && <div style={{padding: '20px'}}><h2>Insights Content</h2></div>}
+                {activeSection === 'overview' && <div style={{ padding: '20px' }}><h2>Overview Content</h2></div>}
+                {activeSection === 'insights' && <div style={{ padding: '20px' }}><h2>Insights Content</h2></div>}
             </div>
         </div>
     );
@@ -244,7 +247,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", // Font đẹp hơn chút
         overflow: 'hidden',
     },
-    
+
     // Sidebar
     sidebar: {
         width: '260px',
@@ -324,7 +327,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     },
     avatar: { width: 32, height: 32, borderRadius: "50%", objectFit: "cover" },
     userName: { fontSize: 14, color: "#343a40", fontWeight: '500' },
-    
+
     dropdown: {
         position: "absolute",
         top: "50px",

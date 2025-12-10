@@ -25,6 +25,8 @@ export interface IUserRepository {
 
     update(id: string, data: Partial<User>): Promise<User>;
 
+    updateAvatar(userId: string, avatarPath: string): Promise<User | null>;
+
     updateStatus(id: string, status: UserStatus): Promise<void>;
 
     delete(id: string): Promise<void>;

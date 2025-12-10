@@ -27,7 +27,7 @@ export class User {
     @Prop({ default: null })
     phoneNumber: string;
 
-    @Prop({ default: null })
+    @Prop({ default: '/uploads/avatars/default.png' })
     avatar: string;
 
     @Prop({ default: null })
