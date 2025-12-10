@@ -12,6 +12,7 @@ import ResetPassword from './pages/Password/ResetPassword';
 import LoginAdmin from './pages/Login/LoginAdmin';
 import LoginManager from './pages/Login/LoginManager';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
+import ManagerDashboard from './pages/Dashboard/ManagerDashboard';
 
 function App() {
     return (
@@ -30,6 +31,8 @@ function App() {
                 <Route path="/admin/login" element={<LoginAdmin />} />
                 <Route path="/manager/login" element={<LoginManager />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/manager/dashboard" element={<ManagerDashboard />} />
+
 
                 <Route path="/google/callback" element={<GoogleCallback />} />
             </Routes>

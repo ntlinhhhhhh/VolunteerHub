@@ -6,7 +6,7 @@ Accept: application/json
 
 
 ### Get category by ID (PUBLIC) - lấy thông tin của loại sự kiện theo id (69353497dca8945bda8b8318 là id của loại sự kiện đó)
-GET http://localhost:8000/categories/69353497dca8945bda8b8318
+GET http://localhost:8000/categories/6935a50f1a51c72418085e99
 Accept: application/json
 
 
@@ -17,7 +17,7 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM0NWY0NTlkZWJiMTA0ODM1YzM4ZTkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6bnVsbCwicm9sZUlkIjoiNjkzNDVmNDU5ZGViYjEwNDgzNWMzOGRjIiwicm9sZU5hbWUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbIioiXSwiaWF0IjoxNzY1MDgwNzQzLCJleHAiOjE3NjUwODE2NDN9.GVW_ev_r1FWv7HkwlfuJPqOF5M0vHQmbGz4o24ecoYc
 
 {
-"name": "hehe",
+"name": "Test 1",
 "description": "Sports related events",
 "icon": "i",
 "color": "#FF5733",

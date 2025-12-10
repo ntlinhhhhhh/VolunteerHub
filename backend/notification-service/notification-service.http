@@ -1,3 +1,3 @@
 
 ### lấy danh sách thông báo của 1 user nào đấy
-GET http://localhost:8000/notifications/6939599bd71231bf43067113?channel=in_app
+GET http://localhost:8000/notifications/692fa4815a5338d2c23110b2?channel=in_app
