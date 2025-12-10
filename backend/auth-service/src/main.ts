@@ -40,7 +40,7 @@ async function bootstrap() {
         app.connectMicroservice(microserviceOptions);
         await app.startAllMicroservices();
 
-        const port = parseInt(process.env.PORT || '4000', 10);
+        const port = parseInt(process.env.PORT || '4010', 10);
         await app.listen(port);
 
         logger.log(`✅ Auth Service HTTP API: http://localhost:${port}/api`);

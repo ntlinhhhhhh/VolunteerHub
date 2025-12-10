@@ -81,6 +81,15 @@ export class UserRepository implements IUserRepository {
         return this.toEntity(doc);
     }
 
+    async updateAvatar(userId: string, avatarPath: string): Promise<UserEntity | null> {
+        return this.userModel.findByIdAndUpdate(
+            userId,
+            { avatar: avatarPath },
+            { new: true },
+        );
+    }
+
+
     async updateStatus(id: string, status: UserStatus): Promise<void> {
         await this.userModel.updateOne({ _id: id }, { status }).exec();
     }

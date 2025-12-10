@@ -13,13 +13,14 @@ export class CreateNotificationUseCase {
 
     async execute(dto: CreateNotificationDto): Promise<Notification> {
         const now = new Date();
+
         const notificationData = new Notification(
             '',
             dto.userId,
             dto.type,
             dto.channel,
+            dto.channels || {},
             NotificationStatus.PENDING,
-            dto.recipient,
             dto.subject,
             dto.content,
             dto.data || {},
@@ -28,7 +29,7 @@ export class CreateNotificationUseCase {
             null,
             0,
             now,
-            now,
+            now
         );
 
         return this.notificationRepository.create(notificationData);

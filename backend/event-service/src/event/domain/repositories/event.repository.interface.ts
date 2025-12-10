@@ -9,7 +9,7 @@ export interface EventFilterOptions {
     district?: string;
     featured?: boolean;
     visibility?: 'public' | 'private';
-    search?: string; // search in title, description
+    search?: string;
     startDateFrom?: Date;
     startDateTo?: Date;
     tags?: string[];

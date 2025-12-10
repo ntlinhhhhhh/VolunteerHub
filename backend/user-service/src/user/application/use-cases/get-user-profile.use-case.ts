@@ -1,12 +1,17 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { IUserRepository } from '../../domain/repositories/user.repository.interface';
 import { User, UserStatus } from '../../domain/entities/user.entity';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import { UserWithRoleDto } from '../dto/user-with-role.dto';
 
 @Injectable()
 export class GetUserProfileUseCase {
     constructor(
         @Inject(IUserRepository)
-        private readonly userRepository: IUserRepository
+        private readonly userRepository: IUserRepository,
+        @Inject('AUTH_SERVICE') private authClient: ClientProxy,
+
     ) { }
 
     async execute(userId: string): Promise<User> {
@@ -36,13 +41,75 @@ export class GetUserProfileUseCase {
     async executeAll(
         filters?: {
             status?: UserStatus;
+            role?: string;
             page?: number;
             limit?: number;
-        }): Promise<{ users: User[]; total: number }> {
-        const user = await this.userRepository.findAll(filters);
-        if (!user) {
+        }
+    ): Promise<{ users: UserWithRoleDto[]; total: number }> {
+        const result = await this.userRepository.findAll(filters);
+        let { users, total } = result;
+
+        if (!users || users.length === 0) {
             throw new NotFoundException('User not found');
         }
-        return user;
+
+        try {
+            // Gọi auth-service để lấy role
+            const response = await firstValueFrom(
+                this.authClient.send('auth.getUsersByRole', { role: filters?.role || '' })
+            );
+
+            const roleUsersData = response.data || [];
+            // Map userId => role name
+            const roleMap = new Map<string, string>();
+            roleUsersData.forEach(u => {
+                roleMap.set(u.id, u.role?.name || null);
+            });
+
+            // Map users sang DTO, gán role
+            let usersWithRoles: UserWithRoleDto[] = users.map(user => ({
+                id: user.id,
+                authId: user.authId,
+                email: user.email,
+                username: user.username,
+                fullName: user.fullName,
+                phoneNumber: user.phoneNumber,
+                avatar: user.avatar,
+                address: user.address,
+                bio: user.bio,
+                dateOfBirth: user.dateOfBirth,
+                status: user.status,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                role: roleMap.get(user.authId.toString()) || null,
+            }));
+
+            if (filters?.role) {
+                usersWithRoles = usersWithRoles.filter(u => u.role === filters.role);
+            }
+
+            total = usersWithRoles.length;
+            return { users: usersWithRoles, total };
+
+        } catch (err) {
+            console.error('Failed to fetch users from auth-service', err);
+            const usersWithRoles: UserWithRoleDto[] = users.map(user => ({
+                id: user.id,
+                authId: user.authId,
+                email: user.email,
+                username: user.username,
+                fullName: user.fullName,
+                phoneNumber: user.phoneNumber,
+                avatar: user.avatar,
+                address: user.address,
+                bio: user.bio,
+                dateOfBirth: user.dateOfBirth,
+                status: user.status,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                role: null,
+            }));
+            return { users: usersWithRoles, total: usersWithRoles.length };
+        }
     }
 }

@@ -1,18 +1,18 @@
-import { NotificationType } from './notification-type.enum';
-import { NotificationChannel } from './notification-channel.enum';
 import { NotificationStatus } from './notification-status.enum';
+import { NotificationChannel } from './notification-channel.enum';
+import { NotificationType } from './notification-type.enum';
 
 export class Notification {
     constructor(
         public readonly id: string,
-        public readonly userId: string,           // Người nhận
+        public readonly userId: string,
         public readonly type: NotificationType,
         public readonly channel: NotificationChannel,
+        public readonly channels: { inApp?: boolean; email?: string; push?: string },
         public readonly status: NotificationStatus,
-        public readonly recipient: string,        // address email or phone number
         public readonly subject: string,
         public readonly content: string,
-        public readonly data: Record<string, any>, // Metadata (event name, etc.)
+        public readonly data: Record<string, any>,
         public readonly sentAt: Date | null,
         public readonly readAt: Date | null,
         public readonly errorMessage: string | null,
@@ -39,8 +39,8 @@ export class Notification {
             this.userId,
             this.type,
             this.channel,
+            this.channels,
             NotificationStatus.SENT,
-            this.recipient,
             this.subject,
             this.content,
             this.data,
@@ -59,8 +59,8 @@ export class Notification {
             this.userId,
             this.type,
             this.channel,
+            this.channels,
             NotificationStatus.READ,
-            this.recipient,
             this.subject,
             this.content,
             this.data,

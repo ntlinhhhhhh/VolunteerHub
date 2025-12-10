@@ -9,7 +9,6 @@ import {
 import { IEventRepository } from '../../domain/repositories/event.repository.interface';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { Event } from '../../domain/entities/event.entity';
-import { EventStatus } from '../../domain/entities/event-status.enum';
 
 @Injectable()
 export class UpdateEventUseCase {

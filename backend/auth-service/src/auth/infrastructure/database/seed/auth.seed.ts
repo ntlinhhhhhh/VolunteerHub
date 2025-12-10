@@ -1,40 +1,76 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import { firstValueFrom } from 'rxjs';
+import { ClientProxyFactory, Transport, ClientProxy } from '@nestjs/microservices';
 
 import { Role, RoleSchema } from '../schemas/role.schema';
 import { Auth, AuthSchema } from '../schemas/auth.schema';
 import { Permission } from '../../../domain/entities/permission.enum';
 
+const userClient: ClientProxy = ClientProxyFactory.create({
+    transport: Transport.REDIS,
+    options: {
+        host: process.env.REDIS_HOST || 'redis', // docker service name
+        port: parseInt(process.env.REDIS_PORT || '6379', 10),
+        retryAttempts: 5,
+        retryDelay: 3000,
+    },
+});
+
 async function seed() {
     try {
-        const uri =
-            process.env.MONGO_URI ||
-            'mongodb://volunteer-mongo:27017/auth-service';
-
+        // Connect MongoDB
+        const uri = process.env.MONGO_URI || 'mongodb://volunteer-mongo:27017/auth-service';
+        console.log('Connecting to MongoDB...');
         await mongoose.connect(uri);
         console.log('Connected to MongoDB (auth-service)');
 
         const RoleModel = mongoose.model<Role>('Role', RoleSchema);
         const AuthModel = mongoose.model<Auth>('Auth', AuthSchema);
 
-        await seedRoles(RoleModel);
-        await seedAdmin(RoleModel, AuthModel);
-        await seedEventManager(RoleModel, AuthModel);
+        // Connect userClient
+        await userClient.connect();
 
-        console.log('Auth seeding completed successfully');
+        // Seed roles
+        await seedRoles(RoleModel);
+
+        // Seed users
+        await seedUser(RoleModel, AuthModel, {
+            email: 'nguyenthuylinh26012005@gmail.com',
+            username: 'tlinh',
+            fullName: 'Thuy Linh',
+            roleName: 'admin',
+            password: 'tlinh123',
+        });
+
+        await seedUser(RoleModel, AuthModel, {
+            email: 'duonghoangg261@gmail.com',
+            username: 'duonghoang',
+            fullName: 'Duong Hoang',
+            roleName: 'event_manager',
+            password: 'tlinh123',
+        });
+
+        await seedUser(RoleModel, AuthModel, {
+            email: 'tlinh123@gmail.com',
+            username: 'tlinh123',
+            fullName: 'Nguyen Thuy Linh',
+            roleName: 'volunteer',
+            password: 'tlinh123',
+        });
+
+        console.log('✅ Auth seeding completed successfully');
         process.exit(0);
     } catch (err) {
-        console.error('Auth seeding error:', err);
+        console.error('❌ Auth seeding error:', err);
         process.exit(1);
     }
 }
 
+// === Seed Roles ===
 async function seedRoles(RoleModel: mongoose.Model<Role>) {
     const count = await RoleModel.countDocuments();
-    if (count > 0) {
-        console.log('Roles already exist');
-        return;
-    }
+    if (count > 0) return;
 
     await RoleModel.create([
         {
@@ -86,51 +122,60 @@ async function seedRoles(RoleModel: mongoose.Model<Role>) {
         },
     ]);
 
-    console.log('Roles seeded');
+    console.log('✅ Roles seeded');
 }
 
-async function seedAdmin(RoleModel, AuthModel) {
-    const exists = await AuthModel.findOne({ email: 'tlinh@gmail.com' });
+// === Seed Users ===
+interface UserSeed {
+    email: string;
+    username: string;
+    fullName: string;
+    roleName: string;
+    password: string;
+}
+
+async function seedUser(
+    RoleModel: mongoose.Model<Role>,
+    AuthModel: mongoose.Model<Auth>,
+    userData: UserSeed,
+) {
+    const exists = await AuthModel.findOne({ email: userData.email });
     if (exists) {
-        console.log('Admin already exists');
+        console.log(`⚠️ ${userData.roleName} already exists: ${userData.email}`);
         return;
     }
 
-    const role = await RoleModel.findOne({ name: 'admin' });
-    const passwordHash = await bcrypt.hash('tlinh123', 10);
-
-    await AuthModel.create({
-        email: 'tlinh@gmail.com',
-        passwordHash,
-        roleId: role?._id,
-        isLocked: false,
-    });
-
-    console.log('Admin created: email=tlinh@gmail.com / pass=tlinh123');
-}
-
-async function seedEventManager(RoleModel, AuthModel) {
-    const exists = await AuthModel.findOne({
-        email: 'tlinh_manager@gmail.com',
-    });
-    if (exists) {
-        console.log('Event manager already exists');
+    const role = await RoleModel.findOne({ name: userData.roleName });
+    if (!role) {
+        console.error(`❌ Role ${userData.roleName} missing. Cannot create user.`);
         return;
     }
 
-    const role = await RoleModel.findOne({ name: 'event_manager' });
-    const passwordHash = await bcrypt.hash('tlinh123', 10);
+    const passwordHash = await bcrypt.hash(userData.password, 10);
 
-    await AuthModel.create({
-        email: 'tlinh_manager@gmail.com',
+    const authUser = await AuthModel.create({
+        email: userData.email,
         passwordHash,
-        roleId: role?._id,
+        roleId: role._id,
         isLocked: false,
     });
 
-    console.log(
-        'Event manager created: email=tlinh_manager@gmail.com / pass=tlinh123'
-    );
+    console.log(`✅ ${userData.roleName} created: ${userData.email} / pass=${userData.password}`);
+
+    // Gửi sang user-service
+    try {
+        await firstValueFrom(
+            userClient.send('user.create', {
+                authId: authUser._id.toString(),
+                email: authUser.email,
+                username: userData.username,
+                fullName: userData.fullName,
+            }),
+        );
+        console.log(`✅ User record created in user-service for ${userData.email}`);
+    } catch (err) {
+        console.error(`❌ Failed to create user-service record for ${userData.email}:`, err);
+    }
 }
 
 seed();

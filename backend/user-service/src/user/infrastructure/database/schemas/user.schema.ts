@@ -3,6 +3,7 @@ import { Document, Types } from 'mongoose';
 import { UserStatus } from '../../../domain/entities/user.entity';
 
 export type UserDocument = User & Document;
+export type UserRole = 'admin' | 'volunteer' | 'event_manager';
 
 @Schema({ collection: 'users', timestamps: true })
 export class User {
@@ -12,7 +13,13 @@ export class User {
     @Prop({ required: true, unique: true, lowercase: true, trim: true })
     email: string;
 
-    @Prop({ required: true})
+    // @Prop({ type: String, enum: ['admin', 'event_manager', 'volunteer'], default: 'volunteer' })
+    // role: string;
+
+    // @Prop({ default: true })
+    // isActive: boolean;
+
+    @Prop({ required: true })
     username: string;
 
     @Prop({ required: true })
@@ -21,7 +28,7 @@ export class User {
     @Prop({ default: null })
     phoneNumber: string;
 
-    @Prop({ default: null })
+    @Prop({ default: '/uploads/avatars/default.png' })
     avatar: string;
 
     @Prop({ default: null })
@@ -38,6 +45,9 @@ export class User {
 
     createdAt: Date;
     updatedAt: Date;
+
+    // @Prop({ default: 'volunteer' })
+    // role: UserRole;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

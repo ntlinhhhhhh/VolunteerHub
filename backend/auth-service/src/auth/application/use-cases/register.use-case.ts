@@ -8,6 +8,8 @@ import { AUTH_REPOSITORY } from "../../domain/repositories/auth.repository.inter
 import type { IAuthRepository } from "../../domain/repositories/auth.repository.interface";
 import { ROLE_REPOSITORY } from "../../domain/repositories/role.repository.interface";
 import type { IRoleRepository } from "../../domain/repositories/role.repository.interface";
+import { RegisterDto } from '../dto/register.dto';
+import { MessagePublisherService } from 'src/auth/infrastructure/messaging/message-publisher.service';
 
 @Injectable()
 export class RegisterUseCase {
@@ -15,15 +17,16 @@ export class RegisterUseCase {
         @Inject(AUTH_REPOSITORY) private readonly authRepository: IAuthRepository,
         @Inject(ROLE_REPOSITORY) private readonly roleRepository: IRoleRepository,
         private readonly configService: ConfigService,
-        private readonly jwtService: JwtService
+        private readonly jwtService: JwtService,
+        private readonly messagePublisherService: MessagePublisherService,
     ) { console.log('✅ RegisterUseCase constructor called'); }
 
-    async execute(email: string, password: string): Promise<AuthToken> {
-        if (!Auth.isValidEmail(email)) {
+    async execute(registerDto: RegisterDto): Promise<AuthToken> {
+        if (!Auth.isValidEmail(registerDto.email)) {
             throw new ConflictException('Invalid email format');
         }
 
-        const sanitizedEmail = Auth.sanitizeEmail(email);
+        const sanitizedEmail = Auth.sanitizeEmail(registerDto.email);
 
         const existingUser = await this.authRepository.findByEmail(sanitizedEmail);
         if (existingUser) {
@@ -35,7 +38,7 @@ export class RegisterUseCase {
             throw new NotFoundException('Volunteer role does not exist');
         }
 
-        const passwordHash = await bcrypt.hash(password, 10);
+        const passwordHash = await bcrypt.hash(registerDto.password, 10);
 
         const auth = await this.authRepository.create(
             sanitizedEmail,
@@ -43,6 +46,8 @@ export class RegisterUseCase {
             volunteerRole.id
         );
 
+        await this.messagePublisherService.publishUserRegistered(auth.id, registerDto.email, registerDto.fullName);
+        
         const accessToken = this.jwtService.sign(
             {
                 userId: auth.id,

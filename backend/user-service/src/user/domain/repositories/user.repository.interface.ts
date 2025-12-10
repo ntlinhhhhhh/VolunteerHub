@@ -8,14 +8,7 @@ export interface IUserRepository {
     findByUsername(username: string): Promise<User | null>;
 
     findByEmail(email: string): Promise<User | null>;
-
-    // search(
-    //     keyword: string,
-    //     role?: string,
-    //     page?: number,
-    //     limit?: number
-    // ): Promise<{ users: User[]; total: number }>;
-
+    
     create(data: {
         authId: string;
         email: string;
@@ -24,6 +17,8 @@ export interface IUserRepository {
     }): Promise<User>;
 
     update(id: string, data: Partial<User>): Promise<User>;
+
+    updateAvatar(userId: string, avatarPath: string): Promise<User | null>;
 
     updateStatus(id: string, status: UserStatus): Promise<void>;
 

@@ -13,6 +13,7 @@ import { Notification, NotificationSchema } from './notification/infrastructure/
 import { NotificationController } from './notification/presentation/controllers/notification.controller';
 import { MarkNotificationAsReadUseCase } from './notification/application/use-cases/mark-notification-as-read.use-case';
 import { GetUserNotificationsUseCase } from './notification/application/use-cases/get-user-notifications.use-case';
+import { UpdateNotificationStatusUseCase } from './notification/application/use-cases/update-notification-status.use-case';
 
 
 @Module({
@@ -35,6 +36,7 @@ import { GetUserNotificationsUseCase } from './notification/application/use-case
         NotificationRepository,
         MarkNotificationAsReadUseCase,
         GetUserNotificationsUseCase,
+        UpdateNotificationStatusUseCase,
         { provide: INotificationRepository, useClass: NotificationRepository },
     ],
     exports: [EmailService, NotificationRepository],
