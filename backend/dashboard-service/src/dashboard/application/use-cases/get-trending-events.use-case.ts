@@ -9,7 +9,7 @@ export class GetTrendingEventsUseCase {
     private readonly dashboardRepository: IDashboardRepository
   ) {}
 
-  async execute(limit: number = 10): Promise {
+  async execute(limit: number = 10): Promise<TrendingEvent[]> {
     return this.dashboardRepository.findTrendingEvents(limit);
   }
 }

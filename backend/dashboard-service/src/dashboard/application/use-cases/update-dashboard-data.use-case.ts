@@ -12,7 +12,7 @@ export class UpdateDashboardDataUseCase {
     private readonly dashboardRepository: IDashboardRepository
   ) {}
 
-  async execute(message: DashboardMessage): Promise {
+  async execute(message: DashboardMessage): Promise<void> {
     this.logger.log(`Processing: ${message.type}`);
 
     switch (message.type) {
@@ -42,7 +42,7 @@ export class UpdateDashboardDataUseCase {
     }
   }
 
-  private async handleEventCreated(message: DashboardMessage): Promise {
+  private async handleEventCreated(message: DashboardMessage): Promise<void> {
     const { eventId, eventName, eventDate, eventLocation, managerId, managerName } = message.data;
 
     // Create trending event record
@@ -72,7 +72,7 @@ export class UpdateDashboardDataUseCase {
     await this.dashboardRepository.incrementUserStat(managerId, 'totalEventsCreated');
   }
 
-  private async handleEventApproved(message: DashboardMessage): Promise {
+  private async handleEventApproved(message: DashboardMessage): Promise<void> {
     const { eventId, eventName } = message.data;
 
     // Update event activity timestamp
@@ -91,7 +91,7 @@ export class UpdateDashboardDataUseCase {
     } as any);
   }
 
-  private async handleRegistrationSubmitted(message: DashboardMessage): Promise {
+  private async handleRegistrationSubmitted(message: DashboardMessage): Promise<void> {
     const { eventId, eventName, volunteerId, volunteerName } = message.data;
 
     // Increment registration count
@@ -110,7 +110,7 @@ export class UpdateDashboardDataUseCase {
     } as any);
   }
 
-  private async handleRegistrationAccepted(message: DashboardMessage): Promise {
+  private async handleRegistrationAccepted(message: DashboardMessage): Promise<void> {
     const { eventId, volunteerId } = message.data;
 
     // Update event activity
@@ -132,14 +132,14 @@ export class UpdateDashboardDataUseCase {
     } as any);
   }
 
-  private async handleRegistrationCompleted(message: DashboardMessage): Promise {
+  private async handleRegistrationCompleted(message: DashboardMessage): Promise<void> {
     const { volunteerId } = message.data;
 
     // Update user stats
     await this.dashboardRepository.incrementUserStat(volunteerId, 'totalEventsCompleted');
   }
 
-  private async handleNewPost(message: DashboardMessage): Promise {
+  private async handleNewPost(message: DashboardMessage): Promise<void> {
     const { eventId, postId, authorId, authorName, postTitle } = message.data;
 
     // Update event activity
@@ -161,7 +161,7 @@ export class UpdateDashboardDataUseCase {
     } as any);
   }
 
-  private async handleNewComment(message: DashboardMessage): Promise {
+  private async handleNewComment(message: DashboardMessage): Promise<void> {
     const { eventId, authorId } = message.data;
 
     // Update event activity

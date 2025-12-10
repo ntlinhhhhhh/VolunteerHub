@@ -9,7 +9,7 @@ export class GetUserStatsUseCase {
     private readonly dashboardRepository: IDashboardRepository
   ) {}
 
-  async execute(userId: string): Promise {
+  async execute(userId: string): Promise<UserStats> {
     const stats = await this.dashboardRepository.findUserStats(userId);
     
     if (!stats) {

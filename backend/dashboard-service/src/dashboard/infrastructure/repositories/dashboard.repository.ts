@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { IDashboardRepository } from '../../domain/repositories/dashboard.repository.interface';
 import { TrendingEvent as TrendingEventEntity } from '../../domain/entities/trending-event.entity';
 import { RecentActivity as RecentActivityEntity } from '../../domain/entities/recent-activity.entity';
-import { UserStats as UserStatsEntity } from '../../domain/entities/user-stats.entity';
+import { UserStats as UserStatsEntity } from '../../domain/entities/user-stats.entity'
 import {
   TrendingEvent,
   TrendingEventDocument,
@@ -24,15 +24,15 @@ export class DashboardRepository implements IDashboardRepository {
 
   constructor(
     @InjectModel(TrendingEvent.name)
-    private trendingEventModel: Model,
+    private trendingEventModel: Model<TrendingEventDocument>,
     @InjectModel(RecentActivity.name)
-    private recentActivityModel: Model,
+    private recentActivityModel: Model<RecentActivityDocument>,
     @InjectModel(UserStats.name)
-    private userStatsModel: Model
+    private userStatsModel: Model<UserStatsDocument>
   ) {}
 
   // ========== TRENDING EVENTS ==========
-  async findTrendingEvents(limit: number = 10): Promise {
+  async findTrendingEvents(limit: number = 10): Promise<TrendingEventEntity[]> {
     const docs = await this.trendingEventModel
       .find()
       .sort({ trendScore: -1 })
@@ -42,7 +42,7 @@ export class DashboardRepository implements IDashboardRepository {
     return docs.map(doc => this.toTrendingEventEntity(doc));
   }
 
-  async upsertTrendingEvent(data: Partial): Promise {
+  async upsertTrendingEvent(data: Partial<TrendingEvent>): Promise<TrendingEventEntity> {
     const doc = await this.trendingEventModel
       .findOneAndUpdate(
         { eventId: data.eventId },
@@ -63,7 +63,7 @@ export class DashboardRepository implements IDashboardRepository {
     return this.toTrendingEventEntity(doc);
   }
 
-  async incrementEventRegistrations(eventId: string): Promise {
+  async incrementEventRegistrations(eventId: string): Promise<void> {
     await this.trendingEventModel
       .updateOne(
         { eventId },
@@ -78,7 +78,7 @@ export class DashboardRepository implements IDashboardRepository {
     await this.recalculateTrendScore(eventId);
   }
 
-  async updateEventActivity(eventId: string): Promise {
+  async updateEventActivity(eventId: string): Promise<void> {
     await this.trendingEventModel
       .updateOne(
         { eventId },
@@ -89,7 +89,7 @@ export class DashboardRepository implements IDashboardRepository {
     await this.recalculateTrendScore(eventId);
   }
 
-  private async recalculateTrendScore(eventId: string): Promise {
+  private async recalculateTrendScore(eventId: string): Promise<void> {
     const event = await this.trendingEventModel.findOne({ eventId }).exec();
     if (!event) return;
 
@@ -107,7 +107,7 @@ export class DashboardRepository implements IDashboardRepository {
   }
 
   // ========== RECENT ACTIVITIES ==========
-  async findRecentActivities(limit: number = 20): Promise {
+  async findRecentActivities(limit: number = 20): Promise<RecentActivityEntity[]> {
     const docs = await this.recentActivityModel
       .find()
       .sort({ timestamp: -1 })
@@ -117,7 +117,7 @@ export class DashboardRepository implements IDashboardRepository {
     return docs.map(doc => this.toRecentActivityEntity(doc));
   }
 
-  async createActivity(data: Partial): Promise {
+  async createActivity(data: Partial<RecentActivity>): Promise<RecentActivityEntity> {
     const doc = new this.recentActivityModel({
       type: data.type,
       actorId: data.actorId,
@@ -134,12 +134,12 @@ export class DashboardRepository implements IDashboardRepository {
   }
 
   // ========== USER STATS ==========
-  async findUserStats(userId: string): Promise {
+  async findUserStats(userId: string): Promise<UserStatsEntity | null> {
     const doc = await this.userStatsModel.findOne({ userId }).exec();
     return doc ? this.toUserStatsEntity(doc) : null;
   }
 
-  async upsertUserStats(data: Partial): Promise {
+  async upsertUserStats(data: Partial<UserStats>): Promise<UserStatsEntity> {
     const doc = await this.userStatsModel
       .findOneAndUpdate(
         { userId: data.userId },
@@ -160,7 +160,7 @@ export class DashboardRepository implements IDashboardRepository {
     return this.toUserStatsEntity(doc);
   }
 
-  async incrementUserStat(userId: string, field: string): Promise {
+  async incrementUserStat(userId: string, field: string): Promise<void> {
     const update: any = {
       $inc: { [field]: 1 },
       $set: { lastActivityAt: new Date() },
@@ -170,15 +170,15 @@ export class DashboardRepository implements IDashboardRepository {
   }
 
   // ========== ADMIN OVERVIEW ==========
-  async getTotalEvents(): Promise {
+  async getTotalEvents(): Promise<number> {
     return this.trendingEventModel.countDocuments().exec();
   }
 
-  async getTotalUsers(): Promise {
+  async getTotalUsers(): Promise<number> {
     return this.userStatsModel.countDocuments().exec();
   }
 
-  async getTotalRegistrations(): Promise {
+  async getTotalRegistrations(): Promise<number> {
     const result = await this.trendingEventModel
       .aggregate([
         {

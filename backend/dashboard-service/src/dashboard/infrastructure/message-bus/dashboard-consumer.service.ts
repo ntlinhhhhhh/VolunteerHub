@@ -16,7 +16,7 @@ export class DashboardConsumerService implements OnModuleInit {
     await this.rabbitMQService.consume(this.handleMessage.bind(this));
   }
 
-  private async handleMessage(message: DashboardMessage): Promise {
+  private async handleMessage(message: DashboardMessage): Promise<void> {
     this.logger.log(`Processing dashboard update: ${message.type}`);
 
     try {

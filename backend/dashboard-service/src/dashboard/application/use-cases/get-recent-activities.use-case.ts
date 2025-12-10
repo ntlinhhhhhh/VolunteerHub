@@ -9,7 +9,7 @@ export class GetRecentActivitiesUseCase {
     private readonly dashboardRepository: IDashboardRepository
   ) {}
 
-  async execute(limit: number = 20): Promise {
+  async execute(limit: number = 20): Promise<RecentActivity[]> {
     return this.dashboardRepository.findRecentActivities(limit);
   }
 }

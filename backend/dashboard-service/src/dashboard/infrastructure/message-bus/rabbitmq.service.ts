@@ -50,7 +50,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     this.logger.log(`Queue "${this.queueName}" bound to exchange "${this.exchangeName}"`);
   }
 
-  async consume(handler: (msg: any) => Promise) {
+  async consume(handler: (msg: any) => Promise<void>) {
     if (!this.channel) throw new Error('RabbitMQ channel not ready');
 
     this.channel.prefetch(10);
