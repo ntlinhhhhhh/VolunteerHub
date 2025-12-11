@@ -13,6 +13,7 @@ import LoginAdmin from './pages/Login/LoginAdmin';
 import LoginManager from './pages/Login/LoginManager';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import ManagerDashboard from './pages/Dashboard/ManagerDashboard';
+import EventsApproval from './pages/Dashboard/Admin-Crud/EventsApproval';
 
 function App() {
     return (
@@ -32,6 +33,7 @@ function App() {
                 <Route path="/manager/login" element={<LoginManager />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/manager/dashboard" element={<ManagerDashboard />} />
+                <Route path="/admin/event-approvals" element={<EventsApproval />} />
 
 
                 <Route path="/google/callback" element={<GoogleCallback />} />

@@ -80,43 +80,45 @@ Accept: application/json
 ### Create Event - tạo một sự kiện - có thể do admin hoặc event-manager ( thường là event-manager tạo để admin duyệt)
 ### Authorization: Bearer <event-manager access token>
 ### sau khi gọi --> tạo bản draft --> status: DRAFT
+### Create Event - tạo một sự kiện - tạo bản draft (status: DRAFT)
 POST http://localhost:8000/events
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjNhZTQ0NTA2N2QzYzY3MGZmYjUiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCBNYW5hZ2VyIiwicGhvbmVOdW1iZXIiOiIrODQ5MDk4NzY1NDMiLCJyb2xlSWQiOiI2OTJlYmFhMmRiOGIzOGQ0Zjk5YWViYWYiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjUzNzg5MzQsImV4cCI6MTc2NTM3OTgzNH0.Q-1v7uFN-2bivJwjsyEB7glC2NZkVjRwSzgPVXH3URI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjNhZTQ0NTA2N2QzYzY3MGZmYjUiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCBNYW5hZ2VyIiwicGhvbmVOdW1iZXIiOiIrODQ5MDk4NzY1NDMiLCJyb2xlSWQiOiI2OTJlYmFhMmRiOGIzOGQ0Zjk5YWViYWYiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU0MjQ2NDgsImV4cCI6MTc2NTQyNTU0OH0.X44z2vPCWqP34ciPYEbXiBeEGBeZ_3yfLkPGvefUNrc
 
 {
-"title": "Chủ nhật xanh cùng đại học công nghệ",
-"description": "Cùng nhau dọn dẹp vệ sinh môi trường, làm sạch công viên và bãi biển.",
-"categoryId": "6935a50f1a51c72418085e99",
-"location": {
-    "address": "Xuân Thủy - Hà Nội",
+  "title": "Workshop 'Màu Sắc Cho Cuộc Sống'",
+  "description": "Tổ chức chuỗi buổi vẽ tranh và thủ công cho trẻ em khuyết tật. Mục tiêu là tạo ra môi trường sáng tạo, hỗ trợ phát triển kỹ năng tinh thần và vận động cho các em, sau đó tổ chức bán đấu giá tác phẩm để gây quỹ.",
+  "categoryId": "6935a50f1a51c72418085eaa",
+  "location": {
+    "address": "Trung tâm phục hồi chức năng người khuyết tật Hà Nội",
     "city": "Hà Nội",
-    "district": "Cầu Giấy"
-},
-  "schedule": {
-    "startDate": "2025-12-22T14:00:00.000Z",
-    "endDate": "2025-12-22T17:00:00.000Z",
-  "registrationDeadline": "2025-12-18T13:10:00.000Z" 
+    "district": "Thanh Xuân"
   },
-"requirements": {
+  "schedule": {
+    "startDate": "2026-05-01T09:00:00.000Z",
+    "endDate": "2026-05-03T16:00:00.000Z",
+    "registrationDeadline": "2026-04-15T18:00:00.000Z"
+  },
+  "requirements": {
     "minAge": 16,
-    "maxAge": 60,
-    "skills": ["Làm việc nhóm","Chăm chỉ"],
-    "experience": "Không yêu cầu kinh nghiệm",
+    "maxAge": 50,
+    "skills": ["Kỹ năng hội họa cơ bản", "Kiên nhẫn", "Làm việc với trẻ em đặc biệt"],
+    "experience": "Ưu tiên sinh viên ngành nghệ thuật, sư phạm hoặc công tác xã hội",
     "healthRequirements": "Sức khỏe tốt"
-},
-"capacity": {
-    "maxVolunteers": 50,
-    "minVolunteers": 10
-},
-"roles": [
-    { "name": "Nhóm trưởng", "description": "Điều phối nhóm 5-10 người", "slots": 5 },
-    { "name": "Tình nguyện viên", "description": "Thu gom rác", "slots": 45 }
-],
-"images": [ "https://cdn.example.com/events/green-sunday-cover.jpg" ],
-"videos": [ "https://cdn.example.com/events/green-sunday-cover.jpg" ],
-"visibility": "public",
-"tags": ["xanh", "sinh viên"]
+  },
+  "capacity": {
+    "maxVolunteers": 30,
+    "minVolunteers": 15
+  },
+  "roles": [
+    { "name": "Giáo viên mỹ thuật", "description": "Hướng dẫn kỹ thuật vẽ và tổ chức lớp học", "slots": 5 },
+    { "name": "Trợ lý hỗ trợ cá nhân", "description": "Giúp đỡ các em khuyết tật trong quá trình tham gia", "slots": 20 },
+    { "name": "Hậu cần và Tổ chức đấu giá", "description": "Chuẩn bị vật liệu, địa điểm và tổ chức sự kiện gây quỹ", "slots": 5 }
+  ],
+  "images": [ "https://cdn.example.com/events/art-therapy-cover.jpg" ],
+  "videos": [],
+  "visibility": "public",
+  "tags": ["nghệ thuật", "người khuyết tật", "gây quỹ", "trẻ em"]
 }
 
 ### Update event (ORGANIZER/ADMIN) - có thể sửa khi status là draft -- người tạo mới có thể sửa nhaa
@@ -140,27 +142,25 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM4M
 ### Submit event for approval (ORGANIZER) -- submit để admin duyệt event
 ### Authorization: Bearer <event-manager access token>
 ### status: PENDING_APPROVAL (chờ duyệt)
-POST http://localhost:8000/events/69398bf6084d5268ca006a91/submit
+POST http://localhost:8000/events/693a3ea9ba5788d2304a88b7/submit
 Accept: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjNhZTQ0NTA2N2QzYzY3MGZmYjUiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCBNYW5hZ2VyIiwicGhvbmVOdW1iZXIiOiIrODQ5MDk4NzY1NDMiLCJyb2xlSWQiOiI2OTJlYmFhMmRiOGIzOGQ0Zjk5YWViYWYiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjUzNzg5MzQsImV4cCI6MTc2NTM3OTgzNH0.Q-1v7uFN-2bivJwjsyEB7glC2NZkVjRwSzgPVXH3URI
-
-
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjNhZTQ0NTA2N2QzYzY3MGZmYjUiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCBNYW5hZ2VyIiwicGhvbmVOdW1iZXIiOiIrODQ5MDk4NzY1NDMiLCJyb2xlSWQiOiI2OTJlYmFhMmRiOGIzOGQ0Zjk5YWViYWYiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU0MjQ2NDgsImV4cCI6MTc2NTQyNTU0OH0.X44z2vPCWqP34ciPYEbXiBeEGBeZ_3yfLkPGvefUNrc
 
 # sau khi event-manager submit --> chuyển qua admin để chấp nhận hoặc từ chối
 ### Approve event (ADMIN)
 ### status: APPROVED
 ### Authorization: Bearer <admin access token>
-POST http://localhost:8000/events/69398bf6084d5268ca006a91/approve
+POST http://localhost:8000/events/693a2f11ba5788d2304a8568/approve
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjUyMzU4ZjVhMjMwYWUwNjYwNWQiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MmViYWEyZGI4YjM4ZDRmOTlhZWJhZCIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJ1c2VyOmNyZWF0ZSIsInVzZXI6cmVhZCIsInVzZXI6dXBkYXRlIiwidXNlcjpkZWxldGUiLCJ1c2VyOmxvY2siLCJ1c2VyOnVubG9jayIsImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDp1cGRhdGU6b3duIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6ZGVsZXRlOm93biIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZSIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiY29tbWVudDpkZWxldGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCIsInN5c3RlbTpzZXR0aW5ncyIsInJvbGU6bWFuYWdlIl0sImlhdCI6MTc2NTM3OTI1OSwiZXhwIjoxNzY1MzgwMTU5fQ.T_887f5yqJDAhBoKwCp1LsAkVmz0AxYPMp47i1KKV50
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjUyMzU4ZjVhMjMwYWUwNjYwNWQiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MmViYWEyZGI4YjM4ZDRmOTlhZWJhZCIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJ1c2VyOmNyZWF0ZSIsInVzZXI6cmVhZCIsInVzZXI6dXBkYXRlIiwidXNlcjpkZWxldGUiLCJ1c2VyOmxvY2siLCJ1c2VyOnVubG9jayIsImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDp1cGRhdGU6b3duIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6ZGVsZXRlOm93biIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZSIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiY29tbWVudDpkZWxldGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCIsInN5c3RlbTpzZXR0aW5ncyIsInJvbGU6bWFuYWdlIl0sImlhdCI6MTc2NTQyMTEyNCwiZXhwIjoxNzY1NDIyMDI0fQ.wxbFsdf4wQ4oNIt3Nx0LVWkXYvZA5k5RyIFWa3IriuM
+
 
 ### Reject event (ADMIN) 
 ### status: REJECTED
 ### Authorization: Bearer <admin access token>
-POST http://localhost:8000/events/69383ed9900d6076ff2d819f/reject
+POST http://localhost:8000/events/693a2f11ba5788d2304a8568/reject
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM4M2QyY2EwNDY1Mjc3YjcyNWFmZTciLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCIsInBob25lTnVtYmVyIjoiKzg0OTAxMjM0NTY3Iiwicm9sZUlkIjoiNjkzODNkMmNhMDQ2NTI3N2I3MjVhZmRiIiwicm9sZU5hbWUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbIioiXSwiaWF0IjoxNzY1MjkzNTYxLCJleHAiOjE3NjUyOTQ0NjF9.4MV9iw9hnTMIPDST-rDdXQV3ekaXHFsevVTz0OfEyWo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjUyMzU4ZjVhMjMwYWUwNjYwNWQiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MmViYWEyZGI4YjM4ZDRmOTlhZWJhZCIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJ1c2VyOmNyZWF0ZSIsInVzZXI6cmVhZCIsInVzZXI6dXBkYXRlIiwidXNlcjpkZWxldGUiLCJ1c2VyOmxvY2siLCJ1c2VyOnVubG9jayIsImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDp1cGRhdGU6b3duIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6ZGVsZXRlOm93biIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZSIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiY29tbWVudDpkZWxldGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCIsInN5c3RlbTpzZXR0aW5ncyIsInJvbGU6bWFuYWdlIl0sImlhdCI6MTc2NTQyMTEyNCwiZXhwIjoxNzY1NDIyMDI0fQ.wxbFsdf4wQ4oNIt3Nx0LVWkXYvZA5k5RyIFWa3IriuM
 
 {
     "rejectionReason": "Missing key information"
@@ -169,8 +169,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM4M
 ###
 ### Publish event (ORGANIZER/ADMIN) - sự kiện bắt đầu đăng ký được
 ### Authorization: Bearer <event-maanger access token>
-POST http://localhost:8000/events/69398bf6084d5268ca006a91/publish
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjNhZTQ0NTA2N2QzYzY3MGZmYjUiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCBNYW5hZ2VyIiwicGhvbmVOdW1iZXIiOiIrODQ5MDk4NzY1NDMiLCJyb2xlSWQiOiI2OTJlYmFhMmRiOGIzOGQ0Zjk5YWViYWYiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjUzNzg5MzQsImV4cCI6MTc2NTM3OTgzNH0.Q-1v7uFN-2bivJwjsyEB7glC2NZkVjRwSzgPVXH3URI
+POST http://localhost:8000/events/693a2f11ba5788d2304a8568/publish
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjNhZTQ0NTA2N2QzYzY3MGZmYjUiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCBNYW5hZ2VyIiwicGhvbmVOdW1iZXIiOiIrODQ5MDk4NzY1NDMiLCJyb2xlSWQiOiI2OTJlYmFhMmRiOGIzOGQ0Zjk5YWViYWYiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU0MjA2NjMsImV4cCI6MTc2NTQyMTU2M30.uEKpB6kipuDV2iLa5CCiqD3Iniaqa9S-pZHIQOa-YVs
 
 
 ###
@@ -178,7 +178,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2N
 ### Authorization: Bearer <event-maanger access token>
 POST http://localhost:8000/events/6938303dc915113317c392bd/cancel
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjNhZTQ0NTA2N2QzYzY3MGZmYjUiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCBNYW5hZ2VyIiwicGhvbmVOdW1iZXIiOiIrODQ5MDk4NzY1NDMiLCJyb2xlSWQiOiI2OTJlYmFhMmRiOGIzOGQ0Zjk5YWViYWYiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjUzNzg5MzQsImV4cCI6MTc2NTM3OTgzNH0.Q-1v7uFN-2bivJwjsyEB7glC2NZkVjRwSzgPVXH3URI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM4MjUzMDBjMDlhOGEwY2Y5ZGRmMWMiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCBNYW5hZ2VyIiwicGhvbmVOdW1iZXIiOiIrODQ5MDk4NzY1NDMiLCJyb2xlSWQiOiI2OTM4MjUzMDBjMDlhOGEwY2Y5ZGRmMTEiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjUyOTEyMjQsImV4cCI6MTc2NTI5MjEyNH0.x4G_4grxyLkG1CHN0qjEHPit3Bdd5Nyezn0EgPrTIH4
 
 {
 "cancellationReason": "Unexpected situation"
