@@ -17,17 +17,6 @@ const COLORS = {
     INFO: '#4CB7A5', 
 };
 
-const EVENT_STATUS_COLORS: { [key: string]: string } = {
-    'draft': COLORS.TEXT_SECONDARY,
-    'pending_approval': COLORS.WARNING,
-    'approved': COLORS.INFO,
-    'published': COLORS.PRIMARY,
-    'ongoing': COLORS.SECONDARY,
-    'completed': COLORS.SUCCESS_ACCENT,
-    'cancelled': COLORS.DANGER,
-    'rejected': COLORS.DANGER,
-};
-
 
 interface DashboardStyles {
     [key: string]: React.CSSProperties;
@@ -52,6 +41,13 @@ const EventsApproval: React.FC = () => {
     const [actionMessage, setActionMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentAction, setCurrentAction] = useState<'approve' | 'reject' | null>(null);
+    const [currentEventId, setCurrentEventId] = useState<string | null>(null);
+    const [currentEventTitle, setCurrentEventTitle] = useState<string | null>(null); // State MỚI: LƯU TÊN SỰ KIỆN
+    const [rejectionReason, setRejectionReason] = useState<string>(''); 
+    const [rejectionError, setRejectionError] = useState<string | null>(null);
+    
     const navigate = useNavigate();
 
     const fetchPendingEvents = useCallback(async (token: string) => {
@@ -116,35 +112,52 @@ const EventsApproval: React.FC = () => {
         fetchPendingEvents(token);
     }, [refreshKey, fetchPendingEvents]); 
 
-    const handleApproveReject = async (eventId: string, action: 'approve' | 'reject') => {
+    const handleApproveReject = (eventId: string, action: 'approve' | 'reject') => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
             setActionMessage({ type: 'error', text: "Token not found. Please log in again." });
             return;
         }
 
-        const confirmMessage = `Bạn có chắc chắn muốn ${action === 'approve' ? 'DUYỆT' : 'TỪ CHỐI'} sự kiện này (ID: ${eventId})?`;
-        
-        if (!window.confirm(confirmMessage)) {
-            return;
-        }
-        
-        const endpoint = `http://localhost:8000/events/${eventId}/${action}`;
-        
-        let reason: string | null | undefined;
+        const eventToApprove = pendingEvents.find(e => e.id === eventId);
+        const eventTitle = eventToApprove ? eventToApprove.title : 'Sự kiện không tên';
+
+        setCurrentEventId(eventId);
+        setCurrentAction(action);
+        setCurrentEventTitle(eventTitle); 
+        setRejectionReason(''); // Reset lý do từ chối
+        setRejectionError(null);
+        setIsModalOpen(true);
+    };
+    
+    const confirmAction = async () => {
+        if (!currentEventId || !currentAction) return;
+
+        const eventId = currentEventId;
+        const action = currentAction;
+        const token = localStorage.getItem('accessToken'); 
+
+        let reasonToSubmit: string | undefined;
         let body: any = {};
         
         if (action === 'reject') {
-            reason = prompt("Vui lòng nhập lý do từ chối:");
-            if (!reason || reason.trim() === '') {
-                 setActionMessage({ type: 'error', text: "Phải có lý do từ chối." });
-                 return;
+            reasonToSubmit = rejectionReason.trim();
+            if (!reasonToSubmit || reasonToSubmit.length < 5) { 
+                setRejectionError("Lý do từ chối phải có ít nhất 5 ký tự.");
+                return; 
             }
-            body = { rejectionReason: reason };
+            body = { rejectionReason: reasonToSubmit };
         }
-
-        setLoading(true);
-
+        
+        setIsModalOpen(false);
+        setCurrentAction(null);
+        setCurrentEventId(null);
+        setCurrentEventTitle(null);
+        setRejectionReason('');
+        setRejectionError(null);
+        setLoading(true); 
+        const endpoint = `http://localhost:8000/events/${eventId}/${action}`;
+        
         try {
             const res = await fetch(endpoint, {
                 method: "POST", 
@@ -159,25 +172,34 @@ const EventsApproval: React.FC = () => {
 
             if (res.ok && result.success) {
                 const message = action === 'approve' 
-                    ? `✅ Sự kiện đã được DUYỆT thành công!` 
-                    : `❌ Sự kiện đã bị TỪ CHỐI thành công!`;
+                    ? `Sự kiện ID ${eventId} đã được DUYỆT thành công!` 
+                    : `Sự kiện ID ${eventId} đã bị TỪ CHỐI thành công!`;
                 setActionMessage({ type: 'success', text: message });
 
                 setPendingEvents(prevEvents => prevEvents.filter(e => e.id !== eventId));
-                
             } else {
                 setActionMessage({ 
                     type: 'error', 
-                    text: `❌ Thao tác ${action} thất bại: ${result.message || res.statusText || 'Lỗi không xác định.'}` 
+                    text: `Thao tác ${action} thất bại: ${result.message || res.statusText || 'Lỗi không xác định.'}` 
                 });
             }
         } catch (err) {
             console.error(err);
-            setActionMessage({ type: 'error', text: "❌ Lỗi mạng trong quá trình thay đổi trạng thái." });
+            setActionMessage({ type: 'error', text: "Lỗi mạng trong quá trình thay đổi trạng thái." });
         } finally {
             setLoading(false);
         }
     };
+    
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setCurrentAction(null);
+        setCurrentEventId(null);
+        setCurrentEventTitle(null);
+        setRejectionReason('');
+        setRejectionError(null);
+    };
+
     
     const handleRefresh = useCallback(() => {
         setRefreshKey(prevKey => prevKey + 1);
@@ -294,6 +316,64 @@ const EventsApproval: React.FC = () => {
         );
     };
 
+    const renderConfirmationModal = () => {
+        if (!isModalOpen || !currentAction) return null;
+
+        const isReject = currentAction === 'reject';
+        const title = isReject ? "Xác nhận TỪ CHỐI Sự kiện" : "Xác nhận DUYỆT Sự kiện";
+        
+        const eventDisplay = currentEventTitle || `ID: ${currentEventId}`; 
+        
+        const message = isReject 
+            ? `Bạn sắp TỪ CHỐI sự kiện: "${eventDisplay}". Vui lòng nhập lý do:`
+            : `Bạn có chắc chắn muốn DUYỆT sự kiện: "${eventDisplay}"?`;
+            
+        const confirmButtonColor = isReject ? COLORS.DANGER : COLORS.SUCCESS_ACCENT;
+        // Kiểm tra độ dài lý do tối thiểu 5 ký tự
+        const isConfirmDisabled = isReject && rejectionReason.trim().length < 5;
+
+        return (
+            <div style={styles.modalOverlay}>
+                <div style={styles.modalContent}>
+                    <h3 style={styles.modalTitle}>{title}</h3>
+                    <p style={styles.modalMessage}>{message}</p>
+                    
+                    {isReject && (
+                        <div style={{marginBottom: '15px'}}>
+                            <textarea
+                                style={styles.rejectionTextarea}
+                                value={rejectionReason}
+                                onChange={(e) => {
+                                    setRejectionReason(e.target.value);
+                                    if (rejectionError) setRejectionError(null);
+                                }}
+                                placeholder="Lý do từ chối (bắt buộc, tối thiểu 5 ký tự)..."
+                                rows={4}
+                            />
+                            {rejectionError && <p style={styles.rejectionErrorText}>{rejectionError}</p>}
+                        </div>
+                    )}
+                    
+                    <div style={styles.modalActions}>
+                        <button 
+                            onClick={closeModal} 
+                            style={styles.modalCancelButton}
+                        >
+                            Hủy bỏ
+                        </button>
+                        <button 
+                            onClick={confirmAction} 
+                            style={{...styles.modalConfirmButton, backgroundColor: confirmButtonColor}}
+                            disabled={isConfirmDisabled}
+                        >
+                            <FaCheckCircle size={14} style={{marginRight: '5px'}}/> Xác nhận {isReject ? 'Từ chối' : 'Duyệt'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
 
     return (
         <div style={styles.dashboardContainer}>
@@ -388,7 +468,6 @@ const EventsApproval: React.FC = () => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        {/* Nút Filter */}
                         <button style={styles.filterButton}>
                             <FaFilter style={{marginRight: '5px'}}/> Filter
                         </button>
@@ -398,6 +477,9 @@ const EventsApproval: React.FC = () => {
                 </div>
                 
             </div>
+            
+            {renderConfirmationModal()} 
+            
         </div>
     );
 };
@@ -504,7 +586,6 @@ const styles: DashboardStyles = {
         backgroundColor: '#FDE7E7', color: COLORS.DANGER, border: `1px solid ${COLORS.DANGER}`,
     },
     
-    // ACTION BUTTONS
     actionButtonContainerVertical: {
         display: 'flex',
         flexDirection: 'column',
@@ -530,6 +611,56 @@ const styles: DashboardStyles = {
         maxWidth: '120px', 
         justifyContent: 'center',
         ...({ ':hover': { backgroundColor: '#C73327' } } as React.CSSProperties),
+    },
+
+    modalOverlay: {
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.6)', 
+        display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000,
+    },
+    modalContent: {
+        backgroundColor: COLORS.CARD_BG, 
+        padding: '30px 48px', 
+        borderRadius: '10px', 
+        width: '90%',
+        maxWidth: '450px', 
+        boxShadow: '0 15px 30px rgba(0,0,0,0.2)', 
+    },
+    modalTitle: {
+        fontSize: '22px', fontWeight: '600', color: COLORS.PRIMARY, marginBottom: '15px', 
+    },
+    modalMessage: {
+        fontSize: '15px', color: COLORS.TEXT_SECONDARY, marginBottom: '20px', lineHeight: '1.5',
+    },
+    rejectionTextarea: {
+        width: '100%', 
+        padding: '12px', 
+        border: `1px solid ${COLORS.BORDER}`, 
+        borderRadius: '6px', // Bo tròn nhẹ
+        resize: 'vertical',
+        fontSize: '14px', 
+        minHeight: '80px',
+        backgroundColor: COLORS.WHITE, // Nền trắng
+        color: COLORS.DARK_NAVY,
+        transition: 'border-color 0.2s, box-shadow 0.2s',
+        ...({ ':focus': { borderColor: COLORS.PRIMARY, outline: 'none', boxShadow: '0 0 0 1px ' + COLORS.PRIMARY } } as React.CSSProperties),
+    },
+    rejectionErrorText: {
+        color: COLORS.DANGER, fontSize: '12px', marginTop: '5px', margin: 0,
+    },
+    modalActions: {
+        display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px',
+    },
+    modalCancelButton: {
+        padding: '10px 15px', backgroundColor: COLORS.BACKGROUND, color: COLORS.DARK_NAVY, border: `1px solid ${COLORS.BORDER}`, borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px', transition: 'background-color 0.2s',
+        ...({ ':hover': { backgroundColor: '#E0E0E0' } } as React.CSSProperties),
+    },
+    modalConfirmButton: {
+        padding: '10px 15px', color: COLORS.WHITE, border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px', display: 'inline-flex', alignItems: 'center',
+        transition: 'background-color 0.2s, opacity 0.2s',
+        ...({ 
+            ':hover': { opacity: 0.9 },
+            ':disabled': { opacity: 0.6, cursor: 'not-allowed', backgroundColor: COLORS.TEXT_SECONDARY } 
+        } as React.CSSProperties),
     },
 };
 
