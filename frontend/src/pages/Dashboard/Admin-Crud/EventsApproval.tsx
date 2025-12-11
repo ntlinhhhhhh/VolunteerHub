@@ -2,20 +2,19 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FaUsers, FaCalendarAlt, FaFilter, FaSearch, FaChevronRight, FaSync, FaArrowAltCircleLeft, FaInfoCircle, FaCheckCircle, FaTimesCircle, FaClock, FaClipboardList, FaMapMarkerAlt, FaShieldAlt } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 
-// Định nghĩa màu sắc theo phong cách hiện đại, tương tự Google/Material Design
 const COLORS = {
-    PRIMARY: '#1A73E8', // Blue
-    SECONDARY: '#4285F4', // Light Blue
-    DARK_NAVY: '#202124', // Dark Text
-    BACKGROUND: '#F8F9FA', // Light Gray Background
-    CARD_BG: '#FFFFFF', // White Card Background
-    BORDER: '#EBEBEB', // Light Border
-    SUCCESS_ACCENT: '#34A853', // Green
-    DANGER: '#EA4335', // Red
-    TEXT_SECONDARY: '#5F6368', // Gray Text
+    PRIMARY: '#1A73E8', 
+    SECONDARY: '#4285F4', 
+    DARK_NAVY: '#202124', 
+    BACKGROUND: '#F8F9FA', 
+    CARD_BG: '#FFFFFF', 
+    BORDER: '#EBEBEB', 
+    SUCCESS_ACCENT: '#34A853', 
+    DANGER: '#EA4335', 
+    TEXT_SECONDARY: '#5F6368', 
     WHITE: '#FFFFFF',
-    WARNING: '#F7B200', // Yellow/Orange
-    INFO: '#4CB7A5', // Teal/Cyan
+    WARNING: '#F7B200', 
+    INFO: '#4CB7A5', 
 };
 
 const EVENT_STATUS_COLORS: { [key: string]: string } = {
@@ -55,7 +54,6 @@ const EventsApproval: React.FC = () => {
 
     const navigate = useNavigate();
 
-    // 1. Logic Fetch Sự kiện cần duyệt 
     const fetchPendingEvents = useCallback(async (token: string) => {
         setLoading(true);
         setError(null); 
@@ -118,7 +116,6 @@ const EventsApproval: React.FC = () => {
         fetchPendingEvents(token);
     }, [refreshKey, fetchPendingEvents]); 
 
-    // 2. Logic Duyệt/Từ chối Sự kiện 
     const handleApproveReject = async (eventId: string, action: 'approve' | 'reject') => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
@@ -182,7 +179,6 @@ const EventsApproval: React.FC = () => {
         }
     };
     
-    // 3. Logic Refresh & Message
     const handleRefresh = useCallback(() => {
         setRefreshKey(prevKey => prevKey + 1);
         setLoading(true);
@@ -205,7 +201,6 @@ const EventsApproval: React.FC = () => {
         return {};
     }
 
-    // 4. Logic Search
     const filteredEvents = useMemo(() => {
         if (!searchTerm) return pendingEvents;
         const lowerCaseSearchTerm = searchTerm.toLowerCase();
@@ -217,7 +212,6 @@ const EventsApproval: React.FC = () => {
     }, [pendingEvents, searchTerm]);
 
     
-    // 5. Render Table
     const renderEventsApprovalTable = () => {
         if (loading && pendingEvents.length === 0) return <p style={{ textAlign: 'center', padding: '20px', color: COLORS.TEXT_SECONDARY }}>Loading events...</p>;
         if (error && pendingEvents.length === 0) return <p style={{ color: COLORS.DANGER, textAlign: 'center', padding: '20px' }}>Error fetching data: {error}</p>;
@@ -261,35 +255,36 @@ const EventsApproval: React.FC = () => {
                                 </td>
                                 
                                 <td style={{...styles.td, textAlign: 'center'}}>
-                                    {/* Nút VIEW: Icon View + Margin Right */}
-                                    <button 
-                                        onClick={() => navigate(`/admin/events/${event.id}/view`)} 
-                                        title="View Event Details"
-                                        style={{...styles.iconActionButton, color: COLORS.PRIMARY, marginRight: '10px'}} // ĐÃ THÊM MARGIN Ở ĐÂY
-                                        disabled={loading}
-                                    >
-                                        <FaInfoCircle size={16} /> 
-                                    </button>
-                                    
-                                    {/* Nút APPROVE */}
-                                    <button 
-                                        style={{...styles.approveButton}}
-                                        onClick={() => handleApproveReject(event.id, 'approve')} 
-                                        title="Approve Event"
-                                        disabled={loading}
-                                    >
-                                        <FaCheckCircle size={14} style={{marginRight: '5px'}}/> Approve
-                                    </button>
-                                    
-                                    {/* Nút REJECT + Margin Left */}
-                                    <button 
-                                        style={{...styles.rejectButton, marginLeft: '10px'}} // ĐÃ THÊM MARGIN Ở ĐÂY
-                                        onClick={() => handleApproveReject(event.id, 'reject')} 
-                                        title="Reject Event"
-                                        disabled={loading}
-                                    >
-                                        <FaTimesCircle size={14} style={{marginRight: '5px'}}/> Reject
-                                    </button>
+                                    <div style={styles.actionButtonContainerVertical}>
+                                        
+                                        <button 
+                                            onClick={() => navigate(`/admin/events/${event.id}/view`)} 
+                                            title="View Event Details"
+                                            style={{...styles.iconActionButton, color: COLORS.PRIMARY}} 
+                                            disabled={loading}
+                                        >
+                                            <FaInfoCircle size={16} /> 
+                                        </button>
+                                        
+                                        <button 
+                                            style={{...styles.approveButton}}
+                                            onClick={() => handleApproveReject(event.id, 'approve')} 
+                                            title="Approve Event"
+                                            disabled={loading}
+                                        >
+                                            <FaCheckCircle size={14} style={{marginRight: '5px'}}/> Approve
+                                        </button>
+                                        
+                                        <button 
+                                            style={{...styles.rejectButton}} 
+                                            onClick={() => handleApproveReject(event.id, 'reject')} 
+                                            title="Reject Event"
+                                            disabled={loading}
+                                        >
+                                            <FaTimesCircle size={14} style={{marginRight: '5px'}}/> Reject
+                                        </button>
+                                        
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -312,7 +307,6 @@ const EventsApproval: React.FC = () => {
                 }
             `}</style>
             
-            {/* Sidebar (Giữ nguyên) */}
             <div style={styles.sidebar}>
                 <h2 style={styles.logo}>Kindle</h2>
                 <div style={styles.navSectionTitle}>MENU</div>
@@ -354,7 +348,6 @@ const EventsApproval: React.FC = () => {
             </div>
 
 
-            {/* Main Content */}
             <div style={styles.mainContent}>
                 <div style={styles.headerRow}>
                     <h1 style={styles.mainTitle}><FaClipboardList size={28} style={{marginRight: '10px', color: COLORS.PRIMARY}}/> Event Approvals</h1>
@@ -371,7 +364,6 @@ const EventsApproval: React.FC = () => {
                 </div>
                 <p style={styles.mainSubtitle}>Review and manage events awaiting approval.</p>
                 
-                {/* Action Message Bar */}
                 {actionMessage && (
                     <div style={{...styles.actionMessageBar, ...getActionMessageStyle()}}>
                         {actionMessage.text}
@@ -379,15 +371,12 @@ const EventsApproval: React.FC = () => {
                 )}
 
 
-                {/* CONTENT: Event Approval Table (SỬ DỤNG CARD) */}
                 <div style={{...styles.dataCard, marginTop: '20px'}}>
                     
-                    {/* Tiêu đề riêng biệt, có marginBottom nhỏ */}
                     <h3 style={{...styles.dataCardTitle, marginBottom: '10px'}}>
                         <FaCalendarAlt size={20} style={{marginRight: '10px', color: COLORS.PRIMARY}}/> Pending Events ({pendingEvents.length})
                     </h3>
                     
-                    {/* Table Toolbar đã được di chuyển xuống và có thêm margin-top và marginBottom lớn hơn */}
                     <div style={{...styles.tableToolbar, marginTop: '15px', marginBottom: '25px'}}>
                         <div style={styles.searchWrapper}>
                             <FaSearch style={styles.searchIcon} />
@@ -451,18 +440,15 @@ const styles: DashboardStyles = {
         ...({ ':hover': { backgroundColor: COLORS.BORDER } } as React.CSSProperties),
     },
     
-    // DATA CARD VÀ TABLE - TÁCH BIỆT RÕ RÀNG
     dataCard: {
         backgroundColor: COLORS.CARD_BG, borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', 
         padding: '30px', 
         marginBottom: '30px', 
     },
     dataCardTitle: {
-        // Đã sửa: Bỏ marginBottom 25px cũ, chỉ giữ margin 0 và sẽ điều khiển khoảng cách bằng margin-top/bottom trong JSX
         fontSize: '20px', fontWeight: '500', color: COLORS.DARK_NAVY, margin: 0, display: 'flex', alignItems: 'center',
     },
     tableToolbar: {
-        // Đã sửa: Bỏ marginBottom 20px cũ, sẽ dùng margin trong JSX cho khoảng cách linh hoạt hơn
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
     },
     searchWrapper: {
@@ -499,7 +485,6 @@ const styles: DashboardStyles = {
         ...({ ':hover': { backgroundColor: '#F0F3F6' } } as React.CSSProperties),
     },
 
-    // EMPTY STATE - Giao diện thân thiện hơn
     emptyState: {
         textAlign: 'center', 
         padding: '40px', 
@@ -509,7 +494,6 @@ const styles: DashboardStyles = {
         border: `1px dashed ${COLORS.BORDER}`,
     },
 
-    // ACTION MESSAGE BAR - Thông báo rõ ràng hơn
     actionMessageBar: {
         padding: '15px', borderRadius: '4px', marginBottom: '20px', fontWeight: '500', fontSize: '15px',
     },
@@ -521,16 +505,30 @@ const styles: DashboardStyles = {
     },
     
     // ACTION BUTTONS
+    actionButtonContainerVertical: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     iconActionButton: { 
         background: 'none', border: 'none', cursor: 'pointer', padding: '5px', borderRadius: '4px', transition: 'background-color 0.2s, color 0.2s',
+        marginBottom: '5px', 
         ...({ ':hover': { backgroundColor: '#E0E0E0' } } as React.CSSProperties),
     },
     approveButton: {
         padding: '8px 12px', backgroundColor: COLORS.SUCCESS_ACCENT, color: COLORS.WHITE, border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '13px', display: 'inline-flex', alignItems: 'center', transition: 'background-color 0.2s',
+        marginBottom: '10px', 
+        width: '100%', 
+        maxWidth: '120px', 
+        justifyContent: 'center',
         ...({ ':hover': { backgroundColor: '#2B8C44' } } as React.CSSProperties),
     },
     rejectButton: {
         padding: '8px 12px', backgroundColor: COLORS.DANGER, color: COLORS.WHITE, border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '13px', display: 'inline-flex', alignItems: 'center', transition: 'background-color 0.2s',
+        width: '100%', 
+        maxWidth: '120px', 
+        justifyContent: 'center',
         ...({ ':hover': { backgroundColor: '#C73327' } } as React.CSSProperties),
     },
 };
