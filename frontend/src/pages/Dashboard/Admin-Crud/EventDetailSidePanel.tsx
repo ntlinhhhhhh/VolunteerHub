@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FaTimes, FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaInfoCircle, FaClock, FaTag, FaCheckCircle, FaUserCircle } from 'react-icons/fa';
+import { FaTimes, FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaInfoCircle, FaClock, FaTag, FaCheckCircle, FaUserCircle, FaExclamationTriangle } from 'react-icons/fa';
 
 const COLORS = {
     PRIMARY: '#1A73E8', 
@@ -7,7 +7,8 @@ const COLORS = {
     CARD_BG: '#FFFFFF', 
     BORDER: '#EBEBEB', 
     TEXT_SECONDARY: '#5F6368', 
-    DANGER: '#EA4335', 
+    DANGER: '#EA4335',
+    WARNING: '#F7B200', 
 };
 
 interface DetailedEvent {
@@ -22,7 +23,7 @@ interface DetailedEvent {
     capacity: number;
     requirements: string;
     status: string;
-    createdAt: string;
+    createdAt: string; 
 }
 
 interface EventDetailSidePanelProps {
@@ -52,6 +53,25 @@ const EventDetailSidePanel: React.FC<EventDetailSidePanelProps> = ({ eventId, on
     const [eventDetail, setEventDetail] = useState<DetailedEvent | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const formatSubmittedDate = (dateString: string | undefined): string => {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) {
+                return 'Invalid Date';
+            }
+            return date.toLocaleString('vi-VN', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        } catch (e) {
+            return 'Invalid Date Format';
+        }
+    };
 
     const fetchEventDetails = useCallback(async (id: string) => {
         setLoading(true);
@@ -84,12 +104,12 @@ const EventDetailSidePanel: React.FC<EventDetailSidePanelProps> = ({ eventId, on
                     organizerName: event.organizerName || event.organizer?.name || 'Unknown Organizer',
                     organizerEmail: event.organizerEmail || event.organizer?.email || 'N/A',
                     categoryName: event.categoryName || 'N/A',
-                    capacity: event.capacity?.max || 0,
-                    requirements: event.requirements?.description || 'No specific requirements.',
+                    capacity: event.capacity?.maxVolunteers || 0, // Cập nhật capacity từ maxVolunteers
+                    requirements: event.requirements?.experience || 'No specific requirements.',
                     status: event.status || 'N/A',
                     eventDate: event.schedule?.startDate ? new Date(event.schedule.startDate).toLocaleDateString('vi-VN') : 'N/A',
                     location: event.location?.address || 'Online',
-                    createdAt: new Date(event.createdAt).toLocaleString('vi-VN'),
+                    createdAt: formatSubmittedDate(event.createdAt), // DÙNG HÀM FORMAT DATE
                 };
                 setEventDetail(detail);
             } else {
@@ -124,16 +144,16 @@ const EventDetailSidePanel: React.FC<EventDetailSidePanelProps> = ({ eventId, on
             </div>
             
             {loading && <p style={panelStyles.loadingText}>Loading event details...</p>}
-            {error && <p style={panelStyles.errorText}>{error}</p>}
+            {error && <p style={panelStyles.errorText}><FaExclamationTriangle style={{marginRight: '5px'}}/> {error}</p>}
 
             {eventDetail && !loading && (
                 <div style={panelStyles.content}>
                     <h2 style={panelStyles.eventTitle}>{eventDetail.title}</h2>
                     
-                    <div style={panelStyles.detailItem}>
-                        <FaClock style={panelStyles.icon} />
-                        <span style={panelStyles.label}>Submitted:</span>
-                        <span>{eventDetail.createdAt}</span>
+                    {/* HIỂN THỊ TRƯỜNG Submitted: */}
+                    <div style={panelStyles.submittedRow}> 
+                        <span style={panelStyles.submittedLabel}>Submitted:</span>
+                        <span style={panelStyles.submittedValue}>{eventDetail.createdAt}</span>
                     </div>
 
                     <div style={panelStyles.section}>
@@ -163,97 +183,62 @@ const EventDetailSidePanel: React.FC<EventDetailSidePanelProps> = ({ eventId, on
 
 const panelStyles: { [key: string]: React.CSSProperties } = {
     sidePanel: {
-        position: 'fixed',
-        top: 0,
-        right: 0,
-        width: '350px',
-        height: '100%',
-        backgroundColor: COLORS.CARD_BG,
-        boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.1)',
-        zIndex: 900,
-        transition: 'transform 0.3s ease-in-out',
-        overflowY: 'auto',
+        position: 'fixed', top: 0, right: 0, width: '350px', height: '100%', 
+        backgroundColor: COLORS.CARD_BG, boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.1)',
+        zIndex: 900, transition: 'transform 0.3s ease-in-out', overflowY: 'auto',
     },
     header: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '20px 25px',
-        borderBottom: `1px solid ${COLORS.BORDER}`,
-        backgroundColor: '#F7F9FC',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '20px 25px', borderBottom: `1px solid ${COLORS.BORDER}`, backgroundColor: '#F7F9FC',
     },
     title: {
-        fontSize: '20px',
-        fontWeight: '600',
-        color: COLORS.DARK_NAVY,
-        margin: 0,
-        display: 'flex',
-        alignItems: 'center',
+        fontSize: '20px', fontWeight: '600', color: COLORS.DARK_NAVY, margin: 0, display: 'flex', alignItems: 'center',
     },
     closeButton: {
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer',
-        color: COLORS.TEXT_SECONDARY,
-        padding: '5px',
-        transition: 'color 0.2s',
-        ...({ ':hover': { color: COLORS.DANGER } } as React.CSSProperties), // Sử dụng COLORS.DANGER khi hover
+        background: 'none', border: 'none', cursor: 'pointer', color: COLORS.TEXT_SECONDARY, padding: '5px', transition: 'color 0.2s',
+        ...({ ':hover': { color: COLORS.DANGER } } as React.CSSProperties),
     },
     content: {
         padding: '25px',
     },
     eventTitle: {
-        fontSize: '24px',
-        fontWeight: '700',
-        color: COLORS.PRIMARY,
-        marginBottom: '20px',
+        fontSize: '24px', fontWeight: '700', color: COLORS.PRIMARY, marginBottom: '10px',
+    },
+    submittedRow: {
+        display: 'flex', marginBottom: '20px', alignItems: 'center', paddingBottom: '5px',
+    },
+    submittedLabel: {
+        fontWeight: '500', color: COLORS.DARK_NAVY, fontSize: '14px', marginRight: '5px',
+    },
+    submittedValue: {
+        color: COLORS.TEXT_SECONDARY, fontSize: '14px',
     },
     section: {
-        marginTop: '20px',
-        paddingTop: '15px',
-        borderTop: `1px solid ${COLORS.BORDER}`,
+        marginTop: '20px', paddingTop: '15px', borderTop: `1px solid ${COLORS.BORDER}`,
     },
     sectionTitle: {
-        fontSize: '16px',
-        fontWeight: '600',
-        color: COLORS.DARK_NAVY,
-        marginBottom: '10px',
+        fontSize: '16px', fontWeight: '600', color: COLORS.DARK_NAVY, marginBottom: '10px',
     },
     detailItem: {
-        display: 'flex',
-        alignItems: 'flex-start',
-        marginBottom: '10px',
-        fontSize: '14px',
+        display: 'flex', alignItems: 'flex-start', marginBottom: '10px', fontSize: '14px',
     },
     icon: {
-        marginRight: '10px',
-        color: COLORS.TEXT_SECONDARY,
-        marginTop: '3px',
+        marginRight: '10px', color: COLORS.TEXT_SECONDARY, marginTop: '3px',
     },
     label: {
-        fontWeight: '500',
-        color: COLORS.DARK_NAVY,
-        minWidth: '80px',
+        fontWeight: '500', color: COLORS.DARK_NAVY, minWidth: '80px',
     },
     value: {
-        color: COLORS.TEXT_SECONDARY,
-        flexGrow: 1,
+        color: COLORS.TEXT_SECONDARY, flexGrow: 1,
     },
     descriptionText: {
-        fontSize: '14px',
-        color: COLORS.TEXT_SECONDARY,
-        lineHeight: '1.6',
-        whiteSpace: 'pre-wrap',
+        fontSize: '14px', color: COLORS.TEXT_SECONDARY, lineHeight: '1.6', whiteSpace: 'pre-wrap',
     },
     loadingText: {
-        textAlign: 'center',
-        padding: '20px',
-        color: COLORS.TEXT_SECONDARY,
+        textAlign: 'center', padding: '20px', color: COLORS.TEXT_SECONDARY,
     },
     errorText: {
-        textAlign: 'center',
-        padding: '20px',
-        color: 'red',
+        textAlign: 'center', padding: '20px', color: COLORS.DANGER, backgroundColor: '#FDE7E7', borderRadius: '4px',
     }
 };
 
