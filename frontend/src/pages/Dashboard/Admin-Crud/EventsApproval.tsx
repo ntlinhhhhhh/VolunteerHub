@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FaUsers, FaCalendarAlt, FaFilter, FaSearch, FaChevronRight, FaSync, FaArrowAltCircleLeft, FaInfoCircle, FaCheckCircle, FaTimesCircle, FaClock, FaClipboardList, FaMapMarkerAlt, FaShieldAlt } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
+import EventDetailSidePanel from './EventDetailSidePanel';
 
 const COLORS = {
     PRIMARY: '#1A73E8', 
@@ -47,8 +48,16 @@ const EventsApproval: React.FC = () => {
     const [currentEventTitle, setCurrentEventTitle] = useState<string | null>(null); // State MỚI: LƯU TÊN SỰ KIỆN
     const [rejectionReason, setRejectionReason] = useState<string>(''); 
     const [rejectionError, setRejectionError] = useState<string | null>(null);
-    
+    const [viewingEventId, setViewingEventId] = useState<string | null>(null);
+
     const navigate = useNavigate();
+    const handleViewDetails = (eventId: string) => {
+        setViewingEventId(eventId);
+    };
+
+    const handleCloseSidePanel = () => {
+        setViewingEventId(null);
+    };
 
     const fetchPendingEvents = useCallback(async (token: string) => {
         setLoading(true);
@@ -249,6 +258,13 @@ const EventsApproval: React.FC = () => {
             );
         }
 
+    const isPanelOpen = !!viewingEventId;
+    const mainContentStyle = {
+        ...styles.mainContent,
+        marginRight: isPanelOpen ? '350px' : '0', // Đẩy nội dung chính sang trái 
+        transition: 'margin-right 0.3s ease-in-out',
+    };
+
         return (
             <div style={styles.tableWrapper}>
                 <table style={styles.table}>
@@ -280,7 +296,7 @@ const EventsApproval: React.FC = () => {
                                     <div style={styles.actionButtonContainerVertical}>
                                         
                                         <button 
-                                            onClick={() => navigate(`/admin/events/${event.id}/view`)} 
+                                            onClick={() => handleViewDetails(event.id)}
                                             title="View Event Details"
                                             style={{...styles.iconActionButton, color: COLORS.PRIMARY}} 
                                             disabled={loading}
@@ -479,6 +495,10 @@ const EventsApproval: React.FC = () => {
             </div>
             
             {renderConfirmationModal()} 
+            <EventDetailSidePanel 
+                eventId={viewingEventId} 
+                onClose={handleCloseSidePanel} 
+            />
             
         </div>
     );
