@@ -294,7 +294,6 @@ const AdminDashboard: React.FC = () => {
     }, [actionMessage]);
 
 
-    // >>> LOGIC QUAN TRỌNG: Thực hiện gọi API Khóa/Mở khóa (Không đổi) <<<
     const toggleUserStatus = async (userAuthId: string, currentStatus: User['status']) => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
@@ -310,7 +309,7 @@ const AdminDashboard: React.FC = () => {
             return;
         }
 
-        const endpoint = `http://localhost:8000/users/${userAuthId}/${action}`;
+        const endpoint = `http://localhost:8000/auth/${userAuthId}/${action}`;
         const payload = action === 'lock' ? { reason: "Admin action via dashboard" } : {}; 
 
         setLoading(true); 
