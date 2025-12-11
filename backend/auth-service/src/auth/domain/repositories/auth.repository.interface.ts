@@ -1,6 +1,7 @@
 import { Auth, Auth as AuthEntity } from '../entities/auth.entity';
 
 export interface IAuthRepository {
+    findAll(): Promise<AuthEntity[] | null>;
     findByEmail(email: string): Promise<AuthEntity | null>;
     findById(id: string): Promise<AuthEntity | null>;
     create(email: string, passwordHash: string| null, roleId: string): Promise<AuthEntity>;

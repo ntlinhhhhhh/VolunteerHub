@@ -7,6 +7,10 @@ import {
     Request,
     UseGuards,
     Query,
+    Patch,
+    UseInterceptors,
+    Post,
+    UploadedFile,
 } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
@@ -19,9 +23,10 @@ import { RolesGuard } from '@share/auth/roles.guard';
 import { Roles } from '@share/auth/roles.decorator';
 import { ClientProxy } from '@nestjs/microservices';
 import { Inject } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
 import { GetUser } from '@share/auth/get-user.decorator';
-import { UserStatus } from 'src/user/domain/entities/user.entity';
+import { User, UserStatus } from 'src/user/domain/entities/user.entity';
+import { UpdateAvatarUseCase } from 'src/user/application/use-cases/update-avatar.use-case';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 
 @Controller('users')
@@ -32,6 +37,7 @@ export class UserController {
         private readonly createUserUseCase: CreateUserUseCase,
         private readonly getUserProfileUseCase: GetUserProfileUseCase,
         private readonly updateUserProfileUseCase: UpdateUserProfileUseCase,
+        private readonly updateAvatarUseCase: UpdateAvatarUseCase,
     ) { }
 
     // volunteer 
@@ -73,6 +79,7 @@ export class UserController {
         @Query()
         filters?: {
             status?: UserStatus;
+            role?: string,
             page?: number;
             limit?: number;
         }) {
@@ -80,6 +87,8 @@ export class UserController {
         console.log('filters', filters);
 
         const users = await this.getUserProfileUseCase.executeAll(filters);
+        console.log('users-filter', users);
+
         return {
             success: true,
             data: users || [],
@@ -96,74 +105,15 @@ export class UserController {
             data: user?.toSafeObject() || null,
         };
     }
-    // @Roles('admin')
-    // @UseGuards(JwtAuthGuard, RolesGuard)
-    // @Get('search')
-    // async searchUsers(
-    //     @Query('q') q: string,
-    //     @Query('role') role?: string,
-    //     @Query('page') page: number = 1,
-    //     @Query('limit') limit: number = 20,
-    // ) {
-    //     const users = await this.getUserProfileUseCase.search(
-    //         q,
-    //         role,
-    //         Number(page),
-    //         Number(limit),
-    //     );
 
-    //     return { success: true, data: users };
-    // }
-
-
-
-    @Roles('admin')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Put(':id/lock')
-    async lockUser(@Param('id') id: string, @Body('reason') reason: string) {
-        try {
-
-            await firstValueFrom(
-                this.userClient.send('auth.lock', {
-                    userId: id,
-                    reason: reason || 'Locked by admin',
-                }),
-            );
-
-            await this.updateUserProfileUseCase.execute(
-                id,
-                { status: UserStatus.INACTIVE }
-            );
-            return {
-                success: true,
-                message: `User ${id} locked`,
-            };
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    @Roles('admin')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Put(':id/unlock')
-    async unlockUser(@Param('id') id: string) {
-        try {
-            await firstValueFrom(
-                this.userClient.send('auth.unlock', { userId: id })
-            );
-
-            await this.updateUserProfileUseCase.execute(
-                id,
-                { status: UserStatus.ACTIVE }
-            );
-
-            return {
-                success: true,
-                message: `User ${id} unlocked`,
-            };
-        } catch (err) {
-            console.log(err);
-        }
+    @Post(':id/avatar')
+    @UseInterceptors(FileInterceptor('file'))
+    async updateAvatar(
+        @Param('id') userId: string,
+        @UploadedFile() file: Express.Multer.File,
+    ) {
+        const avatarPath = await this.updateAvatarUseCase.execute(userId, file);
+        return { success: true, avatar: avatarPath };
     }
 
     @MessagePattern('user.create')
@@ -187,9 +137,21 @@ export class UserController {
         }
     }
 
+    @MessagePattern('user.update')
+    async updateUser(
+        @Payload() data: { authId: string; profileData: Partial<User> }
+    ): Promise<User> {
+        const { authId, profileData } = data;
+
+        // gọi use-case
+        return await this.updateUserProfileUseCase.execute(authId, profileData);
+    }
+
+
 
     @MessagePattern('user.findByAuthId')
     async findByAuthId(@Payload() data: { authId: string }) {
+        console.log('call user.findByAuthId');
         const user = await this.getUserProfileUseCase.executeByAuthId(
             data.authId
         );
@@ -198,6 +160,8 @@ export class UserController {
 
     @MessagePattern('user.findByEmail')
     async findByEmail(@Payload() data: { email: string }) {
+        console.log('call user.email');
+
         const user = await this.getUserProfileUseCase.executeByEmail(
             data.email
         );

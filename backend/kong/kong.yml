@@ -18,6 +18,7 @@ services:
       - name: user-route
         paths:
           - /users
+          - /uploads/avatars
         strip_path: false
 
   - name: notification-service

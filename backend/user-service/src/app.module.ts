@@ -14,39 +14,42 @@ import { ShareModule } from '@share/share.module'
 import { RefreshTokenStrategy } from '@share/auth/refresh-token.strategy'
 import { JwtStrategy } from '@share/auth/jwt.strategy'
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { UpdateAvatarUseCase } from './user/application/use-cases/update-avatar.use-case';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRoot(process.env.MONGO_URI || 'mongodb://volunteer-mongo:27017/user-service'),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    JwtModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_ACCESS_SECRET'),
-        signOptions: { expiresIn: '15m' },
-      }),
-    }),
-    ShareModule,
-  ],
-  controllers: [UserController],
-  providers: [
-    CreateUserUseCase,
-    GetUserProfileUseCase,
-    UpdateUserProfileUseCase,
-    JwtStrategy,
-    RefreshTokenStrategy,
-    { provide: IUserRepository, useClass: UserRepository },
-    {
-      provide: 'AUTH_SERVICE',
-      useFactory: () =>
-        ClientProxyFactory.create({
-          transport: Transport.REDIS,
-          options: { host: 'redis', port: 6379 },
+    imports: [
+        ConfigModule.forRoot({ isGlobal: true }),
+        MongooseModule.forRoot(process.env.MONGO_URI || 'mongodb://volunteer-mongo:27017/user-service'),
+        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+        JwtModule.registerAsync({
+            inject: [ConfigService],
+            useFactory: (config: ConfigService) => ({
+                secret: config.get<string>('JWT_ACCESS_SECRET'),
+                signOptions: { expiresIn: '15m' },
+            }),
         }),
-    },
-  ],exports: [
-    'AUTH_SERVICE',
-  ]
+        ShareModule,
+    ],
+    controllers: [UserController],
+    providers: [
+        CreateUserUseCase,
+        GetUserProfileUseCase,
+        UpdateUserProfileUseCase,
+        JwtStrategy,
+        RefreshTokenStrategy,
+        UpdateAvatarUseCase,
+        { provide: IUserRepository, useClass: UserRepository },
+        {
+            provide: 'AUTH_SERVICE',
+            useFactory: () =>
+                ClientProxyFactory.create({
+                    transport: Transport.REDIS,
+                    options: { host: 'redis', port: 6379 },
+                }),
+        },
+    ], exports: [
+        'AUTH_SERVICE',
+        UpdateAvatarUseCase
+    ]
 })
-export class AppModule {}
+export class AppModule { }

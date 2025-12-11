@@ -11,6 +11,7 @@ import { Event } from '../../domain/entities/event.entity';
 import { EventStatus } from '../../domain/entities/event-status.enum';
 import { CancelEventDto } from '../dto/approve-event.dto';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { MessagePublisherService } from 'src/event/infrastructure/messaging/message-publisher.service';
 
 @Injectable()
 export class CancelEventUseCase {
@@ -19,7 +20,7 @@ export class CancelEventUseCase {
     constructor(
         @Inject(IEventRepository)
         private readonly eventRepository: IEventRepository,
-        private readonly amqp: AmqpConnection,
+        private readonly messagePublisherService: MessagePublisherService,
     ) { }
 
     async execute(
@@ -48,21 +49,17 @@ export class CancelEventUseCase {
         await this.eventRepository.updateStatus(eventId, EventStatus.CANCELLED);
 
         // 5. Publish event to message bus
-        // Notify all registered volunteers (registration service will handle this)
-        await this.amqp.publish(
-            'notification_exchange',
-            'event.cancelled',
-            {
-                type: 'event_cancelled',
-                userId: event.organizerId,
-                recipient: event.organizerEmail,
-                eventId: event.id,
-                eventTitle: event.title,
-                organizerId: event.organizerId,
-                organizerName: event.organizerName,
-                cancellationReason: dto.cancellationReason,
-                eventDate: event.schedule.startDate.toISOString(),
-            });
+
+        const data = {
+            eventId: event.id,
+            eventTitle: event.title,
+            organizerId: event.organizerId,
+            organizerName: event.organizerName,
+            cancellationReason: dto.cancellationReason,
+            eventDate: event.schedule.startDate.toISOString(),
+        }
+        
+        await this.messagePublisherService.notifyEventManagerEventCancelled(event.organizerId,event.organizerEmail, data);
 
         this.logger.log(`Event cancelled: ${eventId} by user: ${userId}`);
 

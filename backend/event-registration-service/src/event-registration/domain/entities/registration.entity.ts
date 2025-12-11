@@ -1,5 +1,9 @@
 import { RegistrationStatus } from './registration-status.enum';
 
+export const CHECK_METHODS = ['manual', 'qr_code'] as const;
+export type CheckMethod = (typeof CHECK_METHODS)[number];
+
+
 export interface ApplicationForm {
     motivation: string;
     experience: string;
@@ -26,11 +30,11 @@ export interface Attendance {
         lat: number;
         lng: number;
     };
-    checkInMethod?: 'manual' | 'qr_code' | 'self';
+    checkInMethod?: CheckMethod;
 
     checkOutTime?: Date;
     checkOutBy?: string;
-    checkOutMethod?: 'manual' | 'qr_code' | 'self';
+    checkOutMethod?: CheckMethod;
 
     actualHours?: number;
     notes?: string;
@@ -85,9 +89,9 @@ export class Registration {
         // Status & Forms
         public readonly status: RegistrationStatus,
         public readonly applicationForm: ApplicationForm,
-        public readonly approval: Approval,
-        public readonly attendance: Attendance,
-        public readonly completion: Completion,
+        public readonly approval: Partial<Approval>,
+        public readonly attendance: Partial<Attendance>,
+        public readonly completion: Partial<Completion>,
 
         // Timestamps
         public readonly createdAt: Date,

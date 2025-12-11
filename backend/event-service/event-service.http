@@ -1,0 +1,215 @@
+### EVENT CATEGORY
+
+### lấy tất các loại sự kiện (có thể là mặc định hoặc do admin tạo
+GET http://localhost:8000/categories?activeOnly=true
+Accept: application/json
+
+
+### Get category by ID (PUBLIC) - lấy thông tin của loại sự kiện theo id (69353497dca8945bda8b8318 là id của loại sự kiện đó)
+GET http://localhost:8000/categories/6935a50f1a51c72418085e99
+Accept: application/json
+
+
+### Create category (ADMIN) - tạo một loại sự kiện mới do admin tạo
+### Authorization: Bearer <admin access token>
+POST http://localhost:8000/categories
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM0NWY0NTlkZWJiMTA0ODM1YzM4ZTkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6bnVsbCwicm9sZUlkIjoiNjkzNDVmNDU5ZGViYjEwNDgzNWMzOGRjIiwicm9sZU5hbWUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbIioiXSwiaWF0IjoxNzY1MDgwNzQzLCJleHAiOjE3NjUwODE2NDN9.GVW_ev_r1FWv7HkwlfuJPqOF5M0vHQmbGz4o24ecoYc
+
+{
+"name": "Test 1",
+"description": "Sports related events",
+"icon": "i",
+"color": "#FF5733",
+"parentId": null,
+"order": 5,
+"isActive": true
+}
+
+
+### Update category (ADMIN) - cập nhận thông tin của loại sự kiện đó 
+### 693537e1e17f21cc31027a3d - id của loại sự kiện đó
+### Authorization: Bearer <admin access token>
+PUT http://localhost:8000/categories/693537e1e17f21cc31027a3d
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM0NWY0NTlkZWJiMTA0ODM1YzM4ZTkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6bnVsbCwicm9sZUlkIjoiNjkzNDVmNDU5ZGViYjEwNDgzNWMzOGRjIiwicm9sZU5hbWUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbIioiXSwiaWF0IjoxNzY1MDgwNzQzLCJleHAiOjE3NjUwODE2NDN9.GVW_ev_r1FWv7HkwlfuJPqOF5M0vHQmbGz4o24ecoYc
+
+{
+"name": "Sports",
+"color": "#33FF57"
+}
+
+### Delete category (ADMIN) - xóa loại sự kiện theo id
+### Authorization: Bearer <admin access token>
+DELETE http://localhost:8000/categories/693537e1e17f21cc31027a3d
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM1Mzc1NTA2MTc1OWYwNGY0ZmRhMWUiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzUzNzU1MDYxNzU5ZjA0ZjRmZGExNiIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTA5NTM2MSwiZXhwIjoxNzY1MDk2MjYxfQ.NqU0rYynT4TZl5lV5_73UYDlZB9qTgXD3Uaj4L7MYkU
+
+
+### Seed default categories (ADMIN) - tạo các sự kiện mặc định - do admin tạo -- sẽ tạo sẵn trước nên ko cần gọi
+### Authorization: Bearer <admin access token>
+POST http://localhost:8000/categories/seed/default
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM5NTk3YmY3OWJhYzkxNDZlMDVkNmMiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTM5NTk3YmY3OWJhYzkxNDZlMDVkNjQiLCJyb2xlTmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiKiJdLCJpYXQiOjE3NjUzNzA1MDYsImV4cCI6MTc2NTM3MTQwNn0.soZPmsOViHXCB4tQE5Cs7mPWoHXvwNWzzRdgaxWVoQQ
+
+
+### EVENT
+
+### List all published events (PUBLIC) - lấy danh sách tất cả các sự kiện - theo các filter
+### filter: 
+GET http://localhost:8000/events
+Accept: application/json
+
+
+### Get event by slug (PUBLIC) - lấy sự kiện theo slug (tên sự kiện nhưng theo kiểu cách nhau dấu gạch như này)
+GET http://localhost:8000/events/slug/chu-nhat-xanh-cung-djai-hoc-cong-nghe
+Accept: application/json
+
+
+### các luồng có thể xảy ra
+# export const EVENT_STATUS_TRANSITIONS = {
+#     [EventStatus.DRAFT]: [EventStatus.PENDING_APPROVAL, EventStatus.CANCELLED], -- bên trái có thể chuyển qua các trạng thái bên phải
+#     [EventStatus.PENDING_APPROVAL]: [EventStatus.APPROVED, EventStatus.REJECTED],
+#     [EventStatus.APPROVED]: [EventStatus.PUBLISHED, EventStatus.CANCELLED],
+#     [EventStatus.REJECTED]: [EventStatus.PENDING_APPROVAL, EventStatus.CANCELLED],
+#     [EventStatus.PUBLISHED]: [EventStatus.ONGOING, EventStatus.CANCELLED],
+#     [EventStatus.ONGOING]: [EventStatus.COMPLETED, EventStatus.CANCELLED],
+#     [EventStatus.COMPLETED]: [],
+#     [EventStatus.CANCELLED]: [],
+# };
+
+
+### Create Event - tạo một sự kiện - có thể do admin hoặc event-manager ( thường là event-manager tạo để admin duyệt)
+### Authorization: Bearer <event-manager access token>
+### sau khi gọi --> tạo bản draft --> status: DRAFT
+### Create Event - tạo một sự kiện - tạo bản draft (status: DRAFT)
+POST http://localhost:8000/events
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjNhZTQ0NTA2N2QzYzY3MGZmYjUiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCBNYW5hZ2VyIiwicGhvbmVOdW1iZXIiOiIrODQ5MDk4NzY1NDMiLCJyb2xlSWQiOiI2OTJlYmFhMmRiOGIzOGQ0Zjk5YWViYWYiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU0MjQ2NDgsImV4cCI6MTc2NTQyNTU0OH0.X44z2vPCWqP34ciPYEbXiBeEGBeZ_3yfLkPGvefUNrc
+
+{
+  "title": "Workshop 'Màu Sắc Cho Cuộc Sống'",
+  "description": "Tổ chức chuỗi buổi vẽ tranh và thủ công cho trẻ em khuyết tật. Mục tiêu là tạo ra môi trường sáng tạo, hỗ trợ phát triển kỹ năng tinh thần và vận động cho các em, sau đó tổ chức bán đấu giá tác phẩm để gây quỹ.",
+  "categoryId": "6935a50f1a51c72418085eaa",
+  "location": {
+    "address": "Trung tâm phục hồi chức năng người khuyết tật Hà Nội",
+    "city": "Hà Nội",
+    "district": "Thanh Xuân"
+  },
+  "schedule": {
+    "startDate": "2026-05-01T09:00:00.000Z",
+    "endDate": "2026-05-03T16:00:00.000Z",
+    "registrationDeadline": "2026-04-15T18:00:00.000Z"
+  },
+  "requirements": {
+    "minAge": 16,
+    "maxAge": 50,
+    "skills": ["Kỹ năng hội họa cơ bản", "Kiên nhẫn", "Làm việc với trẻ em đặc biệt"],
+    "experience": "Ưu tiên sinh viên ngành nghệ thuật, sư phạm hoặc công tác xã hội",
+    "healthRequirements": "Sức khỏe tốt"
+  },
+  "capacity": {
+    "maxVolunteers": 30,
+    "minVolunteers": 15
+  },
+  "roles": [
+    { "name": "Giáo viên mỹ thuật", "description": "Hướng dẫn kỹ thuật vẽ và tổ chức lớp học", "slots": 5 },
+    { "name": "Trợ lý hỗ trợ cá nhân", "description": "Giúp đỡ các em khuyết tật trong quá trình tham gia", "slots": 20 },
+    { "name": "Hậu cần và Tổ chức đấu giá", "description": "Chuẩn bị vật liệu, địa điểm và tổ chức sự kiện gây quỹ", "slots": 5 }
+  ],
+  "images": [ "https://cdn.example.com/events/art-therapy-cover.jpg" ],
+  "videos": [],
+  "visibility": "public",
+  "tags": ["nghệ thuật", "người khuyết tật", "gây quỹ", "trẻ em"]
+}
+
+### Update event (ORGANIZER/ADMIN) - có thể sửa khi status là draft -- người tạo mới có thể sửa nhaa
+### Authorization: Bearer <event-manager access token>
+PUT http://localhost:8000/events/69353854e17f21cc31027a4a
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM4M2QyZGEwNDY1Mjc3YjcyNWFmZWIiLCJlbWFpbCI6ImR1b25naG9hbmdnMjYxQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmggTWFuYWdlciIsInBob25lTnVtYmVyIjoiKzg0OTA5ODc2NTQzIiwicm9sZUlkIjoiNjkzODNkMmNhMDQ2NTI3N2I3MjVhZmRjIiwicm9sZU5hbWUiOiJldmVudF9tYW5hZ2VyIiwicGVybWlzc2lvbnMiOlsiZXZlbnQ6Y3JlYXRlIiwiZXZlbnQ6cmVhZCIsImV2ZW50OnVwZGF0ZSIsImV2ZW50OmRlbGV0ZSIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246cmVhZCIsInJlZ2lzdHJhdGlvbjphcHByb3ZlIiwicmVnaXN0cmF0aW9uOm1hcmtfY29tcGxldGUiLCJwb3N0OmNyZWF0ZSIsInBvc3Q6cmVhZCIsInBvc3Q6dXBkYXRlOm93biIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiZGFzaGJvYXJkOnZpZXciLCJyZXBvcnQ6dmlldyIsInJlcG9ydDpleHBvcnQiXSwiaWF0IjoxNzY1MjkzMzg1LCJleHAiOjE3NjUyOTQyODV9.le-2gphOjsP0Nyf0RIL1fwDLYO7YbDQozdk0CJ8ZoIU
+
+{
+    "title": "Chủ nhật xanh cùng Ký túc xá Mỹ Đình - cập nhật",
+    "description": "Cùng nhau dọn dẹp vệ sinh môi trường, làm sạch công viên và bãi biển. Cập nhật nội dung.",
+    "location": {
+        "address": "Xuân Thủy - Hà Nội",
+        "city": "Hà Nội",
+        "district": "Cầu Giấy"
+    },
+    "tags": ["xanh", "sinh viên", "môi trường"]
+}
+
+
+### Submit event for approval (ORGANIZER) -- submit để admin duyệt event
+### Authorization: Bearer <event-manager access token>
+### status: PENDING_APPROVAL (chờ duyệt)
+POST http://localhost:8000/events/693a3ea9ba5788d2304a88b7/submit
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjNhZTQ0NTA2N2QzYzY3MGZmYjUiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCBNYW5hZ2VyIiwicGhvbmVOdW1iZXIiOiIrODQ5MDk4NzY1NDMiLCJyb2xlSWQiOiI2OTJlYmFhMmRiOGIzOGQ0Zjk5YWViYWYiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU0MjQ2NDgsImV4cCI6MTc2NTQyNTU0OH0.X44z2vPCWqP34ciPYEbXiBeEGBeZ_3yfLkPGvefUNrc
+
+# sau khi event-manager submit --> chuyển qua admin để chấp nhận hoặc từ chối
+### Approve event (ADMIN)
+### status: APPROVED
+### Authorization: Bearer <admin access token>
+POST http://localhost:8000/events/693a2f11ba5788d2304a8568/approve
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjUyMzU4ZjVhMjMwYWUwNjYwNWQiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MmViYWEyZGI4YjM4ZDRmOTlhZWJhZCIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJ1c2VyOmNyZWF0ZSIsInVzZXI6cmVhZCIsInVzZXI6dXBkYXRlIiwidXNlcjpkZWxldGUiLCJ1c2VyOmxvY2siLCJ1c2VyOnVubG9jayIsImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDp1cGRhdGU6b3duIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6ZGVsZXRlOm93biIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZSIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiY29tbWVudDpkZWxldGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCIsInN5c3RlbTpzZXR0aW5ncyIsInJvbGU6bWFuYWdlIl0sImlhdCI6MTc2NTQyMTEyNCwiZXhwIjoxNzY1NDIyMDI0fQ.wxbFsdf4wQ4oNIt3Nx0LVWkXYvZA5k5RyIFWa3IriuM
+
+
+### Reject event (ADMIN) 
+### status: REJECTED
+### Authorization: Bearer <admin access token>
+POST http://localhost:8000/events/693a2f11ba5788d2304a8568/reject
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjUyMzU4ZjVhMjMwYWUwNjYwNWQiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MmViYWEyZGI4YjM4ZDRmOTlhZWJhZCIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJ1c2VyOmNyZWF0ZSIsInVzZXI6cmVhZCIsInVzZXI6dXBkYXRlIiwidXNlcjpkZWxldGUiLCJ1c2VyOmxvY2siLCJ1c2VyOnVubG9jayIsImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDp1cGRhdGU6b3duIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6ZGVsZXRlOm93biIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZSIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiY29tbWVudDpkZWxldGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCIsInN5c3RlbTpzZXR0aW5ncyIsInJvbGU6bWFuYWdlIl0sImlhdCI6MTc2NTQyMTEyNCwiZXhwIjoxNzY1NDIyMDI0fQ.wxbFsdf4wQ4oNIt3Nx0LVWkXYvZA5k5RyIFWa3IriuM
+
+{
+    "rejectionReason": "Missing key information"
+}
+
+###
+### Publish event (ORGANIZER/ADMIN) - sự kiện bắt đầu đăng ký được
+### Authorization: Bearer <event-maanger access token>
+POST http://localhost:8000/events/693a2f11ba5788d2304a8568/publish
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjNhZTQ0NTA2N2QzYzY3MGZmYjUiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCBNYW5hZ2VyIiwicGhvbmVOdW1iZXIiOiIrODQ5MDk4NzY1NDMiLCJyb2xlSWQiOiI2OTJlYmFhMmRiOGIzOGQ0Zjk5YWViYWYiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU0MjA2NjMsImV4cCI6MTc2NTQyMTU2M30.uEKpB6kipuDV2iLa5CCiqD3Iniaqa9S-pZHIQOa-YVs
+
+
+###
+### Cancel event (ORGANIZER/ADMIN) - hủy sự kiện như luồng bên trên
+### Authorization: Bearer <event-maanger access token>
+POST http://localhost:8000/events/6938303dc915113317c392bd/cancel
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM4MjUzMDBjMDlhOGEwY2Y5ZGRmMWMiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCBNYW5hZ2VyIiwicGhvbmVOdW1iZXIiOiIrODQ5MDk4NzY1NDMiLCJyb2xlSWQiOiI2OTM4MjUzMDBjMDlhOGEwY2Y5ZGRmMTEiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjUyOTEyMjQsImV4cCI6MTc2NTI5MjEyNH0.x4G_4grxyLkG1CHN0qjEHPit3Bdd5Nyezn0EgPrTIH4
+
+{
+"cancellationReason": "Unexpected situation"
+}
+
+###
+### Delete event (ORGANIZER/ADMIN)
+#  Only DRAFT or REJECTED can be deleted
+### Authorization: Bearer <admin access token>
+### Authorization: Bearer <event-manager access token>
+DELETE http://localhost:8000/events/6935a83b10323954d7a4dcc8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM1Mzc1NTA2MTc1OWYwNGY0ZmRhMWUiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzUzNzU1MDYxNzU5ZjA0ZjRmZGExNiIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTA5OTA0NSwiZXhwIjoxNzY1MDk5OTQ1fQ.dt05Kj9YJ718Gnvtu6SJMydvUZLClp1tFFPo8yVLA5g
+
+###
+
+### Get my events (ORGANIZER/ADMIN) -- lấy danh sách event của mình
+### Authorization: Bearer <event-manager access token>
+GET http://localhost:8000/events/my/list
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM1Mzc1NjA2MTc1OWYwNGY0ZmRhMjIiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCBNYW5hZ2VyIiwicGhvbmVOdW1iZXIiOiIrODQ5MDk4NzY1NDMiLCJyb2xlSWQiOiI2OTM1Mzc1NTA2MTc1OWYwNGY0ZmRhMTciLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjUwOTkyMzQsImV4cCI6MTc2NTEwMDEzNH0.XGPf_Ym78Ej3X1wTToGn2A1s2lYGtMXr_mXGezNTSWg
+Accept: application/json
+
+###
+
+### Get pending approval events (ADMIN) -- lấy sanh sách các event cần duyệt
+GET http://localhost:8000/events/admin/pending
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM4M2QyY2EwNDY1Mjc3YjcyNWFmZTciLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCIsInBob25lTnVtYmVyIjoiKzg0OTAxMjM0NTY3Iiwicm9sZUlkIjoiNjkzODNkMmNhMDQ2NTI3N2I3MjVhZmRiIiwicm9sZU5hbWUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbIioiXSwiaWF0IjoxNzY1MjkzNzM4LCJleHAiOjE3NjUyOTQ2Mzh9.NHGHDAnFH_CwOeuSmdmjAFYIKRqOcnxN5fRJhZhJMXY
+Accept: application/json
+
+###
+
+### Get event statistics (ADMIN) - tổng hợp
+GET http://localhost:8000/events/admin/statistics
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM1Mzc1NTA2MTc1OWYwNGY0ZmRhMWUiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzUzNzU1MDYxNzU5ZjA0ZjRmZGExNiIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTA5OTI2MCwiZXhwIjoxNzY1MTAwMTYwfQ.bhTvtX5-NhPIa3tphDHhf-mTA4Ocy2gc3suhgmMdPqM
+Accept: application/json

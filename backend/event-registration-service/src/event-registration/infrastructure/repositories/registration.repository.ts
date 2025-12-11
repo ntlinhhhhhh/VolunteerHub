@@ -6,7 +6,7 @@ import {
     RegistrationFilterOptions,
     PaginatedResult,
 } from '../../domain/repositories/registration.repository.interface';
-import { Registration as RegistrationEntity } from '../../domain/entities/registration.entity';
+import { CheckMethod, Registration as RegistrationEntity } from '../../domain/entities/registration.entity';
 import { Registration as RegistrationSchema, RegistrationDocument } from '../database/schema/registration.schema';
 import { RegistrationStatus } from '../../domain/entities/registration-status.enum';
 import {
@@ -27,29 +27,24 @@ export class RegistrationRepository implements IRegistrationRepository {
     ) { }
 
     private toEntity(doc: RegistrationDocument): RegistrationEntity {
-        const attendance = doc.attendance
-            ? {
-                ...doc.attendance,
-                checkInMethod:
-                    doc.attendance.checkInMethod === 'manual' ||
-                        doc.attendance.checkInMethod === 'qr_code' ||
-                        doc.attendance.checkInMethod === 'self'
-                        ? doc.attendance.checkInMethod
-                        : undefined,
-                checkOutMethod:
-                    doc.attendance.checkOutMethod === 'manual' ||
-                        doc.attendance.checkOutMethod === 'qr_code' ||
-                        doc.attendance.checkOutMethod === 'self'
-                        ? doc.attendance.checkOutMethod
-                        : undefined,
-            }
-            : {};
+        const attendance: Partial<Attendance> = {
+            checkInTime: doc.attendance?.checkInTime,
+            checkInBy: doc.attendance?.checkInBy,
+            checkInLocation: doc.attendance?.checkInLocation,
+            checkInMethod: doc.attendance?.checkInMethod as CheckMethod | undefined,
 
-        const completion = doc.completion || {};
+            checkOutTime: doc.attendance?.checkOutTime,
+            checkOutBy: doc.attendance?.checkOutBy,
+            checkOutMethod: doc.attendance?.checkOutMethod as CheckMethod | undefined,
 
-        return new RegistrationEntity(
-            doc._id.toString(),
+            actualHours: doc.attendance?.actualHours,
+            notes: doc.attendance?.notes,
+        };
+
+        return new Registration(
+            doc.id,
             doc.registrationCode,
+
             doc.eventId,
             doc.eventTitle,
             doc.eventDate,
@@ -57,21 +52,26 @@ export class RegistrationRepository implements IRegistrationRepository {
             doc.organizerId,
             doc.organizerName,
             doc.organizerEmail,
+
             doc.volunteerId,
             doc.volunteerName,
             doc.volunteerEmail,
             doc.volunteerPhone,
+
             doc.roleId,
             doc.roleName,
+
             doc.status,
-            doc.applicationForm || {},
-            doc.approval || {},
+            doc.applicationForm,
+            doc.approval ?? {},
             attendance,
-            completion,
+            doc.completion ?? {},
+
             doc.createdAt,
-            doc.updatedAt
+            doc.updatedAt,
         );
     }
+
 
 
     async findById(id: string): Promise<RegistrationEntity | null> {

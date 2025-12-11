@@ -12,7 +12,9 @@ import { CreateRegistrationDto } from '../dto/create-registration.dto';
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { MessagePublisherService } from 'src/event-registration/infrastructure/messaging/message-publisher.service';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class ApplyForEventUseCase {
@@ -21,7 +23,8 @@ export class ApplyForEventUseCase {
     constructor(
         @Inject(IRegistrationRepository)
         private readonly registrationRepository: IRegistrationRepository,
-        private readonly amqp: AmqpConnection,
+        private readonly messagePublisherService: MessagePublisherService,
+        @Inject('EVENT_SERVICE') private eventClient: ClientProxy,
         private readonly configService: ConfigService
     ) { }
 
@@ -104,27 +107,29 @@ export class ApplyForEventUseCase {
 
         const registration = await this.registrationRepository.create(registrationData as any);
 
-        // 9. Publish event to message bus
-        await this.amqp.publish(
-            'notification_exchange',
-            'registration.submitted',
-            {
-                type: 'registration_submitted',
-                userId: registration.organizerId,
-                recipient: registration.organizerEmail,
-                registrationId: registration.id,
-                registrationCode: registration.registrationCode,
-                eventId: registration.eventId,
-                eventTitle: registration.eventTitle,
-                volunteerId: registration.volunteerId,
-                volunteerName: registration.volunteerName,
-                volunteerEmail: registration.volunteerEmail,
-                organizerId: registration.organizerId,
-                organizerName: registration.organizerName,
-                organizerEmail: registration.organizerEmail,
-                roleName: registration.roleName,
-            });
 
+        const data = {
+            registrationId: registration.id,
+            eventId: registration.eventId,
+            eventTitle: registration.eventTitle,
+            volunteerId: registration.volunteerId,
+            volunteerName: registration.volunteerName,
+            volunteerEmail: registration.volunteerEmail,
+            eventDate: registration.eventDate.toISOString(),
+            eventLocation: registration.eventLocation,
+            roleName: registration.roleName,
+            organizerPhone: registration.organizerEmail,
+        }
+
+        const result = await firstValueFrom(
+            this.eventClient.send('event.getById', { eventId: registration.eventId })
+        );
+
+        const eventData = result.data;
+
+        console.log('result', result);
+
+        await this.messagePublisherService.notifyEventManagerRegistrationSubmited(eventData.organizerId, eventData.organizerEmail, data);
         this.logger.log(`Registration created: ${registration.id}`);
 
         return registration;

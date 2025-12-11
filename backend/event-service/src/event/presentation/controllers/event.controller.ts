@@ -354,4 +354,13 @@ export class EventController {
         return { success: true, message: 'Role filled incremented' };
     }
 
+    @MessagePattern('event.getById')
+    async getEventByIdPattern(@Payload() data: { eventId: string }) {
+        const event = await this.getEventByIdUseCase.execute(data.eventId);
+        return {
+            success: true,
+            data: event,
+        };
+    }
+
 }

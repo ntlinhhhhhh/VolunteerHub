@@ -39,11 +39,11 @@ import { ListEventsUseCase } from './event/application/use-cases/list-events.use
 import { GetEventStatisticsUseCase } from './event/application/use-cases/get-event-statistics.use-case';
 import { ListCategoriesUseCase } from './event/application/use-cases/list-categories.use-case';
 import { PassportModule } from '@nestjs/passport';
-
-import { JwtStrategy } from '@share/auth/jwt.strategy'; // import strategy từ share
-import { JwtAuthGuard } from '@share/auth/jwt-auth.guard'; // import guard từ share
+import { JwtStrategy } from '@share/auth/jwt.strategy';
+import { JwtAuthGuard } from '@share/auth/jwt-auth.guard';
 import { EventCategorySeeder } from './event/infrastructure/database/seed/event-category.seed';
 import { IncrementRoleFilledUseCase } from './event/application/use-cases/increment-role-filled-use-case';
+import { MessagePublisherService } from './event/infrastructure/messaging/message-publisher.service';
 
 @Module({
     imports: [
@@ -83,6 +83,14 @@ import { IncrementRoleFilledUseCase } from './event/application/use-cases/increm
                     options: { host: 'redis', port: 6379 },
                 }),
         },
+        {
+            provide: 'AUTH_SERVICE',
+            useFactory: () =>
+                ClientProxyFactory.create({
+                    transport: Transport.REDIS,
+                    options: { host: 'redis', port: 6379 },
+                }),
+        },
         DatabaseService,
 
         // Repository Providers
@@ -106,11 +114,12 @@ import { IncrementRoleFilledUseCase } from './event/application/use-cases/increm
         ListCategoriesUseCase,
         EventCategorySeeder,
         IncrementRoleFilledUseCase,
-
-        EventRepository,   
+        EventRepository,
         JwtStrategy,
         JwtAuthGuard,
+        MessagePublisherService,
+
     ],
-    exports: [RabbitMQModule, CacheModule],
+    exports: [RabbitMQModule, CacheModule, MessagePublisherService, 'AUTH_SERVICE'],
 })
 export class AppModule { }

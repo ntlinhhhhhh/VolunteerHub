@@ -104,7 +104,7 @@ export class CategoryController {
     }
 
     /**
-     * ADMIN: Seed default categories -- da tao san, tam thoi bo qua
+     * ADMIN: Seed default categories
      * POST /api/categories/seed
      */
     @Post('seed/default')

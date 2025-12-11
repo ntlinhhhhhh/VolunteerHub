@@ -1,0 +1,104 @@
+### Tạo tài khoản với auth-service - chỉ có 1 trang register cho volunteer
+POST http://localhost:8000/auth/register
+Content-Type: application/json
+
+{
+    "email": "23021610@vnu.edu.vn",
+    "username": "hehe",
+    "fullName": "Duong Hoang",
+    "password": "123456"
+}
+
+### login - đăng nhập cho tình nguyện viên
+POST http://localhost:8000/auth/login
+Content-Type: application/json
+
+{
+    "email": "23021610@vnu.edu.vn",
+    "password": "123456"
+}
+
+### login-admin: tạo một trang login cho admin với đường dấn /auth/admin/login
+POST http://localhost:8000/auth/admin/login
+Content-Type: application/json
+
+{
+    "email": "tlinh@gmail.com",
+    "password": "tlinh123"
+}
+
+### login-manager tương tự tạo 1 cái login cho quản lý sự kiện
+POST http://localhost:8000/auth/event-manager/login
+Content-Type: application/json
+
+{
+    "email": "tlinh_manager@gmail.com",
+    "password": "tlinh123"
+}
+
+### gg login
+POST https://oauth2.googleapis.com/token
+Content-Type: application/x-www-form-urlencoded
+
+code=4%2F0Ab32j9271_Gmz0sHwgAqCIjUZ1mEcGy7hgQctbkZTkOXEJ_o2FiVjJrAGNfXoVl4XtoioA
+&client_id=407408718192.apps.googleusercontent.com
+&client_secret=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
+&redirect_uri=https%3A%2F%2Fdevelopers.google.com%2Foauthplayground
+&grant_type=authorization_code
+
+### quyên mật khẩu, sau khi tạo nó sẽ gửi mail cho bạn để reset (tạo frontend từ giống link mà nó trả về)
+POST http://localhost:8000/auth/forgot-password
+Content-Type: application/json
+
+{
+    "email": "zmint2254@gmail.com"
+}
+
+### reset password
+POST http://localhost:8000/auth/reset-password
+Content-Type: application/json
+
+{
+    "email": "zmint2254@gmail.com",
+    "token": "351552e059f1923bed9b559de4002046ba9af0aa4c4c6bcc90d0043e002d7733",
+    "newPassword": "12345678"
+}
+
+### refresh-token
+POST http://localhost:8000/auth/refresh
+Content-Type: application/json
+Accept: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsInR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzY1MjcxMTc5LCJleHAiOjE3NjU4NzU5NzksInN1YiI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyOSJ9.CFL_Z3toXizt5I7JDrV2Q5NGsGxTjrT_vyy0Ha6NjOI"
+}
+
+
+### logout
+POST http://localhost:8000/auth/logout
+Content-Type: application/json
+Accept: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NjQ5NjY5NjAsImV4cCI6MTc2NTU3MTc2MCwic3ViIjoiNjkzMzM1ZjZiMTdhOTJlNGI3NjFhOWExIn0.bCCu8ZNv6wTnNKpauRlfXhRrZ6J4bJA7VcA5dk3D3to" 
+}
+
+### khóa user - role: admin
+PUT http://localhost:8000/auth/692fa481827f5e7105cb7fdf/lock
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjUyMzU4ZjVhMjMwYWUwNjYwNWQiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MmViYWEyZGI4YjM4ZDRmOTlhZWJhZCIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJ1c2VyOmNyZWF0ZSIsInVzZXI6cmVhZCIsInVzZXI6dXBkYXRlIiwidXNlcjpkZWxldGUiLCJ1c2VyOmxvY2siLCJ1c2VyOnVubG9jayIsImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDp1cGRhdGU6b3duIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6ZGVsZXRlOm93biIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZSIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiY29tbWVudDpkZWxldGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCIsInN5c3RlbTpzZXR0aW5ncyIsInJvbGU6bWFuYWdlIl0sImlhdCI6MTc2NTQzMDc4NSwiZXhwIjoxNzY1NDMxNjg1fQ.iRJfdXXXpv4TlYXteQSYPwCaaYfoY_-dxryc92KZkuI
+
+{
+  "reason": "spam comment"
+}
+
+
+
+### mơ khóa user - role: admin
+PUT http://localhost:8000/auth/692fa481827f5e7105cb7fdf/unlock
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjUyMzU4ZjVhMjMwYWUwNjYwNWQiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MmViYWEyZGI4YjM4ZDRmOTlhZWJhZCIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJ1c2VyOmNyZWF0ZSIsInVzZXI6cmVhZCIsInVzZXI6dXBkYXRlIiwidXNlcjpkZWxldGUiLCJ1c2VyOmxvY2siLCJ1c2VyOnVubG9jayIsImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDp1cGRhdGU6b3duIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6ZGVsZXRlOm93biIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZSIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiY29tbWVudDpkZWxldGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCIsInN5c3RlbTpzZXR0aW5ncyIsInJvbGU6bWFuYWdlIl0sImlhdCI6MTc2NTQzMDc4NSwiZXhwIjoxNzY1NDMxNjg1fQ.iRJfdXXXpv4TlYXteQSYPwCaaYfoY_-dxryc92KZkuI
+Content-Type: application/json
+
+
+### khóa user - role: admin
+GET http://localhost:8000/auth/search?role=volunteer
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM4MjU0NjhmNTUxMDBjOWMzYTZkNWYiLCJlbWFpbCI6IjRAZ21haWwuY29tIiwibmFtZSI6IkR1b25nIEhvYW5nIiwicGhvbmVOdW1iZXIiOm51bGwsInJvbGVJZCI6IjY5MzgyNTMwMGMwOWE4YTBjZjlkZGYxMiIsInJvbGVOYW1lIjoidm9sdW50ZWVyIiwicGVybWlzc2lvbnMiOlsiZXZlbnQ6cmVhZCIsInJlZ2lzdHJhdGlvbjpjcmVhdGUiLCJyZWdpc3RyYXRpb246cmVhZCIsInJlZ2lzdHJhdGlvbjpjYW5jZWwiLCJwb3N0OnJlYWQiLCJwb3N0OmNyZWF0ZSIsInBvc3Q6dXBkYXRlOm93biIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiZGFzaGJvYXJkOnZpZXciXSwiaWF0IjoxNzY1Mjg3MjQzLCJleHAiOjE3NjUyODgxNDN9.xMI5OTEynKcXyq01Nf9ctMJOKYhk8CZpoSNdx2zsXqI
