@@ -38,6 +38,11 @@ export class GetUserProfileUseCase {
         return user;
     }
 
+    async executeByUsername(username: string) {
+        const user = await this.userRepository.findByUsername(username);
+        return user || null;
+    }
+    
     async executeAll(
         filters?: {
             status?: UserStatus;

@@ -11,6 +11,7 @@ import {
     UseInterceptors,
     Post,
     UploadedFile,
+    BadRequestException,
 } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
@@ -27,6 +28,8 @@ import { GetUser } from '@share/auth/get-user.decorator';
 import { User, UserStatus } from 'src/user/domain/entities/user.entity';
 import { UpdateAvatarUseCase } from 'src/user/application/use-cases/update-avatar.use-case';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 
 @Controller('users')
@@ -106,12 +109,40 @@ export class UserController {
         };
     }
 
+    // @Post(':id/avatar')
+    // @UseInterceptors(FileInterceptor('file'))
+    // async updateAvatar(
+    //     @Param('id') userId: string,
+    //     @UploadedFile() file: Express.Multer.File,
+    // ) {
+    //     const avatarPath = await this.updateAvatarUseCase.execute(userId, file);
+    //     return { success: true, avatar: avatarPath };
+    // }
+
     @Post(':id/avatar')
-    @UseInterceptors(FileInterceptor('file'))
+    @UseInterceptors(FileInterceptor('file', {
+        storage: diskStorage({
+            destination: './uploads/avatars',
+            filename: (req, file, cb) => {
+                const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+                const ext = extname(file.originalname);
+                cb(null, `${uniqueSuffix}${ext}`);
+            },
+        }),
+        limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+        fileFilter: (req, file, cb) => {
+            if (!file.mimetype.startsWith('image/')) {
+                return cb(new BadRequestException('Only image files are allowed'), false);
+            }
+            cb(null, true);
+        },
+    }))
     async updateAvatar(
         @Param('id') userId: string,
         @UploadedFile() file: Express.Multer.File,
     ) {
+        if (!file) throw new BadRequestException('No file uploaded');
+
         const avatarPath = await this.updateAvatarUseCase.execute(userId, file);
         return { success: true, avatar: avatarPath };
     }
@@ -119,22 +150,12 @@ export class UserController {
     @MessagePattern('user.create')
     async createUser(@Payload() data: CreateUserDto) {
         console.log('Received user.create payload:', data);
-
-        try {
-            const user = await this.createUserUseCase.execute(
-                data.authId,
-                data.email,
-                data.username,
-                data.fullName
-            );
-            return {
-                success: true,
-                data: user.toSafeObject(),
-            };
-        } catch (err) {
-            console.error('Error inside userservice createUser:', err);
-            throw err;
-        }
+        return await this.createUserUseCase.execute(
+            data.authId,
+            data.email,
+            data.username,
+            data.fullName
+        );
     }
 
     @MessagePattern('user.update')
@@ -164,6 +185,16 @@ export class UserController {
 
         const user = await this.getUserProfileUseCase.executeByEmail(
             data.email
+        );
+        return user?.toSafeObject() || null;
+    }
+
+    @MessagePattern('user.findByUsername')
+    async findByUsername(@Payload() data: { username: string }) {
+        console.log('call user.findByUsername');
+
+        const user = await this.getUserProfileUseCase.executeByUsername(
+            data.username
         );
         return user?.toSafeObject() || null;
     }

@@ -19,7 +19,7 @@ export class User {
     // @Prop({ default: true })
     // isActive: boolean;
 
-    @Prop({ required: true })
+    @Prop({ required: true, unique: true })
     username: string;
 
     @Prop({ required: true })
