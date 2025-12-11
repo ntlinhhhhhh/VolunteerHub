@@ -14,7 +14,7 @@ export class SendEmailNotificationUseCase {
         @Inject(INotificationRepository)
         private readonly notificationRepository: INotificationRepository,
         private readonly emailService: EmailService,
-        private readonly templateService: TemplateService
+        private readonly templateService: TemplateService,
     ) { }
 
     async execute(
@@ -24,13 +24,13 @@ export class SendEmailNotificationUseCase {
         data: Record<string, any>
     ): Promise<void> {
         this.logger.log(`Sending ${type} notification to ${recipient}`);
-
+        let notification;
         try {
             // 1. Get email template
             const { subject, html } = this.templateService.render(type, data);
 
             // 2. Create notification record (PENDING)
-            const notification = await this.notificationRepository.create({
+            notification = await this.notificationRepository.create({
                 userId,
                 type,
                 channel: NotificationChannel.EMAIL,
@@ -61,7 +61,11 @@ export class SendEmailNotificationUseCase {
             this.logger.log(`✅ Email sent successfully to ${recipient}`);
         } catch (error) {
             this.logger.error(`❌ Failed to send email to ${recipient}:`, error.message);
-            throw error;
+            await this.notificationRepository.updateStatus(
+                notification.id,
+                NotificationStatus.FAILED,
+                error
+            );
         }
     }
 }

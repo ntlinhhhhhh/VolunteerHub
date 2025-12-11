@@ -53,10 +53,14 @@ export class CancelEventUseCase {
         const data = {
             eventId: event.id,
             eventTitle: event.title,
+            eventSlug: event.slug,
             organizerId: event.organizerId,
             organizerName: event.organizerName,
-            cancellationReason: dto.cancellationReason,
+            organizerEmail: event.organizerEmail,
             eventDate: event.schedule.startDate.toISOString(),
+            eventLocation: `${event.location.address}, ${event.location.district}, ${event.location.city}`,
+            maxVolunteers: event.capacity.maxVolunteers,
+            cancellationReason: dto.cancellationReason,
         }
         
         await this.messagePublisherService.notifyEventManagerEventCancelled(event.organizerId,event.organizerEmail, data);

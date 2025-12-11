@@ -132,25 +132,40 @@ services:
     volumes:
       - D:/volunteer_hub/volunteerhub/media-storage:/app/uploads
   
-  # communication-service:
+
+  communication-service:
+    build:
+      context: .
+      dockerfile: communication-service/Dockerfile
+    container_name: communication-service
+    env_file:
+      - ./communication-service/.env
+    networks:
+      - volunteerhub-net
+    ports:
+      - "4010:4010"
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    restart: unless-stopped
+
+  # dashboard-service:
   #   build:
   #     context: .
-  #     dockerfile: communication-service/Dockerfile
-  #   container_name: communication-service
+  #     dockerfile: dashboard-service/Dockerfile
+  #   container_name: dashboard-service
   #   env_file:
-  #     - ./communication-service/.env
+  #     - ./dashboard-service/.env
   #   networks:
   #     - volunteerhub-net
   #   ports:
-  #     - "4010:4010"
+  #     - "4012:4012"
   #   depends_on:
   #     - mongo
   #     - redis
   #     - rabbitmq
   #   restart: unless-stopped
-  # volumes:
-  #   - D:/volunteer_hub/volunteerhub/media-storage:/app/uploads
-
   kong:
     image: kong:3.5
     container_name: kong
@@ -159,6 +174,8 @@ services:
     depends_on:
       - auth-service
       - user-service
+      - communication-service
+      # - dashboard-service
     ports:
       - "8000:8000"
       - "8001:8001"

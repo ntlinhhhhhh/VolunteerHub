@@ -25,8 +25,10 @@ import { Public } from '@share/auth/public.decorator';
 import { Roles } from '@share/auth/roles.decorator';
 import { GetUser } from '@share/auth/get-user.decorator';
 import { JwtAuthGuard } from '@share/auth/jwt-auth.guard';
-import { IPostRepository } from 'src/communication/domain/repositories/post.repository.interface';
+import { IPostRepository } from '../../domain/repositories/post.repository.interface';
 import { Inject } from '@nestjs/common';
+import { NotFoundException, ForbiddenException } from '@nestjs/common';
+import { UpdateCommentDto } from '../../application/dto/update-comment.dto';
 
 @Controller('posts')
 export class PostController {
@@ -326,5 +328,3 @@ export class PostController {
     }
 }
 
-import { NotFoundException, ForbiddenException } from '@nestjs/common';
-import { UpdateCommentDto } from 'src/communication/application/dto/update-comment.dto';

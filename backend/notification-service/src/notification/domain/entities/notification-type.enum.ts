@@ -20,6 +20,9 @@ export enum NotificationType {
     // Communication events
     NEW_POST_ON_EVENT = 'new_post_on_event',
     NEW_COMMENT_ON_POST = 'new_comment_on_post',
+    LIKE = 'like',
+    POST_LIKE = 'post_liked',
+    POST_UNLIKE = 'post_unliked',
 
     // Admin alerts
     NEW_EVENT_PENDING = 'new_event_pending',

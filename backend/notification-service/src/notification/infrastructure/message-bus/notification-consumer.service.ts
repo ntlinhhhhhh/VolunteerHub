@@ -16,7 +16,7 @@ export class NotificationConsumerService implements OnModuleInit {
         private readonly sendEmailUseCase: SendEmailNotificationUseCase,
         private readonly createNotificationUseCase: CreateNotificationUseCase,
         private readonly updateNotificationStatusUseCase: UpdateNotificationStatusUseCase,
-    ) {}
+    ) { }
 
     async onModuleInit() {
         await this.rabbitMQService.consume(this.handleMessage.bind(this));
@@ -56,23 +56,7 @@ export class NotificationConsumerService implements OnModuleInit {
 
         // 2. EMAIL NOTIFICATION
         if (channels?.email) {
-            let emailNotification;
-
-            try {
-                await this.sendEmailUseCase.execute(userId, channels.email, mappedType, data);
-
-                // Mark sent
-                await this.updateNotificationStatusUseCase.markSent(emailNotification.id);
-            } catch (err) {
-                this.logger.error(`Email notification failed: ${err.message}`);
-
-                if (emailNotification?.id) {
-                    await this.updateNotificationStatusUseCase.markFailed(
-                        emailNotification.id,
-                        err.message
-                    );
-                }
-            }
+            await this.sendEmailUseCase.execute(userId, channels.email, mappedType, data);
         }
 
         // 3. PUSH NOTIFICATION

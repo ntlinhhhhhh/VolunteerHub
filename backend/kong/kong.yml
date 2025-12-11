@@ -45,4 +45,20 @@ services:
         paths:
           - /registrations
         strip_path: false
+  - name: communication-service
+    url: http://communication-service:4010
+    routes:
+      - name: communication-route
+        paths:
+          - /posts
+        strip_path: false
+
+  - name: dashboard-service
+    url: http://dashboard-service:4012
+    routes:
+      - name: dashboard-route
+        paths:
+          - /dashboard
+        strip_path: false
+
 
