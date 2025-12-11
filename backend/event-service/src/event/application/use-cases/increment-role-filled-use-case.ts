@@ -21,6 +21,7 @@ export class IncrementRoleFilledUseCase {
         }
 
         role.filled += 1;
-        await this.eventRepository.update(eventId, { roles: event.roles });
+        event.capacity.currentVolunteers += 1;
+        await this.eventRepository.update(eventId, { roles: event.roles, capacity: event.capacity });
     }
 }
