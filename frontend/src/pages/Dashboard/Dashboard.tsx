@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from "react";
+// Dashboard.tsx (FULL CODE CẬP NHẬT)
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   FaCompass,
   FaChartBar,
@@ -8,10 +9,16 @@ import {
   FaUser,
   FaCheckCircle,
   FaExclamationTriangle,
+  FaMapMarkerAlt,
+  FaUsers,
+  FaSpinner,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+// Đảm bảo các component này đã được tạo và import đúng đường dẫn
+import EventDetailPanel from "./Volunteer-Crud/EventDetailPanel"; 
+import NotificationHandler from "./Volunteer-Crud/NotificationHandler";
+import NotificationIcon from "./Volunteer-Crud/NotificationIcon";
 
-// --- Định nghĩa COLORS (Cần có để các styles hoạt động) ---
 const COLORS = {
   PRIMARY: "#007bff",
   SECONDARY: "#6c757d",
@@ -30,124 +37,151 @@ const COLORS = {
   SUCCESS_ACCENT: "#34A853",
 };
 
-// --- Dữ liệu mô phỏng sự kiện ---
-interface Event {
-  id: number;
-  title: string;
-  category: "Technology" | "Music" | "Business" | "Food" | "Art";
-  date: string;
-  location: string;
-  attendees: number;
-  capacity: number;
-  imageUrl: string;
+// --- INTERFACES (Giữ nguyên) ---
+interface Location { address: string; city: string; district: string; }
+interface Schedule { startDate: string; endDate: string; registrationDeadline: string; }
+interface Capacity { maxVolunteers: number; currentVolunteers: number; minVolunteers: number; }
+interface Media { images: string[]; videos: string[]; documents: string[]; }
+interface Roles { id: string; name: string; description: string; slots: number; filled: number; }
+interface ApiEvent {
+  id: string; slug: string; title: string; description: string; organizerName: string; organizerEmail: string; categoryName: string; location: Location; schedule: Schedule; capacity: Capacity; roles: Roles[]; requirements: any; status: "published" | "pending" | "closed"; media: Media; tags: string[]; createdAt: string; updatedAt: string;
 }
-
 interface UserData {
-  id: string;
-  email: string;
-  username: string;
-  fullName: string | null;
-  phoneNumber: string | null;
-  avatar: string | null;
-  address: string | null;
-  bio: string | null;
-  dateOfBirth: string | null; // Sẽ là ISO string, cần xử lý để hiển thị YYYY-MM-DD
+  id: string; email: string; username: string; fullName: string | null; phoneNumber: string | null; avatar: string | null; address: string | null; bio: string | null; dateOfBirth: string | null;
 }
+// interface Registration { // Đã di chuyển vào Dashboard component để tránh lỗi scope nếu cần
+//     id: string;
+//     eventId: string; 
+//     roleName: string;
+//     status: "pending" | "confirmed" | "rejected";
+// }
 
-const mockEvents: Event[] = [
-  {
-    id: 1,
-    title: "Tech Conference 2024",
-    category: "Technology",
-    date: "2024-03-15",
-    location: "San Francisco, CA",
-    attendees: 450,
-    capacity: 500,
-    imageUrl:
-      "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=600&h=400&ixlib=rb-4.0.3",
-  },
-  {
-    id: 2,
-    title: "Summer Music Festival",
-    category: "Music",
-    date: "2024-06-20",
-    location: "Austin, TX",
-    attendees: 2600,
-    capacity: 3000,
-    imageUrl:
-      "https://images.unsplash.com/photo-1514525253161-ec8542fe8263?auto=format&fit=crop&q=80&w=600&h=400&ixlib=rb-4.0.3",
-  },
-  {
-    id: 3,
-    title: "Marketing Workshop",
-    category: "Business",
-    date: "2024-02-10",
-    location: "New York, NY",
-    attendees: 129,
-    capacity: 150,
-    imageUrl:
-      "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=600&h=400&ixlib=rb-4.0.3",
-  },
-  {
-    id: 4,
-    title: "Food & Wine Expo",
-    category: "Food",
-    date: "2024-04-05",
-    location: "Chicago, IL",
-    attendees: 680,
-    capacity: 800,
-    imageUrl:
-      "https://images.unsplash.com/photo-1550547660-d94b8cd9a9c5?auto=format&fit=crop&q=80&w=600&h=400&ixlib=rb-4.0.3",
-  },
-];
+// --- useFetchEvents (Giữ nguyên) ---
+const useFetchEvents = (status: string) => {
+    const [events, setEvents] = useState<ApiEvent[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-// --- Component Thẻ Sự Kiện ---
-const EventCard: React.FC<{ event: Event }> = ({ event }) => {
-  const availabilityPercent = Math.round(
-    (event.attendees / event.capacity) * 100
-  );
-  return (
-    <div style={styles.eventCard}>
-      <div
-        style={{
-          ...styles.eventImageWrapper,
-          backgroundImage: `url(${event.imageUrl})`,
-        }}
-      >
-        <span style={styles.eventCategoryTag}>{event.category}</span>
-      </div>
-      <div style={styles.eventCardContent}>
-        <h3 style={styles.eventCardTitle}>{event.title}</h3>
-        <div style={styles.eventCardMeta}>
-          <p style={styles.eventMetaItem}>
-            <FaCalendarAlt style={{ marginRight: "5px" }} /> {event.date}
-          </p>
-          <p style={styles.eventMetaItem}>
-            <FaCompass style={{ marginRight: "5px" }} /> {event.location}
-          </p>
-          <p style={styles.eventMetaItemSmall}>
-            {event.attendees} / {event.capacity} attendees
-          </p>
-        </div>
-        <div style={styles.progressBarContainer}>
-          <div style={styles.progressBarBack}>
-            <div
-              style={{
-                ...styles.progressBarFill,
-                width: `${availabilityPercent}%`,
-              }}
-            ></div>
-          </div>
-          <span style={styles.progressBarText}>
-            Availability: {availabilityPercent}%
-          </span>
-        </div>
-      </div>
-    </div>
-  );
+    useEffect(() => {
+        const fetchEvents = async () => {
+        setLoading(true);
+        setError(null);
+        // Thay đổi URL API phù hợp với project của bạn nếu cần
+        const apiUrl = `http://localhost:8000/events?status=${status}`; 
+
+        try {
+            const res = await fetch(apiUrl, {
+            headers: {
+                Accept: "application/json",
+            },
+            });
+
+            if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+            }
+
+            const result = await res.json();
+
+            if (result.success && Array.isArray(result.data)) {
+            setEvents(result.data);
+            } else {
+            setError("Invalid data format from API.");
+            }
+        } catch (err: any) {
+            console.error("Failed to fetch events:", err);
+            setError(`Failed to fetch events: ${err.message}`);
+        } finally {
+            setLoading(false);
+        }
+        };
+
+        fetchEvents();
+    }, [status]);
+
+    return { events, loading, error };
 };
 
-// --- Component Chính Dashboard ---
+// --- EventCard (Giữ nguyên) ---
+const EventCard: React.FC<{ event: ApiEvent, onClick: () => void }> = ({ event, onClick }) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const { currentVolunteers, maxVolunteers } = event.capacity;
+    const availabilityPercent = Math.min(
+        100,
+        Math.round((currentVolunteers / maxVolunteers) * 100)
+    );
+
+    const imageUrl =
+        event.media.images[0] ||
+        "https://images.unsplash.com/photo-1540321213459-715764d1f274?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNTYxNzd8MHwxfGFsbHx8fHx8fHx8fDE2Mzg3ODU3NjI&ixlib=rb-1.2.1&q=80&w=600";
+
+    const formattedDate = useMemo(() => {
+        try {
+        const date = new Date(event.schedule.startDate);
+        if (isNaN(date.getTime())) return "N/A";
+        return date.toLocaleDateString("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+        });
+        } catch {
+        return "N/A";
+        }
+    }, [event.schedule.startDate]);
+
+    return (
+        <div 
+            style={{
+                ...styles.eventCard,
+                transform: isHovered ? "translateY(-5px)" : "translateY(0)",
+                boxShadow: isHovered ? "0 15px 35px rgba(0,0,0,0.1)" : "0 10px 25px rgba(0,0,0,0.03)",
+            }}
+            onClick={onClick}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+        <div
+            style={{
+            ...styles.eventImageWrapper,
+            backgroundImage: `url(${imageUrl})`,
+            }}
+        >
+            <span style={styles.eventCategoryTag}>{event.categoryName}</span>
+        </div>
+        <div style={styles.eventCardContent}>
+            <h3 style={styles.eventCardTitle}>{event.title}</h3>
+            <div style={styles.eventCardMeta}>
+            <p style={styles.eventMetaItem}>
+                <FaCalendarAlt style={{ marginRight: "5px" }} /> {formattedDate}
+            </p>
+            <p style={styles.eventMetaItem}>
+                <FaMapMarkerAlt style={{ marginRight: "5px" }} />{" "}
+                {`${event.location.address}, ${event.location.district}`}
+            </p>
+            <p style={styles.eventMetaItemSmall}>
+                <FaUsers style={{ marginRight: "5px" }} />
+                {currentVolunteers} / {maxVolunteers} tình nguyện viên
+            </p>
+            </div>
+            <div style={styles.progressBarContainer}>
+            <div style={styles.progressBarBack}>
+                <div
+                style={{
+                    ...styles.progressBarFill,
+                    width: `${availabilityPercent}%`,
+                }}
+                ></div>
+            </div>
+            <span style={styles.progressBarText}>
+                Đã đăng ký: {availabilityPercent}%
+            </span>
+            </div>
+        </div>
+        </div>
+    );
+};
+
+
+// --- DASHBOARD COMPONENT ---
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState<
@@ -155,13 +189,66 @@ const Dashboard: React.FC = () => {
   >("browse");
   const [user, setUser] = useState<UserData | null>(null);
   const [showMenu, setShowMenu] = useState(false);
+  
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<ApiEvent | null>(null);
+  const [isSaveButtonHovered, setIsSaveButtonHovered] = useState(false);
+  
+  // --- THÊM/CẬP NHẬT STATE CHO NOTIFICATION ---
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [forceShowNotification, setForceShowNotification] = useState(false);
+  
+  const PANEL_WIDTH = 450; 
 
-  // STATE MỚI CHO UPDATE PROFILE
+  // interface Registration { // Không cần thiết nếu không dùng trong component Dashboard
+  //     id: string;
+  //     eventId: string; 
+  //     roleName: string;
+  //     status: "pending" | "confirmed" | "rejected";
+  //   }
+
+  const handleCardClick = (event: ApiEvent) => {
+    setSelectedEvent(event);
+    setIsPanelOpen(true);
+  };
+  
+  const handleClosePanel = () => {
+    setIsPanelOpen(false);
+    setSelectedEvent(null);
+  };
+  
+  // --- HÀM CẬP NHẬT SỐ LƯỢNG THÔNG BÁO (Callback từ NotificationHandler) ---
+  const handleNotificationCountChange = useCallback((count: number) => {
+      setNotificationCount(count);
+  }, []);
+
+  // --- HÀM XỬ LÝ KHI CLICK VÀO ICON CHUÔNG (Trigger NotificationHandler hiển thị) ---
+  const handleNotificationIconClick = () => {
+      if (notificationCount > 0) {
+          // Kích hoạt việc hiển thị thông báo đầu tiên trong NotificationHandler
+          setForceShowNotification(true);
+          // Đóng menu nếu đang mở
+          setShowMenu(false); 
+      }
+  };
+  
+  // --- HÀM ĐƯỢC GỌI KHI NotificationHandler ĐÃ XỬ LÝ FORCE SHOW (Đảm bảo chỉ trigger 1 lần) ---
+  const handleForceShowHandled = useCallback(() => {
+      setForceShowNotification(false);
+  }, []);
+
+
+  const {
+    events: publishedEvents,
+    loading: eventsLoading,
+    error: eventsError,
+  } = useFetchEvents("published");
+
   const [formData, setFormData] = useState<any>({});
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
-
-  // HÀM LẤY DỮ LIỆU PROFILE BAN ĐẦU
+  
+  // --- fetchUserProfile (Giữ nguyên) ---
   const fetchUserProfile = useCallback(async () => {
     const token = localStorage.getItem("accessToken");
     const defaultAvatarUrl =
@@ -197,7 +284,6 @@ const Dashboard: React.FC = () => {
           : `http://localhost:8000${userData.avatar}`
         : defaultAvatarUrl;
 
-      // Đặt các giá trị null thành chuỗi rỗng để form kiểm soát tốt hơn
       const dob = userData.dateOfBirth
         ? userData.dateOfBirth.split("T")[0]
         : "";
@@ -219,8 +305,8 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     fetchUserProfile();
   }, [fetchUserProfile]);
-
-  // HÀM XỬ LÝ FORM INPUT
+  
+  // --- Các handlers khác (Giữ nguyên) ---
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -231,7 +317,6 @@ const Dashboard: React.FC = () => {
     setUpdateMessage(null);
   };
 
-  // HÀM XỬ LÝ UPDATE PROFILE
   const handleUpdateProfile = async () => {
     if (!user) return;
     setIsUpdating(true);
@@ -266,13 +351,11 @@ const Dashboard: React.FC = () => {
       const result = await res.json();
 
       if (res.ok && result.success) {
-        // Cập nhật state user và form data với dữ liệu mới
         const updatedData = result.data;
         const updatedDob = updatedData.dateOfBirth
           ? updatedData.dateOfBirth.split("T")[0]
           : "";
 
-        // Cập nhật URL avatar đầy đủ nếu API chỉ trả về path
         updatedData.avatar = updatedData.avatar.startsWith("http")
           ? updatedData.avatar
           : `http://localhost:8000${updatedData.avatar}`;
@@ -301,14 +384,36 @@ const Dashboard: React.FC = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("accessToken"); // Sửa thành accessToken
+    localStorage.removeItem("accessToken"); 
     localStorage.removeItem("refreshToken");
     navigate("/login");
   };
+  
+  // --- Cập nhật Style để áp dụng hiệu ứng thu gọn khi EventDetailPanel mở ---
+  const mainContentShrinkStyle: React.CSSProperties = {
+      width: isPanelOpen 
+          ? `calc(100% - 260px - ${PANEL_WIDTH}px)` 
+          : 'calc(100% - 260px)',
+      paddingRight: isPanelOpen ? `${40}px` : '40px', // Giữ paddingRight ổn định
+      transition: "width 0.4s ease-in-out, padding-right 0.4s ease-in-out",
+      boxSizing: 'border-box', 
+  };
+  
+  const contentMainBaseStyle: React.CSSProperties = {
+    flexGrow: 1,
+    padding: "30px 40px",
+    height: "100vh",
+    overflowY: "auto",
+    backgroundColor: COLORS.BACKGROUND,
+    boxSizing: "border-box",
+    transition: "width 0.4s ease-in-out, padding-right 0.4s ease-in-out",
+  };
+  
 
   return (
     <div style={styles.dashboardContainer}>
-      {/* --- SIDEBAR --- */}
+      
+      {/* 1. SIDEBAR (Giữ nguyên) */}
       <div style={styles.sidebar}>
         <div style={styles.sidebarTitle}>VolunteerHub</div>
         <div style={styles.sidebarSubtitle}>Event Management</div>
@@ -353,42 +458,53 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* --- MAIN CONTENT --- */}
-      <div style={styles.contentMain}>
-        {/* Top Bar */}
+      {/* 2. MAIN CONTENT (Đã áp dụng style thu gọn) */}
+      <div style={{...contentMainBaseStyle, ...mainContentShrinkStyle}}>
         <div style={styles.topBar}>
-          <div></div> {/* Spacer */}
-          {user && (
-            <div style={styles.userBox} onClick={() => setShowMenu(!showMenu)}>
-              <img
-                src={
-                  user.avatar ||
-                  "http://localhost:8000/uploads/avatars/default.png"
-                }
-                alt="avatar"
-                style={styles.avatar}
+          {/* Spacer (Giữ nguyên) */}
+          <div></div> 
+          
+          {/* USER BOX và NOTIFICATION ICON (Đã thêm headerRightGroup) */}
+          <div style={styles.headerRightGroup}>
+              {/* Thêm Notification Icon ở đây */}
+              <NotificationIcon 
+                  count={notificationCount} 
+                  onClick={handleNotificationIconClick}
               />
-              <span style={styles.userName}>{user.email}</span>
-              {showMenu && (
-                <div style={styles.dropdown}>
-                  <div
-                    style={styles.dropdownItem}
-                    onClick={() => setActiveSection("profile")}
-                  >
-                    Profile
+              
+              {user && (
+                  <div style={styles.userBox} onClick={() => setShowMenu(!showMenu)}>
+                      <img
+                          src={
+                              formData.avatar || 
+                              "http://localhost:8000/uploads/avatars/default.png"
+                          }
+                          alt="avatar"
+                          style={styles.avatar}
+                      />
+                      <span style={styles.userName}>{user.email}</span>
+                      {showMenu && (
+                          <div style={styles.dropdown}>
+                              <div
+                                  style={styles.dropdownItem}
+                                  onClick={() => {
+                                      setActiveSection("profile");
+                                      setShowMenu(false);
+                                  }}
+                              >
+                                  Profile
+                              </div>
+                              <div style={styles.dropdownItem} onClick={handleLogout}>
+                                  Logout
+                              </div>
+                          </div>
+                      )}
                   </div>
-                  <div style={styles.dropdownItem} onClick={handleLogout}>
-                    Logout
-                  </div>
-                </div>
               )}
-            </div>
-          )}
+          </div>
         </div>
-
-        {/* --- Nội dung thay đổi dựa trên activeSection --- */}
-
-        {/* SECTION: BROWSE EVENTS */}
+        
+        {/* Render sections */}
         {activeSection === "browse" && (
           <>
             <h1 style={styles.contentTitle}>Browse Events</h1>
@@ -410,15 +526,37 @@ const Dashboard: React.FC = () => {
               </button>
             </div>
 
-            <div style={styles.eventGrid}>
-              {mockEvents.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
+            {eventsLoading && (
+              <div style={styles.loadingMessage}>
+                <FaSpinner style={styles.spinnerIcon} /> Loading events...
+              </div>
+            )}
+
+            {eventsError && (
+              <div style={styles.errorMessage}>
+                <FaExclamationTriangle style={{ marginRight: "8px" }} />{" "}
+                {eventsError}
+              </div>
+            )}
+
+            {!eventsLoading && !eventsError && publishedEvents.length === 0 && (
+              <div style={styles.noDataMessage}>
+                No published events found.
+              </div>
+            )}
+
+            {!eventsLoading &&
+              !eventsError &&
+              publishedEvents.length > 0 && (
+                <div style={styles.eventGrid}>
+                  {publishedEvents.map((event) => (
+                    <EventCard key={event.id} event={event} onClick={() => handleCardClick(event)} />
+                  ))}
+                </div>
+              )}
           </>
         )}
 
-        {/* SECTION: MY PROFILE */}
         {activeSection === "profile" && (
           <div style={styles.profileContainer}>
             <h1 style={styles.contentTitle}>My Profile</h1>
@@ -427,7 +565,6 @@ const Dashboard: React.FC = () => {
             </p>
 
             <div style={styles.profileFormCard}>
-              {/* AVATAR */}
               <div
                 style={{
                   ...styles.formGroup,
@@ -438,7 +575,7 @@ const Dashboard: React.FC = () => {
                 <img
                   src={
                     formData.avatar ||
-                    "http://localhost:8000/uploads/avatars/default.png"
+                    "https://avatar.iran.liara.run/public/11"
                   }
                   alt="User Avatar"
                   style={styles.profileAvatar}
@@ -453,7 +590,6 @@ const Dashboard: React.FC = () => {
                 />
               </div>
 
-              {/* Email (DISABLED) */}
               <div style={styles.formGroup}>
                 <label style={styles.label}>Email</label>
                 <input
@@ -463,7 +599,6 @@ const Dashboard: React.FC = () => {
                 />
               </div>
 
-              {/* Full Name */}
               <div style={styles.formGroup}>
                 <label style={styles.label}>Full Name</label>
                 <input
@@ -474,7 +609,6 @@ const Dashboard: React.FC = () => {
                 />
               </div>
 
-              {/* Username */}
               <div style={styles.formGroup}>
                 <label style={styles.label}>Username</label>
                 <input
@@ -485,7 +619,6 @@ const Dashboard: React.FC = () => {
                 />
               </div>
 
-              {/* Phone Number */}
               <div style={styles.formGroup}>
                 <label style={styles.label}>Phone Number</label>
                 <input
@@ -497,7 +630,6 @@ const Dashboard: React.FC = () => {
                 />
               </div>
 
-              {/* Date of Birth */}
               <div style={styles.formGroup}>
                 <label style={styles.label}>Date of Birth</label>
                 <input
@@ -509,7 +641,6 @@ const Dashboard: React.FC = () => {
                 />
               </div>
 
-              {/* Bio */}
               <div style={styles.formGroup}>
                 <label style={styles.label}>Bio</label>
                 <textarea
@@ -520,12 +651,10 @@ const Dashboard: React.FC = () => {
                 />
               </div>
 
-              {/* Thông báo cập nhật */}
               {updateMessage && (
                 <p
                   style={{
                     ...styles.messageStyle,
-                    // Kiểm tra xem message bắt đầu bằng '🚀' (thành công) hay không
                     color: updateMessage.includes("successfully")
                       ? COLORS.SUCCESS
                       : COLORS.DANGER,
@@ -540,11 +669,16 @@ const Dashboard: React.FC = () => {
                 </p>
               )}
 
-              {/* Nút Save Changes */}
               <button
                 onClick={handleUpdateProfile}
                 disabled={isUpdating}
-                style={{ ...styles.saveButton, opacity: isUpdating ? 0.7 : 1 }}
+                onMouseEnter={() => setIsSaveButtonHovered(true)}
+                onMouseLeave={() => setIsSaveButtonHovered(false)}
+                style={{ 
+                    ...styles.saveButton, 
+                    opacity: isUpdating ? 0.7 : 1,
+                    ...(isSaveButtonHovered ? styles.saveButtonHover : {})
+                }}
               >
                 {isUpdating ? "Saving..." : "Save Changes"}
               </button>
@@ -552,24 +686,50 @@ const Dashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Các section khác */}
         {activeSection === "overview" && (
           <div style={{ padding: "20px" }}>
-            <h2>Overview Content</h2>
+            <h2>Overview Content (To be developed)</h2>
           </div>
         )}
         {activeSection === "insights" && (
           <div style={{ padding: "20px" }}>
-            <h2>Insights Content</h2>
+            <h2>Insights Content (To be developed)</h2>
           </div>
         )}
       </div>
+      
+      {/* 3. EVENT DETAIL PANEL (Giữ nguyên) */}
+      <EventDetailPanel event={selectedEvent} isOpen={isPanelOpen} onClose={handleClosePanel} />
+      
+      {/* 4. NOTIFICATION HANDLER (Đã thêm) */}
+      <NotificationHandler 
+          onNotificationCountChange={handleNotificationCountChange}
+          forceShowNotification={forceShowNotification}
+          onForceShowHandled={handleForceShowHandled}
+      />
+      
     </div>
   );
 };
 
-// --- STYLES ---
+// --- STYLE MỚI (CHỈ THÊM THUỘC TÍNH headerRightGroup VÀ CẬP NHẬT topBar) ---
 const styles: { [key: string]: React.CSSProperties } = {
+  // THÊM:
+  headerRightGroup: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+  },
+  // CẬP NHẬT topBar để căn chỉnh userBox và NotificationIcon
+  topBar: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "space-between", // Đảm bảo căn chỉnh hai bên
+    marginBottom: 30,
+    height: "50px",
+    alignItems: "center",
+  },
+  // Các styles khác (Giữ nguyên)
   dashboardContainer: {
     display: "flex",
     minHeight: "100vh",
@@ -579,8 +739,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
     overflow: "hidden",
   },
-
-  // Sidebar
   sidebar: {
     width: "260px",
     minWidth: "260px",
@@ -626,24 +784,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderRight: "none",
   },
   navIcon: { marginRight: "12px", fontSize: "18px" },
-
-  // Content
-  contentMain: {
-    flexGrow: 1,
-    padding: "30px 40px",
-    height: "100vh",
-    overflowY: "auto",
-    backgroundColor: COLORS.BACKGROUND,
-    boxSizing: "border-box",
-  },
-  topBar: {
-    width: "100%",
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: 30,
-    height: "50px",
-    alignItems: "center",
-  },
   userBox: {
     position: "relative",
     display: "flex",
@@ -680,8 +820,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: "14px",
     borderRadius: "6px",
     transition: "0.2s",
-    // Thêm hover:
-    // ':hover': { backgroundColor: '#f5f5f5' }
+    //'&:hover': {
+        backgroundColor: COLORS.LIGHT,
+    //}
   },
 
   contentTitle: {
@@ -698,7 +839,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginTop: 0,
   },
 
-  // Search Styles
   searchBarWrapper: {
     display: "flex",
     justifyContent: "space-between",
@@ -739,8 +879,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: "600",
     boxShadow: "0 2px 5px rgba(0,0,0,0.02)",
   },
-
-  // Event Grid
   eventGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
@@ -752,7 +890,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderRadius: "16px",
     boxShadow: "0 10px 25px rgba(0,0,0,0.03)",
     overflow: "hidden",
-    transition: "transform 0.2s",
+    transition: "transform 0.2s, box-shadow 0.2s",
     cursor: "pointer",
     border: `1px solid ${COLORS.BORDER}`,
   },
@@ -796,6 +934,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: "12px",
     color: COLORS.TEXT_SECONDARY,
     fontWeight: "500",
+    display: "flex",
+    alignItems: "center",
   },
   progressBarContainer: { marginTop: "15px" },
   progressBarBack: {
@@ -806,7 +946,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   progressBarFill: {
     height: "100%",
-    backgroundColor: COLORS.PRIMARY,
+    backgroundColor: COLORS.SUCCESS_ACCENT,
     borderRadius: "3px",
   },
   progressBarText: {
@@ -816,8 +956,40 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: "block",
     textAlign: "right",
   },
+  loadingMessage: {
+    textAlign: "center",
+    padding: "50px",
+    fontSize: "18px",
+    color: COLORS.PRIMARY,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  errorMessage: {
+    textAlign: "center",
+    padding: "50px",
+    fontSize: "18px",
+    color: COLORS.DANGER,
+    backgroundColor: "#fceaea",
+    borderRadius: "10px",
+    border: `1px solid ${COLORS.DANGER}`,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  noDataMessage: {
+    textAlign: "center",
+    padding: "50px",
+    fontSize: "18px",
+    color: COLORS.SECONDARY,
+    backgroundColor: COLORS.LIGHT,
+    borderRadius: "10px",
+  },
+  spinnerIcon: {
+    marginRight: "10px",
+    animation: "spin 1s linear infinite",
+  },
 
-  // --- PROFILE STYLES ---
   profileContainer: {
     maxWidth: "800px",
     paddingBottom: "50px",
@@ -857,7 +1029,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: COLORS.DARK,
     outline: "none",
     transition: "border-color 0.2s",
-    boxSizing: "border-box",
   },
   textarea: {
     width: "100%",
@@ -868,34 +1039,35 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundColor: COLORS.WHITE,
     color: COLORS.DARK,
     outline: "none",
-    minHeight: "120px",
-    fontFamily: "inherit",
+    minHeight: "100px",
     resize: "vertical",
-    boxSizing: "border-box",
+    transition: "border-color 0.2s",
   },
   saveButton: {
-    backgroundColor: COLORS.DARK,
+    backgroundColor: COLORS.SUCCESS,
     color: COLORS.WHITE,
-    padding: "14px 24px",
-    borderRadius: "8px",
-    border: "none",
+    padding: "12px 25px",
     fontSize: "16px",
     fontWeight: "600",
+    borderRadius: "8px",
+    border: "none",
     cursor: "pointer",
-    marginTop: "10px",
-    width: "100%",
-    transition: "background-color 0.2s",
-    // Thêm hover:
-    // ':hover': { backgroundColor: '#495057' }
+    transition: "background-color 0.2s, opacity 0.2s",
+    marginTop: "15px",
+    width: "auto",
+  },
+  saveButtonHover: {
+    backgroundColor: COLORS.SUCCESS_ACCENT, 
   },
   messageStyle: {
-    display: "flex",
-    alignItems: "center",
     padding: "10px 15px",
     borderRadius: "8px",
     fontWeight: "600",
+    fontSize: "14px",
+    marginTop: "20px",
+    display: "flex",
+    alignItems: "center",
     backgroundColor: COLORS.LIGHT,
-    marginBottom: "15px",
   },
 };
 
