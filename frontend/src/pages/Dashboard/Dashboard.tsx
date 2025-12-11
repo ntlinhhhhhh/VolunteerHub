@@ -1,441 +1,902 @@
-import React, { useEffect, useState } from "react";
-import { FaCompass, FaChartBar, FaCalendarAlt, FaSearch, FaFilter, FaUser } from 'react-icons/fa';
+import React, { useEffect, useState, useCallback } from "react";
+import {
+  FaCompass,
+  FaChartBar,
+  FaCalendarAlt,
+  FaSearch,
+  FaFilter,
+  FaUser,
+  FaCheckCircle,
+  FaExclamationTriangle,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+
+// --- Định nghĩa COLORS (Cần có để các styles hoạt động) ---
+const COLORS = {
+  PRIMARY: "#007bff",
+  SECONDARY: "#6c757d",
+  SUCCESS: "#28a745",
+  DANGER: "#dc3545",
+  WARNING: "#ffc107",
+  INFO: "#17a2b8",
+  LIGHT: "#f8f9fa",
+  DARK: "#343a40",
+  WHITE: "#ffffff",
+  BACKGROUND: "#f8f9fa",
+  CARD_BG: "#ffffff",
+  BORDER: "#e9ecef",
+  TEXT_SECONDARY: "#adb5bd",
+  DARK_NAVY: "#202124",
+  SUCCESS_ACCENT: "#34A853",
+};
 
 // --- Dữ liệu mô phỏng sự kiện ---
 interface Event {
-    id: number;
-    title: string;
-    category: 'Technology' | 'Music' | 'Business' | 'Food' | 'Art';
-    date: string;
-    location: string;
-    attendees: number;
-    capacity: number;
-    imageUrl: string;
+  id: number;
+  title: string;
+  category: "Technology" | "Music" | "Business" | "Food" | "Art";
+  date: string;
+  location: string;
+  attendees: number;
+  capacity: number;
+  imageUrl: string;
+}
+
+interface UserData {
+  id: string;
+  email: string;
+  username: string;
+  fullName: string | null;
+  phoneNumber: string | null;
+  avatar: string | null;
+  address: string | null;
+  bio: string | null;
+  dateOfBirth: string | null; // Sẽ là ISO string, cần xử lý để hiển thị YYYY-MM-DD
 }
 
 const mockEvents: Event[] = [
-    { id: 1, title: 'Tech Conference 2024', category: 'Technology', date: '2024-03-15', location: 'San Francisco, CA', attendees: 450, capacity: 500, imageUrl: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=600&h=400&ixlib=rb-4.0.3' },
-    { id: 2, title: 'Summer Music Festival', category: 'Music', date: '2024-06-20', location: 'Austin, TX', attendees: 2600, capacity: 3000, imageUrl: 'https://images.unsplash.com/photo-1514525253161-ec8542fe8263?auto=format&fit=crop&q=80&w=600&h=400&ixlib=rb-4.0.3' },
-    { id: 3, title: 'Marketing Workshop', category: 'Business', date: '2024-02-10', location: 'New York, NY', attendees: 129, capacity: 150, imageUrl: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=600&h=400&ixlib=rb-4.0.3' },
-    { id: 4, title: 'Food & Wine Expo', category: 'Food', date: '2024-04-05', location: 'Chicago, IL', attendees: 680, capacity: 800, imageUrl: 'https://images.unsplash.com/photo-1550547660-d94b8cd9a9c5?auto=format&fit=crop&q=80&w=600&h=400&ixlib=rb-4.0.3' },
+  {
+    id: 1,
+    title: "Tech Conference 2024",
+    category: "Technology",
+    date: "2024-03-15",
+    location: "San Francisco, CA",
+    attendees: 450,
+    capacity: 500,
+    imageUrl:
+      "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=600&h=400&ixlib=rb-4.0.3",
+  },
+  {
+    id: 2,
+    title: "Summer Music Festival",
+    category: "Music",
+    date: "2024-06-20",
+    location: "Austin, TX",
+    attendees: 2600,
+    capacity: 3000,
+    imageUrl:
+      "https://images.unsplash.com/photo-1514525253161-ec8542fe8263?auto=format&fit=crop&q=80&w=600&h=400&ixlib=rb-4.0.3",
+  },
+  {
+    id: 3,
+    title: "Marketing Workshop",
+    category: "Business",
+    date: "2024-02-10",
+    location: "New York, NY",
+    attendees: 129,
+    capacity: 150,
+    imageUrl:
+      "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=600&h=400&ixlib=rb-4.0.3",
+  },
+  {
+    id: 4,
+    title: "Food & Wine Expo",
+    category: "Food",
+    date: "2024-04-05",
+    location: "Chicago, IL",
+    attendees: 680,
+    capacity: 800,
+    imageUrl:
+      "https://images.unsplash.com/photo-1550547660-d94b8cd9a9c5?auto=format&fit=crop&q=80&w=600&h=400&ixlib=rb-4.0.3",
+  },
 ];
 
 // --- Component Thẻ Sự Kiện ---
 const EventCard: React.FC<{ event: Event }> = ({ event }) => {
-    const availabilityPercent = Math.round((event.attendees / event.capacity) * 100);
-    return (
-        <div style={styles.eventCard}>
-            <div style={{ ...styles.eventImageWrapper, backgroundImage: `url(${event.imageUrl})` }}>
-                <span style={styles.eventCategoryTag}>{event.category}</span>
-            </div>
-            <div style={styles.eventCardContent}>
-                <h3 style={styles.eventCardTitle}>{event.title}</h3>
-                <div style={styles.eventCardMeta}>
-                    <p style={styles.eventMetaItem}><FaCalendarAlt style={{ marginRight: '5px' }} /> {event.date}</p>
-                    <p style={styles.eventMetaItem}><FaCompass style={{ marginRight: '5px' }} /> {event.location}</p>
-                    <p style={styles.eventMetaItemSmall}>{event.attendees} / {event.capacity} attendees</p>
-                </div>
-                <div style={styles.progressBarContainer}>
-                    <div style={styles.progressBarBack}>
-                        <div style={{ ...styles.progressBarFill, width: `${availabilityPercent}%` }}></div>
-                    </div>
-                    <span style={styles.progressBarText}>Availability: {availabilityPercent}%</span>
-                </div>
-            </div>
+  const availabilityPercent = Math.round(
+    (event.attendees / event.capacity) * 100
+  );
+  return (
+    <div style={styles.eventCard}>
+      <div
+        style={{
+          ...styles.eventImageWrapper,
+          backgroundImage: `url(${event.imageUrl})`,
+        }}
+      >
+        <span style={styles.eventCategoryTag}>{event.category}</span>
+      </div>
+      <div style={styles.eventCardContent}>
+        <h3 style={styles.eventCardTitle}>{event.title}</h3>
+        <div style={styles.eventCardMeta}>
+          <p style={styles.eventMetaItem}>
+            <FaCalendarAlt style={{ marginRight: "5px" }} /> {event.date}
+          </p>
+          <p style={styles.eventMetaItem}>
+            <FaCompass style={{ marginRight: "5px" }} /> {event.location}
+          </p>
+          <p style={styles.eventMetaItemSmall}>
+            {event.attendees} / {event.capacity} attendees
+          </p>
         </div>
-    );
+        <div style={styles.progressBarContainer}>
+          <div style={styles.progressBarBack}>
+            <div
+              style={{
+                ...styles.progressBarFill,
+                width: `${availabilityPercent}%`,
+              }}
+            ></div>
+          </div>
+          <span style={styles.progressBarText}>
+            Availability: {availabilityPercent}%
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 // --- Component Chính Dashboard ---
 const Dashboard: React.FC = () => {
-    const navigate = useNavigate();
-    // Thêm trạng thái 'profile' vào activeSection
-    const [activeSection, setActiveSection] = useState<'overview' | 'browse' | 'insights' | 'profile'>('browse');
-    const [user, setUser] = useState<any>(null);
-    const [showMenu, setShowMenu] = useState(false);
+  const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState<
+    "overview" | "browse" | "insights" | "profile"
+  >("browse");
+  const [user, setUser] = useState<UserData | null>(null);
+  const [showMenu, setShowMenu] = useState(false);
 
-    // useEffect(() => {
-    //     const token = localStorage.getItem("accessToken");
-    //     // Giả lập dữ liệu user để hiển thị ngay (bạn có thể bỏ comment fetch để chạy thật)
-    //     // setUser({ 
-    //     //     email: "zmint2254@gmail.com", 
-    //     //     fullName: "ZM", 
-    //     //     username: "zm", 
-    //     //     phoneNumber: "0123456789",
-    //     //     bio: "Volunteer enthusiast",
-    //     //     avatar: "https://i.imgur.com/NGVz6NU.png"
-    //     // });
+  // STATE MỚI CHO UPDATE PROFILE
+  const [formData, setFormData] = useState<any>({});
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState<string | null>(null);
 
-    //     // Code fetch cũ của bạn giữ nguyên nếu cần
-    //     if (!token) return;
-    //     fetch("http://localhost:8000/users/me", { headers: { Authorization: `Bearer ${token}` } })
-    //     .then((res) => res.json())
-    //     .then((data) => setUser(data))
-    //     .catch((err) => console.error(err));
+  // HÀM LẤY DỮ LIỆU PROFILE BAN ĐẦU
+  const fetchUserProfile = useCallback(async () => {
+    const token = localStorage.getItem("accessToken");
+    const defaultAvatarUrl =
+      "http://localhost:8000/uploads/avatars/default.png";
 
-    // }, []);
-    useEffect(() => {
-        const token = localStorage.getItem("accessToken");
-        const defaultAvatarUrl = 'http://localhost:8000/uploads/avatars/default.png';
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
-        if (!token) {
-            navigate("/login");
-            return;
-        }
+    try {
+      const res = await fetch("http://localhost:8000/users/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        fetch("http://localhost:8000/users/me", { headers: { Authorization: `Bearer ${token}` } })
-            .then((res) => {
-                if (res.status === 401) {
-                    localStorage.removeItem("accessToken");
-                    localStorage.removeItem("refreshToken");
-                    navigate("/login");
-                    return null;
-                }
-                return res.json();
-            })
-            .then((result) => {
-                if (!result || !result.success || !result.data) return;
-
-                // --- SỬA ĐỔI QUAN TRỌNG: Lấy user data từ result.data ---
-                const userData = result.data;
-
-                // Xử lý avatar: Gán URL mặc định nếu avatar là null
-
-                userData.avatar = userData.avatar
-                    ? `http://localhost:8000${userData.avatar}` // path lưu trong DB, ví dụ /uploads/avatars/user123.png
-                    : defaultAvatarUrl;
-
-                // Xử lý các trường null khác (đảm bảo chúng không phải là null khi gán)
-                // Đây chỉ là ví dụ để đảm bảo các trường profile có giá trị chuỗi rỗng thay vì null
-                userData.fullName = userData.fullName || '';
-                userData.username = userData.username || '';
-                userData.phoneNumber = userData.phoneNumber || '';
-                userData.bio = userData.bio || '';
-
-                setUser(userData); // Gán dữ liệu user đã được xử lý
-            })
-            .catch((err) => console.error("Failed to fetch user:", err));
-
-    }, [navigate]);
-
-    const handleLogout = () => {
-        localStorage.removeItem("token");
+      if (res.status === 401) {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
         navigate("/login");
-    };
+        return;
+      }
 
-    return (
-        <div style={styles.dashboardContainer}>
-            {/* --- SIDEBAR (Giữ nguyên) --- */}
-            <div style={styles.sidebar}>
-                <div style={styles.sidebarTitle}>VolunteerHub</div>
-                <div style={styles.sidebarSubtitle}>Event Management</div>
+      const result = await res.json();
 
-                <div style={styles.navItemContainer}>
-                    <div style={{ ...styles.navItem, ...(activeSection === 'overview' ? styles.navItemSelected : {}) }} onClick={() => setActiveSection('overview')}>
-                        <FaCompass style={styles.navIcon} /> Overview
-                    </div>
-                    <div style={{ ...styles.navItem, ...(activeSection === 'browse' ? styles.navItemSelected : {}) }} onClick={() => setActiveSection('browse')}>
-                        <FaCalendarAlt style={styles.navIcon} /> Browse Events
-                    </div>
-                    <div style={{ ...styles.navItem, ...(activeSection === 'insights' ? styles.navItemSelected : {}) }} onClick={() => setActiveSection('insights')}>
-                        <FaChartBar style={styles.navIcon} /> Attendee Insights
-                    </div>
-                    {/* Thêm mục Profile vào sidebar để dễ click */}
-                    <div style={{ ...styles.navItem, ...(activeSection === 'profile' ? styles.navItemSelected : {}) }} onClick={() => setActiveSection('profile')}>
-                        <FaUser style={styles.navIcon} /> My Profile
-                    </div>
-                </div>
-            </div>
+      if (!result || !result.success || !result.data) return;
 
-            {/* --- MAIN CONTENT --- */}
-            <div style={styles.contentMain}>
-                {/* Top Bar */}
-                <div style={styles.topBar}>
-                    <div></div> {/* Spacer */}
-                    {user && (
-                        <div style={styles.userBox} onClick={() => setShowMenu(!showMenu)}>
-                            <img src={user.avatar} alt="avatar" style={styles.avatar} />
-                            <span style={styles.userName}>{user.email}</span>
-                            {showMenu && (
-                                <div style={styles.dropdown}>
-                                    <div style={styles.dropdownItem} onClick={() => setActiveSection("profile")}>Profile</div>
-                                    <div style={styles.dropdownItem} onClick={handleLogout}>Logout</div>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
+      const userData = result.data;
 
-                {/* --- Nội dung thay đổi dựa trên activeSection --- */}
+      // Xử lý avatar
+      userData.avatar = userData.avatar
+        ? userData.avatar.startsWith("http")
+          ? userData.avatar
+          : `http://localhost:8000${userData.avatar}`
+        : defaultAvatarUrl;
 
-                {/* SECTION: BROWSE EVENTS */}
-                {activeSection === 'browse' && (
-                    <>
-                        <h1 style={styles.contentTitle}>Browse Events</h1>
-                        <p style={styles.contentSubtitle}>Discover volunteering events you love</p>
+      // Đặt các giá trị null thành chuỗi rỗng để form kiểm soát tốt hơn
+      const dob = userData.dateOfBirth
+        ? userData.dateOfBirth.split("T")[0]
+        : "";
 
-                        <div style={styles.searchBarWrapper}>
-                            <div style={styles.searchInputGroup}>
-                                <FaSearch style={styles.searchIcon} />
-                                <input type="text" placeholder="Search events..." style={styles.searchInput} />
-                            </div>
-                            <button style={styles.filterButton}>
-                                <FaFilter style={{ marginRight: '8px' }} /> Filters
-                            </button>
-                        </div>
+      setUser(userData);
+      setFormData({
+        fullName: userData.fullName || "",
+        username: userData.username || "",
+        phoneNumber: userData.phoneNumber || "",
+        bio: userData.bio || "",
+        dateOfBirth: dob,
+        avatar: userData.avatar,
+      });
+    } catch (err) {
+      console.error("Failed to fetch user:", err);
+    }
+  }, [navigate]);
 
-                        <div style={styles.eventGrid}>
-                            {mockEvents.map(event => <EventCard key={event.id} event={event} />)}
-                        </div>
-                    </>
-                )}
+  useEffect(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
 
-                {/* SECTION: MY PROFILE (Nội dung bạn muốn thay thế) */}
-                {activeSection === 'profile' && (
-                    <div style={styles.profileContainer}>
-                        <h1 style={styles.contentTitle}>My Profile</h1>
-                        <p style={styles.contentSubtitle}>Manage your personal information</p>
+  // HÀM XỬ LÝ FORM INPUT
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+    setUpdateMessage(null);
+  };
 
-                        <div style={styles.profileFormCard}>
-                            <div style={styles.formGroup}>
-                                <label style={styles.label}>Email</label>
-                                <input value={user?.email || ''} disabled style={{ ...styles.input, background: "#e9ecef" }} />
-                            </div>
+  // HÀM XỬ LÝ UPDATE PROFILE
+  const handleUpdateProfile = async () => {
+    if (!user) return;
+    setIsUpdating(true);
+    setUpdateMessage(null);
 
-                            <div style={styles.formGroup}>
-                                <label style={styles.label}>Full Name</label>
-                                <input defaultValue={user?.fullName || ''} style={styles.input} />
-                            </div>
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      setUpdateMessage("Authentication failed. Please log in again.");
+      setIsUpdating(false);
+      return;
+    }
 
-                            <div style={styles.formGroup}>
-                                <label style={styles.label}>Username</label>
-                                <input defaultValue={user?.username || ''} style={styles.input} />
-                            </div>
+    try {
+      const bodyData = {
+        fullName: formData.fullName,
+        username: formData.username,
+        phoneNumber: formData.phoneNumber,
+        bio: formData.bio,
+        dateOfBirth: formData.dateOfBirth,
+        avatar: formData.avatar,
+      };
 
-                            <div style={styles.formGroup}>
-                                <label style={styles.label}>Phone Number</label>
-                                <input defaultValue={user?.phoneNumber || ''} style={styles.input} />
-                            </div>
+      const res = await fetch("http://localhost:8000/users/me", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(bodyData),
+      });
 
-                            <div style={styles.formGroup}>
-                                <label style={styles.label}>Bio</label>
-                                <textarea defaultValue={user?.bio || ''} style={styles.textarea} />
-                            </div>
+      const result = await res.json();
 
-                            <button style={styles.saveButton}>Save Changes</button>
-                        </div>
-                    </div>
-                )}
+      if (res.ok && result.success) {
+        // Cập nhật state user và form data với dữ liệu mới
+        const updatedData = result.data;
+        const updatedDob = updatedData.dateOfBirth
+          ? updatedData.dateOfBirth.split("T")[0]
+          : "";
 
-                {/* Các section khác */}
-                {activeSection === 'overview' && <div style={{ padding: '20px' }}><h2>Overview Content</h2></div>}
-                {activeSection === 'insights' && <div style={{ padding: '20px' }}><h2>Insights Content</h2></div>}
-            </div>
+        // Cập nhật URL avatar đầy đủ nếu API chỉ trả về path
+        updatedData.avatar = updatedData.avatar.startsWith("http")
+          ? updatedData.avatar
+          : `http://localhost:8000${updatedData.avatar}`;
+
+        setUser(updatedData);
+        setFormData({
+          ...formData,
+          fullName: updatedData.fullName || "",
+          username: updatedData.username || "",
+          phoneNumber: updatedData.phoneNumber || "",
+          bio: updatedData.bio || "",
+          dateOfBirth: updatedDob,
+          avatar: updatedData.avatar,
+        });
+        setUpdateMessage("🚀 Profile updated successfully!");
+      } else {
+        setUpdateMessage(
+          `Error: ${result.message || "Failed to update profile."}`
+        );
+      }
+    } catch (error) {
+      setUpdateMessage("Network error. Could not connect to the server.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken"); // Sửa thành accessToken
+    localStorage.removeItem("refreshToken");
+    navigate("/login");
+  };
+
+  return (
+    <div style={styles.dashboardContainer}>
+      {/* --- SIDEBAR --- */}
+      <div style={styles.sidebar}>
+        <div style={styles.sidebarTitle}>VolunteerHub</div>
+        <div style={styles.sidebarSubtitle}>Event Management</div>
+
+        <div style={styles.navItemContainer}>
+          <div
+            style={{
+              ...styles.navItem,
+              ...(activeSection === "overview" ? styles.navItemSelected : {}),
+            }}
+            onClick={() => setActiveSection("overview")}
+          >
+            <FaCompass style={styles.navIcon} /> Overview
+          </div>
+          <div
+            style={{
+              ...styles.navItem,
+              ...(activeSection === "browse" ? styles.navItemSelected : {}),
+            }}
+            onClick={() => setActiveSection("browse")}
+          >
+            <FaCalendarAlt style={styles.navIcon} /> Browse Events
+          </div>
+          <div
+            style={{
+              ...styles.navItem,
+              ...(activeSection === "insights" ? styles.navItemSelected : {}),
+            }}
+            onClick={() => setActiveSection("insights")}
+          >
+            <FaChartBar style={styles.navIcon} /> Attendee Insights
+          </div>
+          <div
+            style={{
+              ...styles.navItem,
+              ...(activeSection === "profile" ? styles.navItemSelected : {}),
+            }}
+            onClick={() => setActiveSection("profile")}
+          >
+            <FaUser style={styles.navIcon} /> My Profile
+          </div>
         </div>
-    );
+      </div>
+
+      {/* --- MAIN CONTENT --- */}
+      <div style={styles.contentMain}>
+        {/* Top Bar */}
+        <div style={styles.topBar}>
+          <div></div> {/* Spacer */}
+          {user && (
+            <div style={styles.userBox} onClick={() => setShowMenu(!showMenu)}>
+              <img
+                src={
+                  user.avatar ||
+                  "http://localhost:8000/uploads/avatars/default.png"
+                }
+                alt="avatar"
+                style={styles.avatar}
+              />
+              <span style={styles.userName}>{user.email}</span>
+              {showMenu && (
+                <div style={styles.dropdown}>
+                  <div
+                    style={styles.dropdownItem}
+                    onClick={() => setActiveSection("profile")}
+                  >
+                    Profile
+                  </div>
+                  <div style={styles.dropdownItem} onClick={handleLogout}>
+                    Logout
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* --- Nội dung thay đổi dựa trên activeSection --- */}
+
+        {/* SECTION: BROWSE EVENTS */}
+        {activeSection === "browse" && (
+          <>
+            <h1 style={styles.contentTitle}>Browse Events</h1>
+            <p style={styles.contentSubtitle}>
+              Discover volunteering events you love
+            </p>
+
+            <div style={styles.searchBarWrapper}>
+              <div style={styles.searchInputGroup}>
+                <FaSearch style={styles.searchIcon} />
+                <input
+                  type="text"
+                  placeholder="Search events..."
+                  style={styles.searchInput}
+                />
+              </div>
+              <button style={styles.filterButton}>
+                <FaFilter style={{ marginRight: "8px" }} /> Filters
+              </button>
+            </div>
+
+            <div style={styles.eventGrid}>
+              {mockEvents.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* SECTION: MY PROFILE */}
+        {activeSection === "profile" && (
+          <div style={styles.profileContainer}>
+            <h1 style={styles.contentTitle}>My Profile</h1>
+            <p style={styles.contentSubtitle}>
+              Manage your personal information
+            </p>
+
+            <div style={styles.profileFormCard}>
+              {/* AVATAR */}
+              <div
+                style={{
+                  ...styles.formGroup,
+                  textAlign: "center",
+                  marginBottom: "30px",
+                }}
+              >
+                <img
+                  src={
+                    formData.avatar ||
+                    "http://localhost:8000/uploads/avatars/default.png"
+                  }
+                  alt="User Avatar"
+                  style={styles.profileAvatar}
+                />
+                <label style={styles.label}>Avatar URL</label>
+                <input
+                  name="avatar"
+                  value={formData.avatar || ""}
+                  onChange={handleInputChange}
+                  placeholder="Enter Avatar URL"
+                  style={styles.input}
+                />
+              </div>
+
+              {/* Email (DISABLED) */}
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Email</label>
+                <input
+                  value={user?.email || ""}
+                  disabled
+                  style={{ ...styles.input, background: "#e9ecef" }}
+                />
+              </div>
+
+              {/* Full Name */}
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Full Name</label>
+                <input
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                />
+              </div>
+
+              {/* Username */}
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Username</label>
+                <input
+                  name="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                />
+              </div>
+
+              {/* Phone Number */}
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Phone Number</label>
+                <input
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                  type="tel"
+                  style={styles.input}
+                />
+              </div>
+
+              {/* Date of Birth */}
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Date of Birth</label>
+                <input
+                  name="dateOfBirth"
+                  value={formData.dateOfBirth}
+                  onChange={handleInputChange}
+                  type="date"
+                  style={styles.input}
+                />
+              </div>
+
+              {/* Bio */}
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Bio</label>
+                <textarea
+                  name="bio"
+                  value={formData.bio}
+                  onChange={handleInputChange}
+                  style={styles.textarea}
+                />
+              </div>
+
+              {/* Thông báo cập nhật */}
+              {updateMessage && (
+                <p
+                  style={{
+                    ...styles.messageStyle,
+                    // Kiểm tra xem message bắt đầu bằng '🚀' (thành công) hay không
+                    color: updateMessage.includes("successfully")
+                      ? COLORS.SUCCESS
+                      : COLORS.DANGER,
+                  }}
+                >
+                  {updateMessage.includes("successfully") ? (
+                    <FaCheckCircle style={{ marginRight: "8px" }} />
+                  ) : (
+                    <FaExclamationTriangle style={{ marginRight: "8px" }} />
+                  )}
+                  {updateMessage.replace("🚀 ", "")}
+                </p>
+              )}
+
+              {/* Nút Save Changes */}
+              <button
+                onClick={handleUpdateProfile}
+                disabled={isUpdating}
+                style={{ ...styles.saveButton, opacity: isUpdating ? 0.7 : 1 }}
+              >
+                {isUpdating ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Các section khác */}
+        {activeSection === "overview" && (
+          <div style={{ padding: "20px" }}>
+            <h2>Overview Content</h2>
+          </div>
+        )}
+        {activeSection === "insights" && (
+          <div style={{ padding: "20px" }}>
+            <h2>Insights Content</h2>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 // --- STYLES ---
 const styles: { [key: string]: React.CSSProperties } = {
-    dashboardContainer: {
-        display: 'flex',
-        minHeight: '100vh',
-        height: '100vh',
-        width: '100vw',
-        backgroundColor: '#f8f9fa',
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", // Font đẹp hơn chút
-        overflow: 'hidden',
-    },
+  dashboardContainer: {
+    display: "flex",
+    minHeight: "100vh",
+    height: "100vh",
+    width: "100vw",
+    backgroundColor: COLORS.BACKGROUND,
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    overflow: "hidden",
+  },
 
-    // Sidebar
-    sidebar: {
-        width: '260px',
-        minWidth: '260px',
-        backgroundColor: 'white',
-        padding: '30px 0',
-        borderRight: '1px solid #e9ecef',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100vh',
-        overflowY: 'auto',
-    },
-    sidebarTitle: {
-        fontSize: '24px',
-        fontWeight: 'bold',
-        color: '#343a40',
-        padding: '0 30px',
-        marginBottom: '5px',
-    },
-    sidebarSubtitle: {
-        fontSize: '14px',
-        color: '#adb5bd',
-        marginBottom: '40px',
-        padding: '0 30px',
-    },
-    navItemContainer: { padding: '0' },
-    navItem: {
-        display: 'flex',
-        alignItems: 'center',
-        padding: '14px 30px',
-        cursor: 'pointer',
-        color: '#495057',
-        fontSize: '15px',
-        fontWeight: '500',
-        transition: 'all 0.2s',
-        marginBottom: '2px',
-        borderLeft: '4px solid transparent', // Để hiệu ứng hover đẹp hơn
-    },
-    navItemSelected: {
-        backgroundColor: '#f0f7ff',
-        color: '#007bff',
-        fontWeight: '600',
-        borderLeft: '4px solid #007bff',
-        borderRight: 'none', // Override style cũ
-    },
-    navIcon: { marginRight: '12px', fontSize: '18px' },
+  // Sidebar
+  sidebar: {
+    width: "260px",
+    minWidth: "260px",
+    backgroundColor: COLORS.WHITE,
+    padding: "30px 0",
+    borderRight: `1px solid ${COLORS.BORDER}`,
+    display: "flex",
+    flexDirection: "column",
+    height: "100vh",
+    overflowY: "auto",
+  },
+  sidebarTitle: {
+    fontSize: "24px",
+    fontWeight: "bold",
+    color: COLORS.DARK,
+    padding: "0 30px",
+    marginBottom: "5px",
+  },
+  sidebarSubtitle: {
+    fontSize: "14px",
+    color: COLORS.TEXT_SECONDARY,
+    marginBottom: "40px",
+    padding: "0 30px",
+  },
+  navItemContainer: { padding: "0" },
+  navItem: {
+    display: "flex",
+    alignItems: "center",
+    padding: "14px 30px",
+    cursor: "pointer",
+    color: COLORS.SECONDARY,
+    fontSize: "15px",
+    fontWeight: "500",
+    transition: "all 0.2s",
+    marginBottom: "2px",
+    borderLeft: "4px solid transparent",
+  },
+  navItemSelected: {
+    backgroundColor: "#f0f7ff",
+    color: COLORS.PRIMARY,
+    fontWeight: "600",
+    borderLeft: `4px solid ${COLORS.PRIMARY}`,
+    borderRight: "none",
+  },
+  navIcon: { marginRight: "12px", fontSize: "18px" },
 
-    // Content
-    contentMain: {
-        flexGrow: 1,
-        padding: '30px 40px',
-        height: '100vh',
-        overflowY: 'auto',
-        backgroundColor: '#f8f9fa',
-        boxSizing: 'border-box',
-    },
-    topBar: {
-        width: "100%",
-        display: "flex",
-        justifyContent: "space-between",
-        marginBottom: 30,
-        height: '50px',
-        alignItems: 'center',
-    },
-    userBox: {
-        position: "relative",
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        padding: "6px 12px",
-        background: "white",
-        border: "1px solid #e9ecef",
-        borderRadius: 20,
-        cursor: "pointer",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.03)",
-        transition: "0.2s",
-    },
-    avatar: { width: 32, height: 32, borderRadius: "50%", objectFit: "cover" },
-    userName: { fontSize: 14, color: "#343a40", fontWeight: '500' },
+  // Content
+  contentMain: {
+    flexGrow: 1,
+    padding: "30px 40px",
+    height: "100vh",
+    overflowY: "auto",
+    backgroundColor: COLORS.BACKGROUND,
+    boxSizing: "border-box",
+  },
+  topBar: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: 30,
+    height: "50px",
+    alignItems: "center",
+  },
+  userBox: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    padding: "6px 12px",
+    background: COLORS.WHITE,
+    border: `1px solid ${COLORS.BORDER}`,
+    borderRadius: 20,
+    cursor: "pointer",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.03)",
+    transition: "0.2s",
+  },
+  avatar: { width: 32, height: 32, borderRadius: "50%", objectFit: "cover" },
+  userName: { fontSize: 14, color: COLORS.DARK, fontWeight: "500" },
 
-    dropdown: {
-        position: "absolute",
-        top: "50px",
-        right: "0",
-        backgroundColor: "white",
-        color: "#333",
-        padding: "5px",
-        borderRadius: "8px",
-        minWidth: "140px",
-        boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-        zIndex: 999,
-        border: '1px solid #f0f0f0',
-    },
-    dropdownItem: {
-        padding: "10px 15px",
-        cursor: "pointer",
-        color: "#333",
-        fontSize: "14px",
-        borderRadius: "6px",
-        transition: "0.2s",
-    },
+  dropdown: {
+    position: "absolute",
+    top: "50px",
+    right: "0",
+    backgroundColor: COLORS.WHITE,
+    color: COLORS.DARK,
+    padding: "5px",
+    borderRadius: "8px",
+    minWidth: "140px",
+    boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+    zIndex: 999,
+    border: `1px solid ${COLORS.BORDER}`,
+  },
+  dropdownItem: {
+    padding: "10px 15px",
+    cursor: "pointer",
+    color: COLORS.DARK,
+    fontSize: "14px",
+    borderRadius: "6px",
+    transition: "0.2s",
+    // Thêm hover:
+    // ':hover': { backgroundColor: '#f5f5f5' }
+  },
 
-    contentTitle: { fontSize: '28px', fontWeight: '700', color: '#343a40', marginBottom: '8px', marginTop: 0 },
-    contentSubtitle: { fontSize: '16px', color: '#6c757d', marginBottom: '30px', marginTop: 0 },
+  contentTitle: {
+    fontSize: "28px",
+    fontWeight: "700",
+    color: COLORS.DARK,
+    marginBottom: "8px",
+    marginTop: 0,
+  },
+  contentSubtitle: {
+    fontSize: "16px",
+    color: COLORS.SECONDARY,
+    marginBottom: "30px",
+    marginTop: 0,
+  },
 
-    // Search Styles
-    searchBarWrapper: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' },
-    searchInputGroup: { display: 'flex', alignItems: 'center', border: '1px solid #e9ecef', borderRadius: '10px', padding: '10px 15px', backgroundColor: 'white', flexGrow: 1, marginRight: '20px', maxWidth: '450px', boxShadow: '0 2px 5px rgba(0,0,0,0.02)' },
-    searchIcon: { color: '#adb5bd', marginRight: '10px' },
-    searchInput: { border: 'none', outline: 'none', fontSize: '15px', width: '100%', backgroundColor: 'transparent', color: '#495057' },
-    filterButton: { display: 'flex', alignItems: 'center', padding: '10px 20px', backgroundColor: 'white', color: '#495057', border: '1px solid #e9ecef', borderRadius: '10px', cursor: 'pointer', fontSize: '15px', fontWeight: '600', boxShadow: '0 2px 5px rgba(0,0,0,0.02)' },
+  // Search Styles
+  searchBarWrapper: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "30px",
+  },
+  searchInputGroup: {
+    display: "flex",
+    alignItems: "center",
+    border: `1px solid ${COLORS.BORDER}`,
+    borderRadius: "10px",
+    padding: "10px 15px",
+    backgroundColor: COLORS.WHITE,
+    flexGrow: 1,
+    marginRight: "20px",
+    maxWidth: "450px",
+    boxShadow: "0 2px 5px rgba(0,0,0,0.02)",
+  },
+  searchIcon: { color: COLORS.TEXT_SECONDARY, marginRight: "10px" },
+  searchInput: {
+    border: "none",
+    outline: "none",
+    fontSize: "15px",
+    width: "100%",
+    backgroundColor: "transparent",
+    color: COLORS.DARK,
+  },
+  filterButton: {
+    display: "flex",
+    alignItems: "center",
+    padding: "10px 20px",
+    backgroundColor: COLORS.WHITE,
+    color: COLORS.SECONDARY,
+    border: `1px solid ${COLORS.BORDER}`,
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontSize: "15px",
+    fontWeight: "600",
+    boxShadow: "0 2px 5px rgba(0,0,0,0.02)",
+  },
 
-    // Event Grid
-    eventGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '30px', paddingBottom: '40px' },
-    eventCard: { backgroundColor: 'white', borderRadius: '16px', boxShadow: '0 10px 25px rgba(0,0,0,0.03)', overflow: 'hidden', transition: 'transform 0.2s', cursor: 'pointer', border: '1px solid #f0f0f0' },
-    eventImageWrapper: { height: '160px', backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative', display: 'flex', justifyContent: 'flex-end', padding: '15px' },
-    eventCategoryTag: { backgroundColor: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)', color: 'white', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', alignSelf: 'flex-start' },
-    eventCardContent: { padding: '20px' },
-    eventCardTitle: { fontSize: '17px', fontWeight: '700', marginBottom: '10px', color: '#343a40', lineHeight: 1.4 },
-    eventCardMeta: { marginBottom: '15px' },
-    eventMetaItem: { display: 'flex', alignItems: 'center', marginBottom: '6px', fontSize: '13px', color: '#6c757d' },
-    eventMetaItemSmall: { marginTop: '8px', fontSize: '12px', color: '#adb5bd', fontWeight: '500' },
-    progressBarContainer: { marginTop: '15px' },
-    progressBarBack: { height: '6px', backgroundColor: '#e9ecef', borderRadius: '3px', overflow: 'hidden' },
-    progressBarFill: { height: '100%', backgroundColor: '#007bff', borderRadius: '3px' },
-    progressBarText: { fontSize: '12px', color: '#adb5bd', marginTop: '6px', display: 'block', textAlign: 'right' },
+  // Event Grid
+  eventGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+    gap: "30px",
+    paddingBottom: "40px",
+  },
+  eventCard: {
+    backgroundColor: COLORS.WHITE,
+    borderRadius: "16px",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.03)",
+    overflow: "hidden",
+    transition: "transform 0.2s",
+    cursor: "pointer",
+    border: `1px solid ${COLORS.BORDER}`,
+  },
+  eventImageWrapper: {
+    height: "160px",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    position: "relative",
+    display: "flex",
+    justifyContent: "flex-end",
+    padding: "15px",
+  },
+  eventCategoryTag: {
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backdropFilter: "blur(4px)",
+    color: COLORS.WHITE,
+    padding: "6px 12px",
+    borderRadius: "6px",
+    fontSize: "12px",
+    fontWeight: "600",
+    alignSelf: "flex-start",
+  },
+  eventCardContent: { padding: "20px" },
+  eventCardTitle: {
+    fontSize: "17px",
+    fontWeight: "700",
+    marginBottom: "10px",
+    color: COLORS.DARK,
+    lineHeight: 1.4,
+  },
+  eventCardMeta: { marginBottom: "15px" },
+  eventMetaItem: {
+    display: "flex",
+    alignItems: "center",
+    marginBottom: "6px",
+    fontSize: "13px",
+    color: COLORS.SECONDARY,
+  },
+  eventMetaItemSmall: {
+    marginTop: "8px",
+    fontSize: "12px",
+    color: COLORS.TEXT_SECONDARY,
+    fontWeight: "500",
+  },
+  progressBarContainer: { marginTop: "15px" },
+  progressBarBack: {
+    height: "6px",
+    backgroundColor: COLORS.BORDER,
+    borderRadius: "3px",
+    overflow: "hidden",
+  },
+  progressBarFill: {
+    height: "100%",
+    backgroundColor: COLORS.PRIMARY,
+    borderRadius: "3px",
+  },
+  progressBarText: {
+    fontSize: "12px",
+    color: COLORS.TEXT_SECONDARY,
+    marginTop: "6px",
+    display: "block",
+    textAlign: "right",
+  },
 
-    // --- PROFILE STYLES (Mới thêm) ---
-    profileContainer: {
-        maxWidth: '800px', // Giới hạn chiều rộng cho đẹp
-        paddingBottom: '50px',
-    },
-    profileFormCard: {
-        backgroundColor: 'white',
-        borderRadius: '16px',
-        padding: '40px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
-        border: '1px solid #f0f0f0',
-    },
-    formGroup: {
-        marginBottom: '20px',
-    },
-    label: {
-        display: 'block',
-        fontSize: '14px',
-        fontWeight: '600',
-        color: '#495057',
-        marginBottom: '8px',
-    },
-    input: {
-        width: '100%',
-        padding: '12px 16px',
-        fontSize: '15px',
-        borderRadius: '8px',
-        border: '1px solid #dee2e6',
-        backgroundColor: '#fff',
-        color: '#212529',
-        outline: 'none',
-        transition: 'border-color 0.2s',
-        boxSizing: 'border-box', // Quan trọng để không bị tràn
-    },
-    textarea: {
-        width: '100%',
-        padding: '12px 16px',
-        fontSize: '15px',
-        borderRadius: '8px',
-        border: '1px solid #dee2e6',
-        backgroundColor: '#fff',
-        color: '#212529',
-        outline: 'none',
-        minHeight: '120px',
-        fontFamily: 'inherit',
-        resize: 'vertical',
-        boxSizing: 'border-box',
-    },
-    saveButton: {
-        backgroundColor: '#000', // Giữ màu đen theo thiết kế cũ của bạn
-        color: 'white',
-        padding: '14px 24px',
-        borderRadius: '8px',
-        border: 'none',
-        fontSize: '16px',
-        fontWeight: '600',
-        cursor: 'pointer',
-        marginTop: '10px',
-        width: '100%',
-        transition: 'background-color 0.2s',
-    },
+  // --- PROFILE STYLES ---
+  profileContainer: {
+    maxWidth: "800px",
+    paddingBottom: "50px",
+  },
+  profileFormCard: {
+    backgroundColor: COLORS.WHITE,
+    borderRadius: "16px",
+    padding: "40px",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.02)",
+    border: `1px solid ${COLORS.BORDER}`,
+  },
+  profileAvatar: {
+    width: "100px",
+    height: "100px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    marginBottom: "15px",
+    border: `3px solid ${COLORS.BORDER}`,
+  },
+  formGroup: {
+    marginBottom: "20px",
+  },
+  label: {
+    display: "block",
+    fontSize: "14px",
+    fontWeight: "600",
+    color: COLORS.SECONDARY,
+    marginBottom: "8px",
+  },
+  input: {
+    width: "100%",
+    padding: "12px 16px",
+    fontSize: "15px",
+    borderRadius: "8px",
+    border: `1px solid ${COLORS.BORDER}`,
+    backgroundColor: COLORS.WHITE,
+    color: COLORS.DARK,
+    outline: "none",
+    transition: "border-color 0.2s",
+    boxSizing: "border-box",
+  },
+  textarea: {
+    width: "100%",
+    padding: "12px 16px",
+    fontSize: "15px",
+    borderRadius: "8px",
+    border: `1px solid ${COLORS.BORDER}`,
+    backgroundColor: COLORS.WHITE,
+    color: COLORS.DARK,
+    outline: "none",
+    minHeight: "120px",
+    fontFamily: "inherit",
+    resize: "vertical",
+    boxSizing: "border-box",
+  },
+  saveButton: {
+    backgroundColor: COLORS.DARK,
+    color: COLORS.WHITE,
+    padding: "14px 24px",
+    borderRadius: "8px",
+    border: "none",
+    fontSize: "16px",
+    fontWeight: "600",
+    cursor: "pointer",
+    marginTop: "10px",
+    width: "100%",
+    transition: "background-color 0.2s",
+    // Thêm hover:
+    // ':hover': { backgroundColor: '#495057' }
+  },
+  messageStyle: {
+    display: "flex",
+    alignItems: "center",
+    padding: "10px 15px",
+    borderRadius: "8px",
+    fontWeight: "600",
+    backgroundColor: COLORS.LIGHT,
+    marginBottom: "15px",
+  },
 };
 
 export default Dashboard;
