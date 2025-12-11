@@ -42,6 +42,7 @@ import { GetUsersByRoleUseCase } from './auth/application/use-cases/get-users-by
 import { SearchUsersUseCase } from './auth/application/use-cases/search-users.use-case';
 import { UpdateUserRoleUseCase } from './auth/application/use-cases/update-role.use-case';
 import { MessagePublisherService } from './auth/infrastructure/messaging/message-publisher.service';
+import { CreateEventManagerUseCase } from './auth/application/use-cases/create-event-manager.use-case';
 
 
 @Module({
@@ -108,6 +109,7 @@ import { MessagePublisherService } from './auth/infrastructure/messaging/message
         SearchUsersUseCase,
         UpdateUserRoleUseCase,
         MessagePublisherService,
+        CreateEventManagerUseCase,
 
         // Services
         DatabaseService,
@@ -149,6 +151,7 @@ import { MessagePublisherService } from './auth/infrastructure/messaging/message
         SearchUsersUseCase,
         UpdateUserRoleUseCase,
         MessagePublisherService,
+        CreateEventManagerUseCase,
     ],
 })
 export class AppModule { }
