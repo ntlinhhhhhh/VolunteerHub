@@ -54,7 +54,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM5Y
 
 ### List all published events (PUBLIC) - lấy danh sách tất cả các sự kiện - theo các filter
 ### filter: 
-GET http://localhost:8000/events
+GET http://localhost:8000/events?status=published
 Accept: application/json
 
 
