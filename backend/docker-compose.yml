@@ -91,9 +91,7 @@ services:
       - redis
       - rabbitmq
     restart: unless-stopped
-    volumes:
-      - D:/volunteer_hub/volunteerhub/media-storage:/app/uploads
-
+    
   event-service:
     build:
       context: .

@@ -1,5 +1,5 @@
 ### GET theo filter các sự kiện
-GET http://localhost:8000/registrations
+GET http://localhost:8000/registrations?organizerId=693663ae445067d3c670ffb5&status=pending
 
 ### get các sự kiện mà bạn đã đăng ký - token của volunteer
 GET http://localhost:8000/registrations/my-registrations

@@ -32,7 +32,7 @@ POST http://localhost:8000/auth/event-manager/login
 Content-Type: application/json
 
 {
-    "email": "tlinh_manager@gmail.com",
+    "email": "duonghoangg261@gmail.com",
     "password": "tlinh123"
 }
 
