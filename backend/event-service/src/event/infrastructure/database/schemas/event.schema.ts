@@ -105,10 +105,9 @@ class Approval {
     @Prop({ type: Date })
     reviewedAt?: Date;
 }
-
 @Schema({ _id: false })
-class Media {
-    @Prop({ type: [String], default: [] })
+export class Media {
+    @Prop({ type: [String], default: ["/uploads/events/default.png"] })
     images: string[];
 
     @Prop({ type: [String], default: [] })
@@ -117,6 +116,8 @@ class Media {
     @Prop({ type: [String], default: [] })
     documents: string[];
 }
+
+export const MediaSchema = SchemaFactory.createForClass(Media);
 
 @Schema({ collection: 'events', timestamps: true })
 export class Event {

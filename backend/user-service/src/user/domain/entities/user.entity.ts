@@ -54,6 +54,7 @@ export class User {
     toSafeObject() {
         return {
             id: this.id,
+            authId: this.authId,
             email: this.email,
             username: this.username,
             fullName: this.fullName,

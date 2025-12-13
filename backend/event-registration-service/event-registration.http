@@ -1,5 +1,37 @@
-### GET theo filter các sự kiện
+### get tất cả registraion
 GET http://localhost:8000/registrations
+
+### GET sự kiện theo id
+GET http://localhost:8000/registrations?eventId=69392b3ccd19460aadf9f53d
+
+### lọc theo volunteerid
+GET http://localhost:8000/registrations?volunteerId=693bef0948558080fd0ebd3e
+
+### lọc theo status
+GET http://localhost:8000/registrations?status=pending
+
+### lọc theo thời gian
+GET http://localhost:8000/registrations?dateFrom=2025-12-01T00:00:00.000Z&dateTo=2025-12-20T23:59:59.999Z
+
+### loc giới hạn
+GET http://localhost:8000/registrations?limit=10
+
+# @IsOptional()
+# @IsEnum(['createdAt', 'eventDate', 'checkInTime'])
+# sortBy?: 'createdAt' | 'eventDate' | 'checkInTime' = 'createdAt';
+
+
+# @IsOptional()
+# @IsEnum(['asc', 'desc']) 
+# sortOrder?: 'asc' | 'desc' = 'desc';
+# asc: tăng dần
+# desc: giảm dần
+
+### lọc theo sort và tăng/giảm dần
+GET http://localhost:8000/registrations?sortBy=createdAt&sortOrder=asc
+
+
+
 
 ### get các sự kiện mà bạn đã đăng ký - token của volunteer
 GET http://localhost:8000/registrations/my-registrations
@@ -14,12 +46,12 @@ GET http://localhost:8000/registrations/6936f894da14cdff5a070305
 
 ### tham gia một sự kiên - token của volunteer
 POST http://localhost:8000/registrations/apply
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM1YWExOTNjNmY4MjRlZjg4YjUzMmYiLCJlbWFpbCI6InptaW50MjI1NEBnbWFpbC5jb20iLCJuYW1lIjoiWk0iLCJwaG9uZU51bWJlciI6IjA5OTk5Nzc3NyIsInJvbGVJZCI6IjY5MmViYWEyZGI4YjM4ZDRmOTlhZWJiMSIsInJvbGVOYW1lIjoidm9sdW50ZWVyIiwicGVybWlzc2lvbnMiOlsiZXZlbnQ6cmVhZCIsInJlZ2lzdHJhdGlvbjpjcmVhdGUiLCJyZWdpc3RyYXRpb246cmVhZCIsInJlZ2lzdHJhdGlvbjpjYW5jZWwiLCJwb3N0OnJlYWQiLCJwb3N0OmNyZWF0ZSIsInBvc3Q6dXBkYXRlOm93biIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiZGFzaGJvYXJkOnZpZXciXSwiaWF0IjoxNzY1NDUxNDMxLCJleHAiOjE3NjU0NTIzMzF9.lfeVWRdZxWLxhDk-Sly_P0Ht3czizr-p-0vAlHxrR5M
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNiZWY0YzQ4NTU4MDgwZmQwZWJkNDkiLCJlbWFpbCI6IjEyM0B2bnUuZWR1LnZuIiwibmFtZSI6IkR1b25nIEhvYW5nIiwicGhvbmVOdW1iZXIiOm51bGwsInJvbGVJZCI6IjY5M2JhMjU5ZjM3OTYyNDUzYjQ1MjU1NSIsInJvbGVOYW1lIjoidm9sdW50ZWVyIiwicGVybWlzc2lvbnMiOlsiZXZlbnQ6cmVhZCIsInJlZ2lzdHJhdGlvbjpjcmVhdGUiLCJyZWdpc3RyYXRpb246cmVhZCIsInJlZ2lzdHJhdGlvbjpjYW5jZWwiLCJwb3N0OnJlYWQiLCJwb3N0OmNyZWF0ZSIsInBvc3Q6dXBkYXRlOm93biIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiZGFzaGJvYXJkOnZpZXciXSwiaWF0IjoxNzY1NTM1NTY2LCJleHAiOjE3NjU1MzY0NjZ9.p-GrAljEQ_DodyoFXndreVbW67F4TyMlmCUTzXZUjjM
 Content-Type: application/json
 
 {
-  "eventId": "693a2b6dba5788d2304a84db",
-  "roleId": "09c49ef4-6d95-4c06-a384-4f3f7712c52f",
+  "eventId": "693bee98e5279822b61f81b3",
+  "roleId": "a961ba44-ef15-4f16-9ecb-0e27327d6c98",
   "motivation": "STUFY I want to help because I have experience volunteering in several community events and I am passionate about supporting people in need.",
   "skills": ["first aid", "organizing"],
   "availability": "weekends",
@@ -32,8 +64,8 @@ Content-Type: application/json
 }
 
 ### sau đó sự kiện đé sẽ đến người tạo sự kiên (thường quản lý sự kiên) hoặc có thể là admin (nhưng ít) để chập nhận - token của event-manager
-PUT http://localhost:8000/registrations/693af080ae9a1543fa7b97f6/accept
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjNhZTQ0NTA2N2QzYzY3MGZmYjUiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCBNYW5hZ2VyIiwicGhvbmVOdW1iZXIiOiIrODQ5MDk4NzY1NDMiLCJyb2xlSWQiOiI2OTJlYmFhMmRiOGIzOGQ0Zjk5YWViYWYiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU0NzAzNjcsImV4cCI6MTc2NTQ3MTI2N30.K7jf7VuWVIheXNx8XtOR6_MFhbJ1JAtUyTmAypcFuT4
+PUT http://localhost:8000/registrations/693bef6ee3261bbb3dcb01e1/accept
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNiYTI1YWYzNzk2MjQ1M2I0NTI1NjAiLCJlbWFpbCI6ImR1b25naG9hbmdnMjYxQGdtYWlsLmNvbSIsIm5hbWUiOiJEdW9uZyBIb2FuZyIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNiYTI1OWYzNzk2MjQ1M2I0NTI1NTQiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU1MzUyOTAsImV4cCI6MTc2NTUzNjE5MH0.rENXPLr0VYcavOCjcIMlziDi8gopPvJedpvFT-LdH-Y
 Content-Type: application/json
 
 {
@@ -51,7 +83,7 @@ Content-Type: application/json
 
 ### nếu được chập nhận --> confirm để tham gia - token của volunteer
 PUT http://localhost:8000/registrations/693af105056ae0a28412167d/confirm
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNhZjBkYmQ1YzM3NGFiMTMyZWUxM2QiLCJlbWFpbCI6IjExMUB2bnUuZWR1LnZuIiwibmFtZSI6IkR1b25nIEhvYW5nIiwicGhvbmVOdW1iZXIiOm51bGwsInJvbGVJZCI6IjY5M2FkNTc5OWNhMTViOWRiM2ZiNzM3MCIsInJvbGVOYW1lIjoidm9sdW50ZWVyIiwicGVybWlzc2lvbnMiOlsiZXZlbnQ6cmVhZCIsInJlZ2lzdHJhdGlvbjpjcmVhdGUiLCJyZWdpc3RyYXRpb246cmVhZCIsInJlZ2lzdHJhdGlvbjpjYW5jZWwiLCJwb3N0OnJlYWQiLCJwb3N0OmNyZWF0ZSIsInBvc3Q6dXBkYXRlOm93biIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiZGFzaGJvYXJkOnZpZXciXSwiaWF0IjoxNzY1NDcwNDMxLCJleHAiOjE3NjU0NzEzMzF9.CF-UAQCMJR7kZx4cJdqYJp8atB7Xxob8_1eAIOjjg80
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNiZWYwOTQ4NTU4MDgwZmQwZWJkM2UiLCJlbWFpbCI6IjExMTFAdm51LmVkdS52biIsIm5hbWUiOiJEdW9uZyBIb2FuZyIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNiYTI1OWYzNzk2MjQ1M2I0NTI1NTUiLCJyb2xlTmFtZSI6InZvbHVudGVlciIsInBlcm1pc3Npb25zIjpbImV2ZW50OnJlYWQiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicG9zdDpyZWFkIiwicG9zdDpjcmVhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZTpvd24iLCJjb21tZW50OmNyZWF0ZSIsImRhc2hib2FyZDp2aWV3Il0sImlhdCI6MTc2NTUzNTUwMiwiZXhwIjoxNzY1NTM2NDAyfQ.f1d3sUbsPagpKG0P907k_0OoukIHmy3OhpZNnqH9DXk
 
 
 ### Rate Event by Volunteer
@@ -98,7 +130,7 @@ Content-Type: application/json
 
 
 ### Check-in by Organizer (by code)
-POST http://localhost:4000/registrations/check-in-by-code
+POST http://localhost:8000/registrations/check-in-by-code
 Authorization: Bearer YOUR_JWT_TOKEN
 Content-Type: application/json
 
@@ -112,7 +144,7 @@ Content-Type: application/json
 }
 
 ### Check-out by Organizer (by code)
-POST http://localhost:4000/registrations/check-out-by-code
+POST http://localhost:8000/registrations/check-out-by-code
 Authorization: Bearer YOUR_JWT_TOKEN
 Content-Type: application/json
 
@@ -122,12 +154,12 @@ Content-Type: application/json
 }
 
 ### Complete Registration by Organizer
-PUT http://localhost:4000/registrations/REGISTRATION_ID/complete
+PUT http://localhost:8000/registrations/REGISTRATION_ID/complete
 Authorization: Bearer YOUR_JWT_TOKEN
 Content-Type: application/json
 
 ### Rate Volunteer by Organizer
-PUT http://localhost:4000/registrations/REGISTRATION_ID/rate-volunteer
+PUT http://localhost:8000/registrations/REGISTRATION_ID/rate-volunteer
 Authorization: Bearer YOUR_JWT_TOKEN
 Content-Type: application/json
 

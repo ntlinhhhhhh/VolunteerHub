@@ -21,11 +21,13 @@ import { Type } from 'class-transformer';
 
 class CoordinatesDto {
     @IsNumber()
+    @Type(() => Number)
     @Min(-90)
     @Max(90)
     lat: number;
 
     @IsNumber()
+    @Type(() => Number)
     @Min(-180)
     @Max(180)
     lng: number;
@@ -72,12 +74,14 @@ class ScheduleDto {
 
 class RequirementsDto {
     @IsNumber()
+    @Type(() => Number)
     @IsOptional()
     @Min(0)
     @Max(100)
     minAge?: number;
 
     @IsNumber()
+    @Type(() => Number)
     @IsOptional()
     @Min(0)
     @Max(100)
@@ -101,11 +105,13 @@ class RequirementsDto {
 
 class CapacityDto {
     @IsNumber()
+    @Type(() => Number)
     @Min(1)
     @Max(10000)
     maxVolunteers: number;
 
     @IsNumber()
+    @Type(() => Number)
     @Min(1)
     @Max(10000)
     minVolunteers: number;
@@ -125,6 +131,7 @@ class RoleDto {
     description: string;
 
     @IsNumber()
+    @Type(() => Number)
     @Min(1)
     @Max(1000)
     slots: number;

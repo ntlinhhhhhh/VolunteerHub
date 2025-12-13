@@ -12,8 +12,8 @@ import {
     FaExpandAlt,
     FaCompressAlt,
 } from "react-icons/fa";
-
-import RegistrationForm from "./RegistrationForm"; 
+import { Maximize2, ChevronRight } from "lucide-react";
+import RegistrationForm from "./RegistrationForm";
 
 const COLORS = {
     PRIMARY: "#007bff",
@@ -57,7 +57,7 @@ interface Media {
     documents: string[];
 }
 
-interface Roles { 
+interface Roles {
     id: string;
     name: string;
     description: string;
@@ -65,7 +65,7 @@ interface Roles {
     filled: number;
 }
 
-interface ApiEvent { 
+interface ApiEvent {
     id: string;
     title: string;
     slug: string;
@@ -90,7 +90,7 @@ interface EventDetailPanelProps {
     isOpen: boolean;
     onClose: () => void;
     sidebarWidth?: number;
-    sidePanelWidth?: number; 
+    sidePanelWidth?: number;
 }
 
 
@@ -102,7 +102,7 @@ const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
     sidePanelWidth = 450,
 }) => {
     const [isMaximized, setIsMaximized] = useState(false);
-    const [showRegistrationForm, setShowRegistrationForm] = useState(false); 
+    const [showRegistrationForm, setShowRegistrationForm] = useState(false);
 
     const toggleMaximize = () => {
         setIsMaximized(!isMaximized);
@@ -115,13 +115,13 @@ const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
 
     const handleFormClose = () => {
         setShowRegistrationForm(false);
-       
+
         // setIsMaximized(false);
     };
-    
+
     const getPanelDimensions = (): React.CSSProperties => {
         const fullWidth = `calc(100% - ${sidebarWidth}px)`;
-        
+
         if (!isOpen) {
             return {
                 width: sidePanelWidth,
@@ -130,22 +130,22 @@ const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
                 transform: "translateX(100%)",
             };
         }
-        
+
         if (isMaximized || showRegistrationForm) {
             return {
                 width: fullWidth, // Chiều rộng lớn
                 right: 0,         // Neo vào cạnh phải
-                left: 'auto',     
-                transform: "translateX(0)", 
+                left: 'auto',
+                transform: "translateX(0)",
             };
-        } 
-        
+        }
+
         else {
             return {
                 width: sidePanelWidth, // Chiều rộng nhỏ
                 right: 0,              // Neo vào cạnh phải
-                left: 'auto',          
-                transform: "translateX(0)", 
+                left: 'auto',
+                transform: "translateX(0)",
             };
         }
     }
@@ -159,17 +159,20 @@ const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
         backgroundColor: COLORS.WHITE,
         boxShadow: "0 0 20px rgba(0, 0, 0, 0.15)",
         zIndex: 1000,
-        transition: "transform 0.4s ease-in-out, width 0.4s ease-in-out", 
+        transition: "transform 0.4s ease-in-out, width 0.4s ease-in-out",
         overflowY: "auto",
-        ...dimensions, 
+        ...dimensions,
     };
 
     if (!event) return null;
-    
-    const imageUrl =
-        event.media.images[0] ||
-        "https://images.unsplash.com/photo-1540321213459-715764d1f274?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNTYxNzd8MHwxfGFsbHx8fHx8fHx8fDE2Mzg3ODU3NjI&ixlib=rb-1.2.1&q=80&w=600";
-    
+
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+    const imageUrl = event.media?.images?.[0]
+        ? `${API_URL}${event.media.images[0]}`
+        : `${API_URL}/uploads/events/default.png`;
+
+
     const getFormattedDate = (dateString: string) => {
         try {
             const date = new Date(dateString);
@@ -192,20 +195,22 @@ const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
         <div style={panelStyle}>
             {/* HIỂN THỊ FORM ĐĂNG KÝ (hoặc chi tiết sự kiện) */}
             {showRegistrationForm && event ? (
-                <RegistrationForm 
+                <RegistrationForm
                     event={event}
                     roles={event.roles}
                     onClose={handleFormClose} handleLogout={function (): void {
                         throw new Error("Function not implemented.");
-                    } }                />
+                    }} />
             ) : (
                 // HIỂN THỊ CHI TIẾT SỰ KIỆN
                 <>
                     <div style={detailStyles.header}>
                         {/* Nút Maximize/Minimize chỉ hiển thị khi không có form */}
-                        <button onClick={toggleMaximize} style={detailStyles.maximizeButton}>
-                            {isMaximized ? <FaCompressAlt style={{ color: COLORS.DARK}}/> : <FaExpandAlt style={{ color: COLORS.DARK}} />}
-                        </button>
+                        {isMaximized ? (
+                            <FaCompressAlt style={{ color: COLORS.DARK, zIndex: 9999, position: "relative" }} />
+                        ) : (
+                            <FaExpandAlt style={{ color: COLORS.DARK, zIndex: 9999, position: "relative" }} />
+                        )}
                         {/* Nút Close */}
                         <button onClick={onClose} style={detailStyles.closeButton}>
                             <FaTimes />
@@ -311,9 +316,9 @@ const detailStyles: { [key: string]: React.CSSProperties } = {
         position: "absolute",
         top: "20px",
         right: "65px",
-        backgroundColor: "rgba(0,0,0,0.75)", 
+        backgroundColor: "rgba(108, 80, 80, 0.75)",
         color: COLORS.WHITE,
-        border: `1px solid ${COLORS.WHITE}`, 
+        border: `1px solid ${COLORS.WHITE}`,
         borderRadius: "50%",
         width: "35px",
         height: "35px",
@@ -365,7 +370,7 @@ const detailStyles: { [key: string]: React.CSSProperties } = {
         position: "absolute",
         top: "20px",
         right: "20px",
-        backgroundColor: "rgba(0,0,0,0.75)", 
+        backgroundColor: "rgba(0,0,0,0.75)",
         color: COLORS.WHITE,
         border: `1px solid ${COLORS.WHITE}`,
         borderRadius: "50%",

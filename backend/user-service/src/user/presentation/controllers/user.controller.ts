@@ -109,16 +109,6 @@ export class UserController {
         };
     }
 
-    // @Post(':id/avatar')
-    // @UseInterceptors(FileInterceptor('file'))
-    // async updateAvatar(
-    //     @Param('id') userId: string,
-    //     @UploadedFile() file: Express.Multer.File,
-    // ) {
-    //     const avatarPath = await this.updateAvatarUseCase.execute(userId, file);
-    //     return { success: true, avatar: avatarPath };
-    // }
-
     @Post(':id/avatar')
     @UseInterceptors(FileInterceptor('file', {
         storage: diskStorage({

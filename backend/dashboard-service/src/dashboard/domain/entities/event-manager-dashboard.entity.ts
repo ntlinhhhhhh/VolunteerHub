@@ -1,13 +1,14 @@
-import { MetricPeriod, UserRole } from "./use-role.enum";
-import { Activity, EventCard, NotificationItem, PendingAction, TrendData } from "./share.entity";
-
+import { Activity } from './shared/activity.entity';
+import { EventCard } from './shared/event-card.entity';
+import { ComparisonData, MetricPeriod, TrendData } from './shared/metrics.entity';
+import { NotificationItem, PendingAction } from './shared/notification.entity';
+import { UserRole } from './volunteer-dashboard.entity';
 
 export interface EventManagerDashboard {
     userId: string;
     role: UserRole.EVENT_MANAGER;
     period: MetricPeriod;
 
-    // Overview Stats
     overview: {
         totalEvents: number;
         activeEvents: number;
@@ -20,28 +21,25 @@ export interface EventManagerDashboard {
         pendingApprovals: number;
     };
 
-    // Event Performance Metrics
     eventMetrics: {
-        registrationRate: number; // % of spots filled
-        showUpRate: number; // % who actually attended
-        completionRate: number; // % who checked out
-        volunteerRetentionRate: number; // % returning volunteers
+        registrationRate: number;
+        showUpRate: number;
+        completionRate: number;
+        volunteerRetentionRate: number;
         averageHoursPerEvent: number;
     };
 
-    // My Events Breakdown
     myEvents: {
         draft: EventCard[];
         published: EventCard[];
         ongoing: EventCard[];
         completed: EventCard[];
-        needsAttention: EventCard[]; // Low registration, past deadline, etc.
+        needsAttention: EventCard[];
     };
 
-    // Volunteer Management
     volunteers: {
         total: number;
-        active: number; // Active in last 30 days
+        active: number;
         inactive: number;
         topPerformers: TopVolunteer[];
         recentRegistrations: RegistrationCard[];
@@ -49,26 +47,19 @@ export interface EventManagerDashboard {
         attendanceTrends: TrendData;
     };
 
-    // Performance Comparison
     comparison: {
         vsLastMonth: ComparisonData;
         vsLastYear: ComparisonData;
     };
 
-    // Pending Actions (Priority sorted)
     pendingActions: PendingAction[];
-
-    // Recent Activities
     recentActivities: Activity[];
-
-    // Notifications
     notifications: NotificationItem[];
 
-    // Analytics & Insights
     insights: {
         bestPerformingEvents: EventCard[];
-        volunteerEngagementScore: number; // 0-100
-        recruitmentEffectiveness: number; // %
+        volunteerEngagementScore: number;
+        recruitmentEffectiveness: number;
         suggestedImprovements: string[];
     };
 }
@@ -95,7 +86,7 @@ export interface RegistrationCard {
     eventTitle: string;
     registeredAt: Date;
     status: 'PENDING' | 'APPROVED' | 'REJECTED';
-    matchScore?: number; // % match with event requirements
+    matchScore?: number;
 }
 
 export interface CheckInCard {
@@ -108,11 +99,4 @@ export interface CheckInCard {
     checkOutTime?: Date;
     hoursWorked?: number;
     status: 'CHECKED_IN' | 'CHECKED_OUT';
-}
-
-export interface ComparisonData {
-    events: { current: number; previous: number; change: number };
-    volunteers: { current: number; previous: number; change: number };
-    hours: { current: number; previous: number; change: number };
-    attendance: { current: number; previous: number; change: number };
 }

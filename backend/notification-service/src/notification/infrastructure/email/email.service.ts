@@ -19,38 +19,39 @@ export class EmailService {
         this.createTransporter();
     }
 
-
     private createTransporter() {
-        const host = this.configService.get('SMTP_HOST');
-        const port = this.configService.get('SMTP_PORT');
-        const user = this.configService.get('SMTP_USER');
-        const pass = this.configService.get('SMTP_PASS');
+        const host = this.configService.get<string>('SMTP_HOST');
+        const port = Number(this.configService.get<string>('SMTP_PORT'));
+        const user = this.configService.get<string>('SMTP_USER');
+        const pass = this.configService.get<string>('SMTP_PASS');
 
         this.logger.log(`📧 Initializing SMTP: ${user}@${host}:${port}`);
 
         this.transporter = nodemailer.createTransport({
             host,
             port,
-            secure: port === 465,
+            secure: true, // Gmail PORT 465 = SSL
             auth: {
                 user,
                 pass,
             },
+            tls: {
+                rejectUnauthorized: false,
+            },
+            connectionTimeout: 20000, 
+            socketTimeout: 20000,
         });
 
-        // Verify connection
+        // Test SMTP connection
         this.transporter.verify((error, success) => {
             if (error) {
-                this.logger.error('❌ SMTP connection failed:', error);
+                this.logger.error(`❌ SMTP connection failed: ${error.message}`);
             } else {
                 this.logger.log('✅ SMTP server ready to send emails');
             }
         });
     }
 
-    /**
-     * Gửi email
-     */
     async sendEmail(options: SendEmailOptions): Promise<void> {
         const { to, subject, html, attachments } = options;
 
@@ -63,24 +64,21 @@ export class EmailService {
                 attachments,
             });
 
-            this.logger.log(`✅ Email sent to ${to}: ${info.messageId}`);
+            this.logger.log(`📨 Sent to ${to}: ${info.messageId}`);
         } catch (error) {
-            this.logger.error(`❌ Failed to send email to ${to}:`, error);
+            this.logger.error(`❌ Failed to send email to ${to}: ${error.message}`);
             throw error;
         }
     }
 
-    /**
-     * Gửi nhiều emails cùng lúc
-     */
     async sendBulkEmails(emails: SendEmailOptions[]): Promise<void> {
         const results = await Promise.allSettled(
-            emails.map(email => this.sendEmail(email))
+            emails.map(email => this.sendEmail(email)),
         );
 
         const failed = results.filter(r => r.status === 'rejected').length;
         const success = results.length - failed;
 
-        this.logger.log(`Bulk email result: ${success} success, ${failed} failed`);
+        this.logger.log(`📦 Bulk email: ${success} success, ${failed} failed`);
     }
 }
