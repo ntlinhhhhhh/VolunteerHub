@@ -1,14 +1,13 @@
-import { Activity } from './shared/activity.entity';
-import { EventCard } from './shared/event-card.entity';
-import { ComparisonData, MetricPeriod, TrendData } from './shared/metrics.entity';
-import { NotificationItem, PendingAction } from './shared/notification.entity';
-import { UserRole } from './volunteer-dashboard.entity';
+import { Activity } from "./shared/activity.entity";
+import { EventCard } from "./shared/event-card.entity";
+import { ComparisonData, MetricPeriod, TrendData } from "./shared/metrics.entity";
+import { NotificationItem, PendingAction } from "./shared/notification.entity";
+import { UserRole } from "./volunteer-dashboard.entity";
 
 export interface EventManagerDashboard {
     userId: string;
     role: UserRole.EVENT_MANAGER;
     period: MetricPeriod;
-
     overview: {
         totalEvents: number;
         activeEvents: number;
@@ -20,7 +19,6 @@ export interface EventManagerDashboard {
         averageEventRating: number;
         pendingApprovals: number;
     };
-
     eventMetrics: {
         registrationRate: number;
         showUpRate: number;
@@ -28,7 +26,6 @@ export interface EventManagerDashboard {
         volunteerRetentionRate: number;
         averageHoursPerEvent: number;
     };
-
     myEvents: {
         draft: EventCard[];
         published: EventCard[];
@@ -36,7 +33,6 @@ export interface EventManagerDashboard {
         completed: EventCard[];
         needsAttention: EventCard[];
     };
-
     volunteers: {
         total: number;
         active: number;
@@ -46,16 +42,13 @@ export interface EventManagerDashboard {
         checkInsToday: CheckInCard[];
         attendanceTrends: TrendData;
     };
-
     comparison: {
         vsLastMonth: ComparisonData;
         vsLastYear: ComparisonData;
     };
-
     pendingActions: PendingAction[];
     recentActivities: Activity[];
     notifications: NotificationItem[];
-
     insights: {
         bestPerformingEvents: EventCard[];
         volunteerEngagementScore: number;

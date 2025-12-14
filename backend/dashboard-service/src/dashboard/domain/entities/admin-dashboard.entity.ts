@@ -1,9 +1,7 @@
+import { EventCard, Activity, NotificationItem, MetricPeriod, MonthlyData, TrendData, ComparisonData } from './shared';
 import { UserRole } from './volunteer-dashboard.entity';
 import { TopVolunteer } from './event-manager-dashboard.entity';
-import { MetricPeriod, MonthlyData } from './shared/metrics.entity';
-import { Activity } from './shared/activity.entity';
-import { NotificationItem } from './shared/notification.entity';
-import { EventCard } from './shared/event-card.entity';
+import { PendingAction } from './shared/notification.entity';
 
 export interface AdminDashboard {
     userId: string;
@@ -22,13 +20,63 @@ export interface AdminDashboard {
         activeEvents: number;
     };
 
-    kpis: SystemKPIs;
-    userAnalytics: UserAnalytics;
-    eventAnalytics: EventAnalytics;
-    registrationAnalytics: RegistrationAnalytics;
-    engagementAnalytics: EngagementAnalytics;
-    systemHealth: SystemHealth;
+    kpis: {
+        userGrowthRate: number;
+        volunteerRetentionRate: number;
+        volunteerChurnRate: number;
+        averageVolunteerLifetime: number;
+        eventCompletionRate: number;
+        averageEventAttendance: number;
+        eventCancellationRate: number;
+        overallEngagementScore: number;
+        averageHoursPerVolunteer: number;
+        volunteerSatisfactionScore: number;
+        costPerVolunteerRecruited: number;
+        returnOnInvestment: number;
+        averageVolunteerValue: number;
+    };
 
+    userAnalytics: {
+        totalUsers: number;
+        newUsersThisMonth: number;
+        activeUsers: { day: number; week: number; month: number };
+        usersByRole: Record<string, number>;
+        topVolunteers: TopVolunteer[];
+        inactiveUsers: InactiveUser[];
+        userGrowthTrend: MonthlyData[];
+    };
+
+    eventAnalytics: {
+        totalEvents: number;
+        eventsByStatus: Record<string, number>;
+        eventsCreatedThisMonth: number;
+        upcomingEvents: EventCard[];
+        mostPopularEvents: EventCard[];
+        lowPerformingEvents: EventCard[];
+        eventTrends: MonthlyData[];
+        averageEventSize: number;
+        averageEventDuration: number;
+    };
+
+    registrationAnalytics: {
+        totalRegistrations: number;
+        registrationsThisMonth: number;
+        registrationsByStatus: Record<string, number>;
+        averageTimeToApproval: number;
+        registrationConversionRate: number;
+        registrationTrends: MonthlyData[];
+    };
+
+    engagementAnalytics: {
+        overallAttendanceRate: number;
+        checkInRate: number;
+        completionRate: number;
+        averageSessionDuration: number;
+        engagementByDayOfWeek: DayData[];
+        engagementByTimeOfDay: HourData[];
+    };
+
+    systemHealth: SystemHealth;
     recentActivities: Activity[];
     alerts: SystemAlert[];
     notifications: NotificationItem[];
@@ -36,61 +84,9 @@ export interface AdminDashboard {
     availableReports: ReportMetadata[];
 }
 
-export interface SystemKPIs {
-    userGrowthRate: number;
-    volunteerRetentionRate: number;
-    volunteerChurnRate: number;
-    averageVolunteerLifetime: number;
-    eventCompletionRate: number;
-    averageEventAttendance: number;
-    eventCancellationRate: number;
-    overallEngagementScore: number;
-    averageHoursPerVolunteer: number;
-    volunteerSatisfactionScore: number;
-    costPerVolunteerRecruited: number;
-    returnOnInvestment: number;
-    averageVolunteerValue: number;
-}
-
-export interface UserAnalytics {
-    totalUsers: number;
-    newUsersThisMonth: number;
-    activeUsers: { day: number; week: number; month: number };
-    usersByRole: Record<string, number>;
-    topVolunteers: TopVolunteer[];
-    inactiveUsers: InactiveUser[];
-    userGrowthTrend: MonthlyData[];
-}
-
-export interface EventAnalytics {
-    totalEvents: number;
-    eventsByStatus: Record<string, number>;
-    eventsCreatedThisMonth: number;
-    upcomingEvents: EventCard[];
-    mostPopularEvents: EventCard[];
-    lowPerformingEvents: EventCard[];
-    eventTrends: MonthlyData[];
-    averageEventSize: number;
-    averageEventDuration: number;
-}
-
-export interface RegistrationAnalytics {
-    totalRegistrations: number;
-    registrationsThisMonth: number;
-    registrationsByStatus: Record<string, number>;
-    averageTimeToApproval: number;
-    registrationConversionRate: number;
-    registrationTrends: MonthlyData[];
-}
-
-export interface EngagementAnalytics {
-    overallAttendanceRate: number;
-    checkInRate: number;
-    completionRate: number;
-    averageSessionDuration: number;
-    engagementByDayOfWeek: DayData[];
-    engagementByTimeOfDay: HourData[];
-}
+// ============================================
+// Supporting interfaces
+// ============================================
 
 export interface InactiveUser {
     id: string;

@@ -102,3 +102,20 @@ Content-Type: application/json
 ### khóa user - role: admin
 GET http://localhost:8000/auth/search?role=volunteer
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM4MjU0NjhmNTUxMDBjOWMzYTZkNWYiLCJlbWFpbCI6IjRAZ21haWwuY29tIiwibmFtZSI6IkR1b25nIEhvYW5nIiwicGhvbmVOdW1iZXIiOm51bGwsInJvbGVJZCI6IjY5MzgyNTMwMGMwOWE4YTBjZjlkZGYxMiIsInJvbGVOYW1lIjoidm9sdW50ZWVyIiwicGVybWlzc2lvbnMiOlsiZXZlbnQ6cmVhZCIsInJlZ2lzdHJhdGlvbjpjcmVhdGUiLCJyZWdpc3RyYXRpb246cmVhZCIsInJlZ2lzdHJhdGlvbjpjYW5jZWwiLCJwb3N0OnJlYWQiLCJwb3N0OmNyZWF0ZSIsInBvc3Q6dXBkYXRlOm93biIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiZGFzaGJvYXJkOnZpZXciXSwiaWF0IjoxNzY1Mjg3MjQzLCJleHAiOjE3NjUyODgxNDN9.xMI5OTEynKcXyq01Nf9ctMJOKYhk8CZpoSNdx2zsXqI
+
+
+###
+GET http://localhost:4012/dashboard/volunteer/693bef4cbec89088d04b4dc8?period=MONTH
+
+
+### 
+POST http://localhost:4012/dashboard/export
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNiYTI1YWYzNzk2MjQ1M2I0NTI1NWMiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNiYTI1OWYzNzk2MjQ1M2I0NTI1NTMiLCJyb2xlTmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiKiJdLCJpYXQiOjE3NjU2NDc3MzIsImV4cCI6MTc2NTY0ODYzMn0.6fZc7J21kcFmhUtzSg0UvUUwAnj4afralQaJKB3M8cY"
+Content-Type: application/json
+
+{
+  "userId": "693da45eeb044473fcbbcb4d",
+  "role": "volunteer",
+  "period": "ALL_TIME",
+  "format": "PDF"
+}

@@ -150,22 +150,24 @@ services:
       - rabbitmq
     restart: unless-stopped
 
-  # dashboard-service:
-  #   build:
-  #     context: .
-  #     dockerfile: dashboard-service/Dockerfile
-  #   container_name: dashboard-service
-  #   env_file:
-  #     - ./dashboard-service/.env
-  #   networks:
-  #     - volunteerhub-net
-  #   ports:
-  #     - "4012:4012"
-  #   depends_on:
-  #     - mongo
-  #     - redis
-  #     - rabbitmq
-  #   restart: unless-stopped
+  dashboard-service:
+    build:
+      context: .
+      dockerfile: dashboard-service/Dockerfile
+    container_name: dashboard-service
+    env_file:
+      - ./dashboard-service/.env
+    networks:
+      - volunteerhub-net
+    ports:
+      - "4012:4012"
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    restart: unless-stopped
+
+    
   kong:
     image: kong:3.5
     container_name: kong

@@ -1,20 +1,17 @@
-import { Activity } from "./shared/activity.entity";
-import { Achievement, Badge } from "./shared/badge.entity";
-import { EventCard } from "./shared/event-card.entity";
-import { MetricPeriod, MonthlyData, TrendData } from "./shared/metrics.entity";
-import { NotificationItem } from "./shared/notification.entity";
+import { EventCard, Badge, Achievement, Activity, NotificationItem, MetricPeriod } from './shared';
+import { MonthlyData, TrendData } from './shared/metrics.entity';
 
+// ✅ FIX: Sửa lỗi chính tả trong enum
 export enum UserRole {
-    VOLUNTEER = 'VOLUNTEER',
-    EVENT_MANAGER = 'EVENT_MANAGER',
-    ADMIN = 'ADMIN'
+    VOLUNTEER = 'volunteer',
+    EVENT_MANAGER = 'event_manager',  // ✅ Đã sửa từ 'event_mager'
+    ADMIN = 'admin'
 }
 
 export interface VolunteerDashboard {
     userId: string;
     role: UserRole.VOLUNTEER;
     period: MetricPeriod;
-
     overview: {
         totalHoursVolunteered: number;
         monetaryValue: number;
@@ -26,7 +23,6 @@ export interface VolunteerDashboard {
         averageHoursPerEvent: number;
         streak: { current: number; longest: number };
     };
-
     gamification: {
         currentLevel: number;
         pointsEarned: number;
@@ -35,25 +31,21 @@ export interface VolunteerDashboard {
         rank: { position: number; total: number };
         achievements: Achievement[];
     };
-
     myEvents: {
         registered: EventCard[];
         inProgress: EventCard[];
         completed: EventCard[];
         needAction: EventCard[];
     };
-
     trends: {
         hoursPerMonth: MonthlyData[];
         eventsPerMonth: MonthlyData[];
         attendanceTrend: TrendData;
     };
-
     recentActivities: Activity[];
     notifications: NotificationItem[];
     unreadMessages: number;
     recommendedEvents: EventCard[];
-
     impact: {
         totalPeopleHelped: number;
         totalProjectsCompleted: number;

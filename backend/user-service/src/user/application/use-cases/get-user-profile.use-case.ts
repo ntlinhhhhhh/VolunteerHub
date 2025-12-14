@@ -42,7 +42,7 @@ export class GetUserProfileUseCase {
         const user = await this.userRepository.findByUsername(username);
         return user || null;
     }
-    
+
     async executeAll(
         filters?: {
             status?: UserStatus;
@@ -117,4 +117,5 @@ export class GetUserProfileUseCase {
             return { users: usersWithRoles, total: usersWithRoles.length };
         }
     }
+
 }

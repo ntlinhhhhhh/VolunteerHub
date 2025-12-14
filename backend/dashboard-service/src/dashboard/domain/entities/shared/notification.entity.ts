@@ -1,8 +1,7 @@
 export interface NotificationItem {
     id: string;
     userId: string;
-    type: 'EVENT_REMINDER' | 'REGISTRATION_UPDATE' | 'EVENT_CANCELLED' |
-    'ACHIEVEMENT' | 'BADGE_EARNED' | 'MESSAGE' | 'SYSTEM';
+    type: 'EVENT_REMINDER' | 'REGISTRATION_UPDATE' | 'EVENT_CANCELLED' | 'ACHIEVEMENT' | 'BADGE_EARNED' | 'MESSAGE' | 'SYSTEM';
     title: string;
     message: string;
     read: boolean;
@@ -13,8 +12,7 @@ export interface NotificationItem {
 
 export interface PendingAction {
     id: string;
-    type: 'APPROVAL_NEEDED' | 'CHECK_IN_PENDING' | 'FEEDBACK_NEEDED' |
-    'EVENT_PUBLISH' | 'LOW_REGISTRATION';
+    type: 'APPROVAL_NEEDED' | 'CHECK_IN_PENDING' | 'FEEDBACK_NEEDED' | 'EVENT_PUBLISH' | 'LOW_REGISTRATION';
     title: string;
     description: string;
     priority: 'HIGH' | 'MEDIUM' | 'LOW';
