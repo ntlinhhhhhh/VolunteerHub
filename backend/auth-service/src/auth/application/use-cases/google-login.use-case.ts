@@ -13,6 +13,7 @@ import type { IAuthRepository } from "../../domain/repositories/auth.repository.
 import { ROLE_REPOSITORY } from "../../domain/repositories/role.repository.interface";
 import type { IRoleRepository } from "../../domain/repositories/role.repository.interface";
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { MessagePublisherService } from 'src/auth/infrastructure/messaging/message-publisher.service';
 
 @Injectable()
 export class GoogleLoginUseCase {
@@ -24,6 +25,8 @@ export class GoogleLoginUseCase {
         private readonly googleAuthService: GoogleAuthService,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
+        private readonly messagePublisherService: MessagePublisherService,
+
     ) { console.log('✅ GoogleLoginUseCase constructor called'); }
 
     async execute(code: string): Promise<GoogleLoginResultDto> {
@@ -64,17 +67,8 @@ export class GoogleLoginUseCase {
                     })
                 );
 
-                await this.rabbitmq.publish(
-                    'notification_exchange',
-                    'user.registered',
-                    {
-                        type: 'user_registered',
-                        userId: auth.id,
-                        recipient: profile.email,
-                        fullName: profile.name,
-                        data: {}
-                    }
-                );
+                await this.messagePublisherService.publishUserRegistered(auth.id, profile.email, profile.name);
+
 
             } else {
                 user = await firstValueFrom(

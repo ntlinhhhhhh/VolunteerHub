@@ -14,4 +14,6 @@ export class CreateUserDto {
     @IsString()
     @MinLength(2, { message: 'FullName must be at least 6 characters long' })
     fullName: string;
+
+    avatar?: string;
 }

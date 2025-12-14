@@ -9,7 +9,7 @@ export class CreateUserUseCase {
         private readonly userRepository: IUserRepository
     ) { }
 
-    async execute(authId: string, email: string, username: string, fullName: string): Promise<User> {
+    async execute(authId: string, email: string, username: string, fullName: string, avatar?: string): Promise<User> {
         const existing = await this.userRepository.findByAuthId(authId);
         if (existing) {
             throw new ConflictException('User profile is exist');
@@ -21,6 +21,7 @@ export class CreateUserUseCase {
             email,
             username,
             fullName,
+            avatar,
         });
     }
 }

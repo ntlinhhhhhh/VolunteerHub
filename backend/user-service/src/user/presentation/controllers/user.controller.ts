@@ -144,7 +144,8 @@ export class UserController {
             data.authId,
             data.email,
             data.username,
-            data.fullName
+            data.fullName,
+            data.avatar,
         );
     }
 

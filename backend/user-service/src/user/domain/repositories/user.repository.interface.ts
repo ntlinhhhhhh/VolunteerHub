@@ -14,6 +14,7 @@ export interface IUserRepository {
         email: string;
         username: string;
         fullName: string;
+        avatar?: string;
     }): Promise<User>;
 
     update(id: string, data: Partial<User>): Promise<User>;
