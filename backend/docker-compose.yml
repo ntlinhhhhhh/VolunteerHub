@@ -13,6 +13,8 @@ services:
     networks:
       - volunteerhub-net
     restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
 
   redis:
     image: redis:7
@@ -196,3 +198,4 @@ services:
 
 volumes:
   rabbitmq-data:
+  mongo_data:
