@@ -14,8 +14,8 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "123@vnu.edu.vn",
-    "password": "123456"
+    "email": "hoanguyenn@gmail.com",
+    "password": "tlinh123"
 }
 
 ### login-admin: tạo một trang login cho admin với đường dấn /auth/admin/login
@@ -32,8 +32,8 @@ POST http://localhost:8000/auth/event-manager/login
 Content-Type: application/json
 
 {
-    "email": "duonghoangg261@gmail.com",
-    "password": "tlinh123"
+    "email": "yenkim@gmail.com",
+    "password": "123456"
 }
 
 ### gg login
@@ -85,13 +85,13 @@ Accept: application/json
 
 ### <admin-tokena>
 POST http://localhost:8000/auth/admin/create-event-maanager
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNhNjE0MDRkMmFkMjhlNDNkYTRlM2UiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNhNjE0MDRkMmFkMjhlNDNkYTRlMzYiLCJyb2xlTmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiKiJdLCJpYXQiOjE3NjU0NDIxNzMsImV4cCI6MTc2NTQ0MzA3M30.a_neZNNoexDmeN70RVHpa6fjRxzZqlhc4A2XGBdXygg
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlYmIzOWI0NDExOTgyZGNjYjJmMGYiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNlYmIzOWI0NDExOTgyZGNjYjJmMDciLCJyb2xlTmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiKiJdLCJpYXQiOjE3NjU3MjA4NzUsImV4cCI6MTc2NTcyMTc3NX0.E7SQRV7F2AezvwFYI8IoTFnZ4sLfx7FaBxelJvdby_c
 Content-Type: application/json
 
 {
-    "email": "duongnguyen@gmail.com",
-    "username": "duongg",
-    "fullName": "Duong Hoang",
+    "email": "yenkim@gmail.com",
+    "username": "kimyen",
+    "fullName": "Nguyễn Kim Yến",
     "password": "123456"
 }
 
@@ -131,3 +131,7 @@ Content-Type: application/json
   "period": "ALL_TIME",
   "format": "PDF"
 }
+
+###
+GET http://localhost:8000/auth/users/summary
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlYmIzOWI0NDExOTgyZGNjYjJmMGYiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNlYmIzOWI0NDExOTgyZGNjYjJmMDciLCJyb2xlTmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiKiJdLCJpYXQiOjE3NjU3Mzg3ODksImV4cCI6MTc2NTczOTY4OX0.8aGqF90x4e-DVPuDNf4ta_5GaUm5hPMs_Upgnxtz9IE

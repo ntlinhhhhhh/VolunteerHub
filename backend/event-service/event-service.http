@@ -48,13 +48,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNhZ
 ### Seed default categories (ADMIN) - tạo các sự kiện mặc định - do admin tạo -- sẽ tạo sẵn trước nên ko cần gọi
 ### Authorization: Bearer <admin access token>
 POST http://localhost:8000/categories/seed/default
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlYjIzMjI2ZTUxNDEzM2E2NDAzNDUiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNlYjIzMjI2ZTUxNDEzM2E2NDAzM2QiLCJyb2xlTmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiKiJdLCJpYXQiOjE3NjU3MTY4MjYsImV4cCI6MTc2NTcxNzcyNn0.GYCDoulVH0XpKQycX30QdckXVxh53PgtENF4xTHCNFc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlYmIzOWI0NDExOTgyZGNjYjJmMGYiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNlYmIzOWI0NDExOTgyZGNjYjJmMDciLCJyb2xlTmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiKiJdLCJpYXQiOjE3NjU3MjEzNTQsImV4cCI6MTc2NTcyMjI1NH0.H0eywE40kqm7qQlGruKga_Ye8sxRm0IME4ESahdH6nw
 
 ### EVENT
 
 ### List all published events (PUBLIC) - lấy danh sách tất cả các sự kiện - theo các filter
 ### filter: 
-GET http://localhost:8000/events?status=published
+GET http://localhost:8000/events?status=approved
 Accept: application/json
 
 
@@ -82,44 +82,43 @@ Accept: application/json
 ### Create Event - tạo một sự kiện - tạo bản draft (status: DRAFT)
 POST http://localhost:8000/events
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlYjIzMjI2ZTUxNDEzM2E2NDAzNDkiLCJlbWFpbCI6ImR1b25naG9hbmdnMjYxQGdtYWlsLmNvbSIsIm5hbWUiOiJEdW9uZyBIb2FuZyIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNlYjIzMjI2ZTUxNDEzM2E2NDAzM2UiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU3MTY4NjcsImV4cCI6MTc2NTcxNzc2N30.ByC10f39dcY62zYcnvZyOWbJmTaDyE6wXPSurA0aW6w
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlYzM3NmM2MjZhY2UyNTA4ZDIyODciLCJlbWFpbCI6InllbmtpbUBnbWFpbC5jb20iLCJuYW1lIjoiTmd1eeG7hW4gS2ltIFnhur9uIiwicGhvbmVOdW1iZXIiOm51bGwsInJvbGVJZCI6IjY5M2ViYjM5YjQ0MTE5ODJkY2NiMmYwOCIsInJvbGVOYW1lIjoiZXZlbnRfbWFuYWdlciIsInBlcm1pc3Npb25zIjpbImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDpkZWxldGUiLCJldmVudDphcHByb3ZlIiwiZXZlbnQ6cmVqZWN0IiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246YXBwcm92ZSIsInJlZ2lzdHJhdGlvbjptYXJrX2NvbXBsZXRlIiwicG9zdDpjcmVhdGUiLCJwb3N0OnJlYWQiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZTpvd24iLCJjb21tZW50OmNyZWF0ZSIsImRhc2hib2FyZDp2aWV3IiwicmVwb3J0OnZpZXciLCJyZXBvcnQ6ZXhwb3J0Il0sImlhdCI6MTc2NTcyMTQ1MiwiZXhwIjoxNzY1NzIyMzUyfQ.Gy4jPbIiXcjcwfCMvnZC8gX4exUKRbcJWR8u-mOHNE8
 
 {
-  "title": "Ngày Hội Hiến Máu Nhân Đạo",
-  "description": "Chương trình hiến máu nhằm hỗ trợ nguồn máu cho các bệnh viện và lan tỏa tinh thần sẻ chia trong cộng đồng.",
-  "categoryId": "693eb37134aee00bc1c009f4",
-  "location": {
-    "address": "Nhà Văn hóa Thanh Niên",
-    "city": "TP. Hồ Chí Minh",
-    "district": "Quận 1"
-  },
-  "schedule": {
-    "startDate": "2026-03-20T01:00:00.000Z",
-    "endDate": "2026-03-20T06:00:00.000Z",
-    "registrationDeadline": "2026-03-19T18:00:00.000Z"
-  },
-  "requirements": {
-    "minAge": 18,
-    "maxAge": 60,
-    "skills": ["Hỗ trợ y tế cơ bản", "Giao tiếp"],
-    "experience": "Ưu tiên người từng tham gia hiến máu",
-    "healthRequirements": "Đủ điều kiện hiến máu theo quy định y tế"
-  },
-  "capacity": {
-    "maxVolunteers": 40,
-    "minVolunteers": 15
-  },
-  "roles": [
-    { "name": "Tình nguyện viên hỗ trợ", "description": "Hướng dẫn người tham gia hiến máu", "slots": 25 },
-    { "name": "Điều phối", "description": "Quản lý danh sách và luồng người", "slots": 10 },
-    { "name": "Truyền thông", "description": "Ghi nhận hình ảnh, truyền thông sự kiện", "slots": 5 }
-  ],
-  "images": [],
-  "videos": [],
-  "visibility": "public",
-  "tags": ["hiến máu", "y tế", "cộng đồng", "nhân đạo"]
-}
-
+    "title": "Chiến Dịch Dọn Rác Kênh Nhiêu Lộc",
+    "description": "Hoạt động làm sạch môi trường kênh rạch nhằm nâng cao ý thức bảo vệ môi trường đô thị.",
+    "categoryId": "693ec515b0cb8e6693bf3c19",
+    "location": {
+      "address": "Kênh Nhiêu Lộc – Thị Nghè",
+      "city": "TP. Hồ Chí Minh",
+      "district": "Quận 3"
+    },
+    "schedule": {
+      "startDate": "2025-12-15T00:30:00.000Z",
+      "endDate": "2026-12-15T05:30:00.000Z",
+      "registrationDeadline": "2025-12-14T18:00:00.000Z"
+    },
+    "requirements": {
+      "minAge": 16,
+      "maxAge": 55,
+      "skills": ["Làm việc nhóm", "Ý thức môi trường"],
+      "experience": "Không yêu cầu",
+      "healthRequirements": "Sức khỏe tốt, không sợ nước"
+    },
+    "capacity": {
+      "maxVolunteers": 50,
+      "minVolunteers": 20
+    },
+    "roles": [
+      { "name": "Thu gom rác", "description": "Thu gom rác dọc bờ kênh", "slots": 30 },
+      { "name": "Phân loại rác", "description": "Phân loại và đóng gói rác", "slots": 15 },
+      { "name": "Điều phối", "description": "Hướng dẫn và giám sát", "slots": 5 }
+    ],
+    "images": [],
+    "videos": [],
+    "visibility": "public",
+    "tags": ["môi trường", "dọn rác", "cộng đồng"]
+  }
 
 
 ### Update event (ORGANIZER/ADMIN) - có thể sửa khi status là draft -- người tạo mới có thể sửa nhaa
@@ -143,16 +142,16 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlN
 ### Submit event for approval (ORGANIZER) -- submit để admin duyệt event
 ### Authorization: Bearer <event-manager access token>
 ### status: PENDING_APPROVAL (chờ duyệt)
-POST http://localhost:8000/events/693eb4ad34aee00bc1c00a59/submit
+POST http://localhost:8000/events/693ec769b0cb8e6693bf3c77/submit
 Accept: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlYjIzMjI2ZTUxNDEzM2E2NDAzNDkiLCJlbWFpbCI6ImR1b25naG9hbmdnMjYxQGdtYWlsLmNvbSIsIm5hbWUiOiJEdW9uZyBIb2FuZyIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNlYjIzMjI2ZTUxNDEzM2E2NDAzM2UiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU3MTY4NjcsImV4cCI6MTc2NTcxNzc2N30.ByC10f39dcY62zYcnvZyOWbJmTaDyE6wXPSurA0aW6w
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlYzM3NmM2MjZhY2UyNTA4ZDIyODciLCJlbWFpbCI6InllbmtpbUBnbWFpbC5jb20iLCJuYW1lIjoiTmd1eeG7hW4gS2ltIFnhur9uIiwicGhvbmVOdW1iZXIiOm51bGwsInJvbGVJZCI6IjY5M2ViYjM5YjQ0MTE5ODJkY2NiMmYwOCIsInJvbGVOYW1lIjoiZXZlbnRfbWFuYWdlciIsInBlcm1pc3Npb25zIjpbImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDpkZWxldGUiLCJldmVudDphcHByb3ZlIiwiZXZlbnQ6cmVqZWN0IiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246YXBwcm92ZSIsInJlZ2lzdHJhdGlvbjptYXJrX2NvbXBsZXRlIiwicG9zdDpjcmVhdGUiLCJwb3N0OnJlYWQiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZTpvd24iLCJjb21tZW50OmNyZWF0ZSIsImRhc2hib2FyZDp2aWV3IiwicmVwb3J0OnZpZXciLCJyZXBvcnQ6ZXhwb3J0Il0sImlhdCI6MTc2NTcyMTQ1MiwiZXhwIjoxNzY1NzIyMzUyfQ.Gy4jPbIiXcjcwfCMvnZC8gX4exUKRbcJWR8u-mOHNE8
 
 # sau khi event-manager submit --> chuyển qua admin để chấp nhận hoặc từ chối
 ### Approve event (ADMIN)
 ### status: APPROVED
 ### Authorization: Bearer <admin access token>
 
-POST http://localhost:8000/events/693e72265826f20f81eab83b/approve
+POST http://localhost:8000/events/693ec6e0b0cb8e6693bf3c6c/approve
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlNmY3NGVlNWViNDE0MWE4NTE0MDUiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNlNmY3NGVlNWViNDE0MWE4NTEzZmQiLCJyb2xlTmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiKiJdLCJpYXQiOjE3NjU3MDAxODcsImV4cCI6MTc2NTcwMTA4N30.kBbGZoDugRfV7DCMbXYC1bBij9zlyB08SGTjzLV9iyQ
 
@@ -170,8 +169,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2N
 ###
 ### Publish event (ORGANIZER/ADMIN) - sự kiện bắt đầu đăng ký được
 ### Authorization: Bearer <event-maanger access token>
-POST http://localhost:8000/events/693eb47034aee00bc1c00a47/publish
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlYjIzMjI2ZTUxNDEzM2E2NDAzNDkiLCJlbWFpbCI6ImR1b25naG9hbmdnMjYxQGdtYWlsLmNvbSIsIm5hbWUiOiJEdW9uZyBIb2FuZyIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNlYjIzMjI2ZTUxNDEzM2E2NDAzM2UiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU3MTY4NjcsImV4cCI6MTc2NTcxNzc2N30.ByC10f39dcY62zYcnvZyOWbJmTaDyE6wXPSurA0aW6w
+POST http://localhost:8000/events/693ec6e0b0cb8e6693bf3c6c/publish
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlYzM3NmM2MjZhY2UyNTA4ZDIyODciLCJlbWFpbCI6InllbmtpbUBnbWFpbC5jb20iLCJuYW1lIjoiTmd1eeG7hW4gS2ltIFnhur9uIiwicGhvbmVOdW1iZXIiOm51bGwsInJvbGVJZCI6IjY5M2ViYjM5YjQ0MTE5ODJkY2NiMmYwOCIsInJvbGVOYW1lIjoiZXZlbnRfbWFuYWdlciIsInBlcm1pc3Npb25zIjpbImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDpkZWxldGUiLCJldmVudDphcHByb3ZlIiwiZXZlbnQ6cmVqZWN0IiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246YXBwcm92ZSIsInJlZ2lzdHJhdGlvbjptYXJrX2NvbXBsZXRlIiwicG9zdDpjcmVhdGUiLCJwb3N0OnJlYWQiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZTpvd24iLCJjb21tZW50OmNyZWF0ZSIsImRhc2hib2FyZDp2aWV3IiwicmVwb3J0OnZpZXciLCJyZXBvcnQ6ZXhwb3J0Il0sImlhdCI6MTc2NTcyMTQ1MiwiZXhwIjoxNzY1NzIyMzUyfQ.Gy4jPbIiXcjcwfCMvnZC8gX4exUKRbcJWR8u-mOHNE8
 
 
 ###

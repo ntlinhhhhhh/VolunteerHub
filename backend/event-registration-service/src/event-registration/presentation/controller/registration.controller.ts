@@ -61,9 +61,7 @@ export class RegistrationController {
         private readonly getVolunteerStatisticsUseCase: GetVolunteerStatisticsUseCase,
     ) { }
 
-    // ===========================================
     // VOLUNTEER ACTIONS
-    // ===========================================
 
     @Post('apply')
     @UseGuards(JwtAuthGuard)
@@ -140,9 +138,7 @@ export class RegistrationController {
         };
     }
 
-    // ===========================================
     // ORGANIZER ACTIONS
-    // ===========================================
 
     @Put(':id/accept')
     @Roles('organizer')
@@ -328,9 +324,7 @@ export class RegistrationController {
         };
     }
 
-    // ===========================================
     // QUERIES
-    // ===========================================
 
     @Get()
     async listRegistrations(@Query() filterDto: FilterRegistrationDto) {
@@ -395,4 +389,8 @@ export class RegistrationController {
             data: registration,
         };
     }
+
+    // partern
+    
+
 }

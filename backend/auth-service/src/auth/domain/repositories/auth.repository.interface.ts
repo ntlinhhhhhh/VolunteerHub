@@ -4,17 +4,22 @@ export interface IAuthRepository {
     findAll(): Promise<AuthEntity[] | null>;
     findByEmail(email: string): Promise<AuthEntity | null>;
     findById(id: string): Promise<AuthEntity | null>;
-    create(email: string, passwordHash: string| null, roleId: string): Promise<AuthEntity>;
+    create(email: string, passwordHash: string | null, roleId: string): Promise<AuthEntity>;
     updatePassword(id: string, passwordHash: string): Promise<void>;
     updateRole(id: string, roleId: string): Promise<void>;
     updateAuth(id: string, authData: Partial<Auth>): Promise<void>;
     delete(id: string): Promise<void>;
     save(auth: AuthEntity);
-    
+
     // Role-based queries
     findByRoleId(roleId: string): Promise<AuthEntity[]>;
     countByRoleId(roleId: string): Promise<number>;
     count(): Promise<number>;
+
+    countAll(): Promise<number>;
+    countGroupByRole(): Promise<Record<string, number>>;
+    countGroupByStatus(): Promise<Record<string, number>>;
+    countNewUsers(period: 'day' | 'week' | 'month'): Promise<number>;
 
     // sercurity method
     updateLastLogin(id: string): Promise<void>;

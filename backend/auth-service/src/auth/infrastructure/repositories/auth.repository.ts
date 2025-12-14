@@ -143,6 +143,69 @@ export class AuthRepository implements IAuthRepository {
         return this.authModel.countDocuments().exec();
     }
 
+    async countAll(): Promise<number> {
+        return this.authModel.countDocuments({});
+    }
+
+    async countGroupByRole(): Promise<Record<string, number>> {
+        const result = await this.authModel.aggregate([
+            {
+                $group: {
+                    _id: '$roleId',
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        return result.reduce((acc, item) => {
+            acc[item._id] = item.count;
+            return acc;
+        }, {} as Record<string, number>);
+    }
+
+    async countGroupByStatus(): Promise<Record<string, number>> {
+        const result = await this.authModel.aggregate([
+            {
+                $group: {
+                    _id: '$status',
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        return result.reduce((acc, item) => {
+            acc[item._id ?? 'unknown'] = item.count;
+            return acc;
+        }, {} as Record<string, number>);
+    }
+
+    async countNewUsers(
+        period: 'day' | 'week' | 'month'
+    ): Promise<number> {
+        const now = new Date();
+
+        let fromDate: Date;
+
+        switch (period) {
+            case 'day':
+                fromDate = new Date(now.setHours(0, 0, 0, 0));
+                break;
+
+            case 'week':
+                fromDate = new Date(now);
+                fromDate.setDate(fromDate.getDate() - 7);
+                break;
+
+            case 'month':
+                fromDate = new Date(now);
+                fromDate.setMonth(fromDate.getMonth() - 1);
+                break;
+        }
+
+        return this.authModel.countDocuments({
+            createdAt: { $gte: fromDate }
+        });
+    }
     async search(
         keyword: string,
         roleId?: string,

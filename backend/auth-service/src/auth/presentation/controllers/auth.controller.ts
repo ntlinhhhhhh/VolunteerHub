@@ -31,6 +31,7 @@ import { CountUsersByRoleUseCase } from 'src/auth/application/use-cases/count-us
 import { SearchUsersUseCase } from 'src/auth/application/use-cases/search-users.use-case';
 import { RolesGuard } from '@share/auth/roles.guard';
 import { CreateEventManagerUseCase } from 'src/auth/application/use-cases/create-event-manager.use-case';
+import { GetUserSummaryUseCase } from 'src/auth/application/use-cases/get-user-summary.use-case';
 
 @Controller('auth')
 export class AuthController {
@@ -52,6 +53,7 @@ export class AuthController {
         private readonly getUsersByRoleUseCase: GetUsersByRoleUseCase,
         private readonly countUsersByRoleUseCase: CountUsersByRoleUseCase,
         private readonly searchUsersUseCase: SearchUsersUseCase,
+        private readonly getUserSummaryUseCase: GetUserSummaryUseCase,
     ) {
         console.log('✅ AuthController constructor called');
     }
@@ -247,6 +249,17 @@ export class AuthController {
         };
     }
 
+    @Roles('admin')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Get('users/summary')
+    async getUserSummary() {
+        const summary = await this.getUserSummaryUseCase.execute();
+
+        return {
+            success: true,
+            data: summary,
+        };
+    }
 
     @MessagePattern('auth.validate')
     async validateToken(@Payload() data: { token: string }) {
