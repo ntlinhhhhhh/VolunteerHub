@@ -13,6 +13,8 @@ services:
     networks:
       - volunteerhub-net
     restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
 
   redis:
     image: redis:7
@@ -148,22 +150,24 @@ services:
       - rabbitmq
     restart: unless-stopped
 
-  # dashboard-service:
-  #   build:
-  #     context: .
-  #     dockerfile: dashboard-service/Dockerfile
-  #   container_name: dashboard-service
-  #   env_file:
-  #     - ./dashboard-service/.env
-  #   networks:
-  #     - volunteerhub-net
-  #   ports:
-  #     - "4012:4012"
-  #   depends_on:
-  #     - mongo
-  #     - redis
-  #     - rabbitmq
-  #   restart: unless-stopped
+  dashboard-service:
+    build:
+      context: .
+      dockerfile: dashboard-service/Dockerfile
+    container_name: dashboard-service
+    env_file:
+      - ./dashboard-service/.env
+    networks:
+      - volunteerhub-net
+    ports:
+      - "4012:4012"
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    restart: unless-stopped
+
+    
   kong:
     image: kong:3.5
     container_name: kong
@@ -192,3 +196,4 @@ services:
 
 volumes:
   rabbitmq-data:
+  mongo_data:

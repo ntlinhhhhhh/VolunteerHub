@@ -1,18 +1,4 @@
-import {
-    Controller,
-    Get,
-    Post,
-    Put,
-    Delete,
-    Patch,
-    Body,
-    Param,
-    Query,
-    UseGuards,
-    HttpCode,
-    HttpStatus,
-    Inject,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, UseGuards, HttpCode, HttpStatus, Inject, UseInterceptors, UploadedFiles, BadRequestException, UploadedFile } from '@nestjs/common';
 import { CreateEventUseCase } from '../../application/use-cases/create-event.use-case';
 import { UpdateEventUseCase } from '../../application/use-cases/update-event.use-case';
 import { SubmitEventForApprovalUseCase } from '../../application/use-cases/submit-event-for-approval.use-case';
@@ -34,8 +20,10 @@ import { Roles } from '@share/auth/roles.decorator';
 import { GetUser } from '@share/auth/get-user.decorator';
 import { JwtAuthGuard } from '@share/auth/jwt-auth.guard'
 import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
 import { IncrementRoleFilledUseCase } from 'src/event/application/use-cases/increment-role-filled-use-case';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('events')
 export class EventController {
@@ -114,14 +102,41 @@ export class EventController {
     @Post()
     @UseGuards(JwtAuthGuard)
     @Roles('event_manager', 'admin')
+    @UseInterceptors(
+        FilesInterceptor('images', 10, {
+            storage: diskStorage({
+                destination: './uploads/events',
+                filename: (req, file, cb) => {
+                    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+                    const ext = extname(file.originalname);
+                    cb(null, `${uniqueSuffix}${ext}`);
+                },
+            }),
+            limits: { fileSize: 10 * 1024 * 1024 }, // 10MB/ảnh
+            fileFilter: (req, file, cb) => {
+                if (!file.mimetype.startsWith('image/')) {
+                    return cb(new BadRequestException('Only images are allowed'), false);
+                }
+                cb(null, true);
+            },
+        })
+    )
     async createEvent(
+        @UploadedFiles() images: Express.Multer.File[],
         @Body() createEventDto: CreateEventDto,
         @GetUser('userId') userId: string,
         @GetUser() user: any
     ) {
-        console.log('user', user)
+        console.log('user', user);
+
+        // Lấy URL ảnh hoặc đường dẫn file
+        const imageUrls = images?.map((file) => `/uploads/events/${file.filename}`) ?? [];
+
         const event = await this.createEventUseCase.execute({
-            dto: createEventDto,
+            dto: {
+                ...createEventDto,
+                images: imageUrls, // <-- THÊM VÀO DTO
+            },
             organizerId: userId,
             organizerName: user.name,
             organizerEmail: user.email,
@@ -134,6 +149,44 @@ export class EventController {
             data: event,
         };
     }
+
+
+    // @Post(':id/avatar')
+    // @UseInterceptors(
+    //     FileInterceptor('file', {
+    //         storage: diskStorage({
+    //             destination: './uploads/avatars',
+    //             filename: (req, file, cb) => {
+    //                 const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    //                 const ext = extname(file.originalname);
+    //                 cb(null, `${uniqueSuffix}${ext}`);
+    //             },
+    //         }),
+    //         limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    //         fileFilter: (req, file, cb) => {
+    //             if (!file.mimetype.startsWith('image/')) {
+    //                 return cb(new BadRequestException('Only image files are allowed'), false);
+    //             }
+    //             cb(null, true);
+    //         },
+    //     }),
+    // )
+    // async uploadAvatar(
+    //     @Param('id') userId: string,
+    //     @UploadedFile() file: MulterFile,     // ✔ DÙNG TYPE MỚI
+    // ) {
+    //     if (!file) {
+    //         throw new BadRequestException('No file uploaded');
+    //     }
+
+    //     const filePath = `/uploads/avatars/${file.filename}`;
+
+    //     return {
+    //         success: true,
+    //         userId,
+    //         avatar: filePath,
+    //     };
+    // }
 
 
     /**

@@ -30,12 +30,15 @@ import { GetUsersByRoleUseCase } from 'src/auth/application/use-cases/get-users-
 import { CountUsersByRoleUseCase } from 'src/auth/application/use-cases/count-users-by-role.use-case';
 import { SearchUsersUseCase } from 'src/auth/application/use-cases/search-users.use-case';
 import { RolesGuard } from '@share/auth/roles.guard';
+import { CreateEventManagerUseCase } from 'src/auth/application/use-cases/create-event-manager.use-case';
+import { GetUserSummaryUseCase } from 'src/auth/application/use-cases/get-user-summary.use-case';
 
 @Controller('auth')
 export class AuthController {
     constructor(
         @Inject('USER_SERVICE') private userClient: ClientProxy,
         private readonly registerUseCase: RegisterUseCase,
+        private readonly createEventManagerUseCase: CreateEventManagerUseCase,
         private readonly loginUseCase: LoginUseCase,
         private readonly adminLoginUseCase: AdminLoginUseCase,
         private readonly eventManagerLoginUseCase: EventManagerLoginUseCase,
@@ -50,6 +53,7 @@ export class AuthController {
         private readonly getUsersByRoleUseCase: GetUsersByRoleUseCase,
         private readonly countUsersByRoleUseCase: CountUsersByRoleUseCase,
         private readonly searchUsersUseCase: SearchUsersUseCase,
+        private readonly getUserSummaryUseCase: GetUserSummaryUseCase,
     ) {
         console.log('✅ AuthController constructor called');
     }
@@ -92,6 +96,20 @@ export class AuthController {
             }
         };
     }
+
+    @Roles('admin')
+    @UseGuards(JwtAuthGuard)
+    @Post('admin/create-event-maanager')
+    @HttpCode(HttpStatus.OK)
+    async createEventManager(@Body() registerDto: RegisterDto) {
+        const auth = await this.createEventManagerUseCase.execute(registerDto);
+        return {
+            success: true,
+            message: 'Event-manger create succesful',
+            data: auth
+        }
+    }
+
 
     @Public()
     @Post('admin/login')
@@ -231,6 +249,17 @@ export class AuthController {
         };
     }
 
+    @Roles('admin')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Get('users/summary')
+    async getUserSummary() {
+        const summary = await this.getUserSummaryUseCase.execute();
+
+        return {
+            success: true,
+            data: summary,
+        };
+    }
 
     @MessagePattern('auth.validate')
     async validateToken(@Payload() data: { token: string }) {

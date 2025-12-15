@@ -1,34 +1,34 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { Logger, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
-  const logger = new Logger('Bootstrap');
+    const app = await NestFactory.create(AppModule);
 
-  const app = await NestFactory.create(AppModule);
+    // app.setGlobalPrefix('api/v1');
 
-  const configService = app.get(ConfigService);
+    app.useGlobalPipes(
+        new ValidationPipe({
+            whitelist: true,
+            transform: true,
+        })
+    );
 
-  // Enable CORS
-  app.enableCors({
-    origin: configService.get('CORS_ORIGIN') || 'http://localhost:5173',
-    credentials: true,
-  });
+    app.enableCors();
 
-  // Enable validation
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    })
-  );
+    const config = new DocumentBuilder()
+        .setTitle('Dashboard Service API')
+        .setVersion('1.0')
+        .addBearerAuth()
+        .build();
 
-  const port = configService.get('PORT') || 4006;
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
 
-  await app.listen(port);
-  logger.log(`Dashboard Service running on port ${port}`);
+    const port = process.env.PORT || 1012;
+    await app.listen(port);
+    console.log(`🚀 Dashboard Service running on port ${port}`);
 }
 
 bootstrap();

@@ -1,13 +1,13 @@
-import { TopVolunteer } from "./event-manager-dashboard.entity";
-import { Activity, CacheHealth, CategoryData, CityData, DatabaseHealth, DayData, EventCard, HourData, LocationData, MessageBusHealth, MonthlyData, NotificationItem, ServiceHealth, SystemAlert } from "./share.entity";
-import { MetricPeriod, UserRole } from "./use-role.enum";
+import { EventCard, Activity, NotificationItem, MetricPeriod, MonthlyData, TrendData, ComparisonData } from './shared';
+import { UserRole } from './volunteer-dashboard.entity';
+import { TopVolunteer } from './event-manager-dashboard.entity';
+import { PendingAction } from './shared/notification.entity';
 
 export interface AdminDashboard {
     userId: string;
     role: UserRole.ADMIN;
     period: MetricPeriod;
 
-    // System Overview
     systemOverview: {
         totalUsers: number;
         totalVolunteers: number;
@@ -20,120 +20,73 @@ export interface AdminDashboard {
         activeEvents: number;
     };
 
-    // Key Performance Indicators
     kpis: {
-        // User KPIs
-        userGrowthRate: number; // % month over month
-        volunteerRetentionRate: number; // %
-        volunteerChurnRate: number; // %
-        averageVolunteerLifetime: number; // months
-
-        // Event KPIs
-        eventCompletionRate: number; // %
-        averageEventAttendance: number; // %
-        eventCancellationRate: number; // %
-
-        // Engagement KPIs
-        overallEngagementScore: number; // 0-100
+        userGrowthRate: number;
+        volunteerRetentionRate: number;
+        volunteerChurnRate: number;
+        averageVolunteerLifetime: number;
+        eventCompletionRate: number;
+        averageEventAttendance: number;
+        eventCancellationRate: number;
+        overallEngagementScore: number;
         averageHoursPerVolunteer: number;
-        volunteerSatisfactionScore: number; // 0-100
-
-        // Financial KPIs
+        volunteerSatisfactionScore: number;
         costPerVolunteerRecruited: number;
-        returnOnInvestment: number; // Monetary value / costs
-        averageVolunteerValue: number; // per month
+        returnOnInvestment: number;
+        averageVolunteerValue: number;
     };
 
-    // User Analytics
     userAnalytics: {
         totalUsers: number;
         newUsersThisMonth: number;
         activeUsers: { day: number; week: number; month: number };
-        usersByRole: { [key in UserRole]: number };
+        usersByRole: Record<string, number>;
         topVolunteers: TopVolunteer[];
         inactiveUsers: InactiveUser[];
         userGrowthTrend: MonthlyData[];
     };
 
-    // Event Analytics
     eventAnalytics: {
         totalEvents: number;
-        eventsByStatus: { [key: string]: number };
+        eventsByStatus: Record<string, number>;
         eventsCreatedThisMonth: number;
         upcomingEvents: EventCard[];
         mostPopularEvents: EventCard[];
         lowPerformingEvents: EventCard[];
         eventTrends: MonthlyData[];
         averageEventSize: number;
-        averageEventDuration: number; // hours
+        averageEventDuration: number;
     };
 
-    // Registration Analytics
     registrationAnalytics: {
         totalRegistrations: number;
         registrationsThisMonth: number;
-        registrationsByStatus: { [key: string]: number };
-        averageTimeToApproval: number; // hours
-        registrationConversionRate: number; // %
+        registrationsByStatus: Record<string, number>;
+        averageTimeToApproval: number;
+        registrationConversionRate: number;
         registrationTrends: MonthlyData[];
     };
 
-    // Engagement Analytics
     engagementAnalytics: {
         overallAttendanceRate: number;
-        checkInRate: number; // % who checked in
-        completionRate: number; // % who checked out
-        averageSessionDuration: number; // minutes
+        checkInRate: number;
+        completionRate: number;
+        averageSessionDuration: number;
         engagementByDayOfWeek: DayData[];
         engagementByTimeOfDay: HourData[];
     };
 
-    // Geographic Analytics
-    geographicAnalytics?: {
-        volunteersByLocation: LocationData[];
-        eventsByLocation: LocationData[];
-        topCities: CityData[];
-    };
-
-    // Category Analytics
-    categoryAnalytics: {
-        popularCategories: CategoryData[];
-        categoriesByVolunteerCount: CategoryData[];
-        categoryTrends: MonthlyData[];
-    };
-
-    // System Health
-    systemHealth: {
-        status: 'HEALTHY' | 'WARNING' | 'CRITICAL';
-        services: ServiceHealth[];
-        database: DatabaseHealth;
-        cache: CacheHealth;
-        messageBus: MessageBusHealth;
-        apiResponseTime: number; // ms
-        errorRate: number; // %
-        uptime: number; // %
-    };
-
-    // Recent Activities (System-wide)
+    systemHealth: SystemHealth;
     recentActivities: Activity[];
-
-    // System Alerts
     alerts: SystemAlert[];
-
-    // Notifications
     notifications: NotificationItem[];
-
-    // Predictive Analytics
-    predictions?: {
-        expectedVolunteersNextMonth: number;
-        expectedEventsNextMonth: number;
-        atRiskVolunteers: AtRiskVolunteer[];
-        growthForecast: ForecastData[];
-    };
-
-    // Reports Available
+    predictions?: PredictiveAnalytics;
     availableReports: ReportMetadata[];
 }
+
+// ============================================
+// Supporting interfaces
+// ============================================
 
 export interface InactiveUser {
     id: string;
@@ -146,10 +99,77 @@ export interface InactiveUser {
     riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
 }
 
+export interface DayData {
+    day: 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
+    value: number;
+}
+
+export interface HourData {
+    hour: number;
+    value: number;
+}
+
+export interface SystemHealth {
+    status: 'HEALTHY' | 'WARNING' | 'CRITICAL';
+    services: ServiceHealth[];
+    database: DatabaseHealth;
+    cache: CacheHealth;
+    messageBus: MessageBusHealth;
+    apiResponseTime: number;
+    errorRate: number;
+    uptime: number;
+}
+
+export interface ServiceHealth {
+    name: string;
+    status: 'UP' | 'DOWN' | 'DEGRADED';
+    responseTime: number;
+    errorRate: number;
+    lastChecked: Date;
+}
+
+export interface DatabaseHealth {
+    status: 'UP' | 'DOWN';
+    connections: { active: number; max: number };
+    queryPerformance: number;
+    storage: { used: string; total: string };
+}
+
+export interface CacheHealth {
+    status: 'UP' | 'DOWN';
+    hitRate: number;
+    memoryUsage: number;
+    evictions: number;
+}
+
+export interface MessageBusHealth {
+    status: 'UP' | 'DOWN';
+    messagesQueued: number;
+    processingRate: number;
+    errorRate: number;
+}
+
+export interface SystemAlert {
+    id: string;
+    severity: 'CRITICAL' | 'WARNING' | 'INFO';
+    service: string;
+    message: string;
+    timestamp: Date;
+    resolved: boolean;
+    resolvedAt?: Date;
+}
+
+export interface PredictiveAnalytics {
+    expectedVolunteersNextMonth: number;
+    expectedEventsNextMonth: number;
+    atRiskVolunteers: AtRiskVolunteer[];
+    growthForecast: ForecastData[];
+}
+
 export interface AtRiskVolunteer {
     id: string;
     name: string;
-    churnRiskScore: number; // 0-100
+    churnRiskScore: number;
     reasons: string[];
     lastActive: Date;
     recommendedActions: string[];
@@ -158,7 +178,7 @@ export interface AtRiskVolunteer {
 export interface ForecastData {
     month: string;
     predicted: number;
-    confidence: number; // %
+    confidence: number;
 }
 
 export interface ReportMetadata {

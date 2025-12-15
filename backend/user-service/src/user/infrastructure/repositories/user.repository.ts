@@ -57,12 +57,14 @@ export class UserRepository implements IUserRepository {
         email: string;
         username: string,
         fullName: string;
+        avatar?: string,
     }): Promise<UserEntity> {
         const doc = new this.userModel({
             authId: data.authId,
             email: data.email.toLowerCase(),
             username: data.username,
             fullName: data.fullName,
+            avatar: data.avatar,
             status: UserStatus.ACTIVE,
         });
         const saved = await doc.save();

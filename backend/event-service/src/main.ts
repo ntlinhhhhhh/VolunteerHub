@@ -4,12 +4,15 @@ import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
 import { AllExceptionsFilter } from './event/presentation/filters/http-exception.filter';
+import * as express from 'express';
 
 async function bootstrap() {
     dotenv.config();
     const logger = new Logger('UserService');
 
     const app = await NestFactory.create(AppModule);
+
+    app.use('/uploads', express.static('/app/uploads'));
 
     app.useGlobalPipes(
         new ValidationPipe({

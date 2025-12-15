@@ -48,13 +48,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNhZ
 ### Seed default categories (ADMIN) - tạo các sự kiện mặc định - do admin tạo -- sẽ tạo sẵn trước nên ko cần gọi
 ### Authorization: Bearer <admin access token>
 POST http://localhost:8000/categories/seed/default
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM5YjkyNDFlNmZkNWY5NTY3MTgxOGUiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTM5YjkyNDFlNmZkNWY5NTY3MTgxODYiLCJyb2xlTmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiKiJdLCJpYXQiOjE3NjUzOTEyNzksImV4cCI6MTc2NTM5MjE3OX0.5DjXrJnOwb8OXqIZ3xPJvVO2iEAFOBdClY7qZaLTxck
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlYmIzOWI0NDExOTgyZGNjYjJmMGYiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNlYmIzOWI0NDExOTgyZGNjYjJmMDciLCJyb2xlTmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiKiJdLCJpYXQiOjE3NjU3MjEzNTQsImV4cCI6MTc2NTcyMjI1NH0.H0eywE40kqm7qQlGruKga_Ye8sxRm0IME4ESahdH6nw
 
 ### EVENT
 
 ### List all published events (PUBLIC) - lấy danh sách tất cả các sự kiện - theo các filter
 ### filter: 
-GET http://localhost:8000/events?status=published
+GET http://localhost:8000/events?status=approved
 Accept: application/json
 
 
@@ -82,49 +82,50 @@ Accept: application/json
 ### Create Event - tạo một sự kiện - tạo bản draft (status: DRAFT)
 POST http://localhost:8000/events
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNiZjY4YTE1ZTE0NjdiMzU4ODJlZjUiLCJlbWFpbCI6ImR1b25naG9hbmdnMjYxQGdtYWlsLmNvbSIsIm5hbWUiOiJEdW9uZyBIb2FuZyIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTJlYmFhMmRiOGIzOGQ0Zjk5YWViYWYiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU1Mzc2MDcsImV4cCI6MTc2NTUzODUwN30.TH-SCrJ_GH0jQGcpCo7eDCa8qxpyIhYCxIFC9fk5ME4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlYzM3NmM2MjZhY2UyNTA4ZDIyODciLCJlbWFpbCI6InllbmtpbUBnbWFpbC5jb20iLCJuYW1lIjoiTmd1eeG7hW4gS2ltIFnhur9uIiwicGhvbmVOdW1iZXIiOm51bGwsInJvbGVJZCI6IjY5M2ViYjM5YjQ0MTE5ODJkY2NiMmYwOCIsInJvbGVOYW1lIjoiZXZlbnRfbWFuYWdlciIsInBlcm1pc3Npb25zIjpbImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDpkZWxldGUiLCJldmVudDphcHByb3ZlIiwiZXZlbnQ6cmVqZWN0IiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246YXBwcm92ZSIsInJlZ2lzdHJhdGlvbjptYXJrX2NvbXBsZXRlIiwicG9zdDpjcmVhdGUiLCJwb3N0OnJlYWQiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZTpvd24iLCJjb21tZW50OmNyZWF0ZSIsImRhc2hib2FyZDp2aWV3IiwicmVwb3J0OnZpZXciLCJyZXBvcnQ6ZXhwb3J0Il0sImlhdCI6MTc2NTcyMTQ1MiwiZXhwIjoxNzY1NzIyMzUyfQ.Gy4jPbIiXcjcwfCMvnZC8gX4exUKRbcJWR8u-mOHNE8
 
 {
-  "title": "Chương II: Chén Trà Đầu Xuân: Thăm Hỏi và Chăm Sóc Người Già neo đơn",
-  "description": "Tổ chức hoạt động thăm hỏi, trò chuyện, cắt tóc, làm vệ sinh cá nhân và tổ chức một buổi văn nghệ nhỏ cho các cụ tại Trung tâm Bảo trợ Xã hội. Đây là hoạt động thường niên nhằm mang lại niềm vui tinh thần cho người cao tuổi.",
-  "categoryId": "6935a50f1a51c72418085ea6",
-  "location": {
-    "address": "Trung tâm Bảo trợ Xã hội Thành phố",
-    "city": "Hà Nội",
-    "district": "Ba Vì"
-  },
-  "schedule": {
-    "startDate": "2026-05-01T08:00:00.000Z",
-    "endDate": "2026-05-01T15:00:00.000Z",
-    "registrationDeadline": "2026-04-25T17:00:00.000Z"
-  },
-  "requirements": {
-    "minAge": 18,
-    "maxAge": 70,
-    "skills": ["Kiên nhẫn và ân cần", "Kỹ năng giao tiếp với người lớn tuổi", "Biết đàn, hát hoặc cắt tóc (ưu tiên)"],
-    "experience": "Ưu tiên người có kinh nghiệm chăm sóc hoặc làm việc với người cao tuổi",
-    "healthRequirements": "Không có bệnh truyền nhiễm, sức khỏe ổn định"
-  },
-  "capacity": {
-    "maxVolunteers": 50,
-    "minVolunteers": 30
-  },
-  "roles": [
-    { "name": "Chăm sóc cá nhân", "description": "Hỗ trợ cắt tóc, rửa mặt, vệ sinh cá nhân cho các cụ", "slots": 15 },
-    { "name": "Văn nghệ và Trò chuyện", "description": "Tổ chức các tiết mục văn nghệ và dành thời gian trò chuyện riêng với các cụ", "slots": 20 },
-    { "name": "Hậu cần và Bữa ăn", "description": "Chuẩn bị và phục vụ bữa ăn nhẹ cho các cụ và tình nguyện viên", "slots": 15 }
-  ],
-  "images": [ "https://cdn.example.com/events/elderly-care-visit.jpg" ],
-  "videos": [],
-  "visibility": "public",
-  "tags": ["người cao tuổi", "chăm sóc", "tình nguyện", "văn hóa"]
-}
+    "title": "Chiến Dịch Dọn Rác Kênh Nhiêu Lộc",
+    "description": "Hoạt động làm sạch môi trường kênh rạch nhằm nâng cao ý thức bảo vệ môi trường đô thị.",
+    "categoryId": "693ec515b0cb8e6693bf3c19",
+    "location": {
+      "address": "Kênh Nhiêu Lộc – Thị Nghè",
+      "city": "TP. Hồ Chí Minh",
+      "district": "Quận 3"
+    },
+    "schedule": {
+      "startDate": "2025-12-15T00:30:00.000Z",
+      "endDate": "2026-12-15T05:30:00.000Z",
+      "registrationDeadline": "2025-12-14T18:00:00.000Z"
+    },
+    "requirements": {
+      "minAge": 16,
+      "maxAge": 55,
+      "skills": ["Làm việc nhóm", "Ý thức môi trường"],
+      "experience": "Không yêu cầu",
+      "healthRequirements": "Sức khỏe tốt, không sợ nước"
+    },
+    "capacity": {
+      "maxVolunteers": 50,
+      "minVolunteers": 20
+    },
+    "roles": [
+      { "name": "Thu gom rác", "description": "Thu gom rác dọc bờ kênh", "slots": 30 },
+      { "name": "Phân loại rác", "description": "Phân loại và đóng gói rác", "slots": 15 },
+      { "name": "Điều phối", "description": "Hướng dẫn và giám sát", "slots": 5 }
+    ],
+    "images": [],
+    "videos": [],
+    "visibility": "public",
+    "tags": ["môi trường", "dọn rác", "cộng đồng"]
+  }
+
 
 ### Update event (ORGANIZER/ADMIN) - có thể sửa khi status là draft -- người tạo mới có thể sửa nhaa
 ### Authorization: Bearer <event-manager access token>
 PUT http://localhost:8000/events/69353854e17f21cc31027a4a
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNhZDU3OTljYTE1YjlkYjNmYjczN2EiLCJlbWFpbCI6ImR1b25naG9hbmdnMjYxQGdtYWlsLmNvbSIsIm5hbWUiOiJEdW9uZyBIb2FuZyIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNhZDU3OTljYTE1YjlkYjNmYjczNmYiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU0Njg3NDMsImV4cCI6MTc2NTQ2OTY0M30.7H05hAA-IUMfeQb095IzBnlXMIBjhoFOmaTZnnkC6Yk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlNmY3NGVlNWViNDE0MWE4NTE0MDkiLCJlbWFpbCI6ImR1b25naG9hbmdnMjYxQGdtYWlsLmNvbSIsIm5hbWUiOiJEdW9uZyBIb2FuZyIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNlNmY3NGVlNWViNDE0MWE4NTEzZmUiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU3MDAwMzgsImV4cCI6MTc2NTcwMDkzOH0.7LlJgFWPb66XRql0CGqaAwjw9o07GunXcQ0g9XEfFoE
 
 {
     "title": "Chủ nhật xanh cùng Ký túc xá Mỹ Đình - cập nhật",
@@ -141,19 +142,18 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNhZ
 ### Submit event for approval (ORGANIZER) -- submit để admin duyệt event
 ### Authorization: Bearer <event-manager access token>
 ### status: PENDING_APPROVAL (chờ duyệt)
-POST http://localhost:8000/events/693bf7786a45940f8563269e/submit
+POST http://localhost:8000/events/693ec769b0cb8e6693bf3c77/submit
 Accept: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNiZjY4YTE1ZTE0NjdiMzU4ODJlZjUiLCJlbWFpbCI6ImR1b25naG9hbmdnMjYxQGdtYWlsLmNvbSIsIm5hbWUiOiJEdW9uZyBIb2FuZyIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTJlYmFhMmRiOGIzOGQ0Zjk5YWViYWYiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU1Mzc2MDcsImV4cCI6MTc2NTUzODUwN30.TH-SCrJ_GH0jQGcpCo7eDCa8qxpyIhYCxIFC9fk5ME4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlYzM3NmM2MjZhY2UyNTA4ZDIyODciLCJlbWFpbCI6InllbmtpbUBnbWFpbC5jb20iLCJuYW1lIjoiTmd1eeG7hW4gS2ltIFnhur9uIiwicGhvbmVOdW1iZXIiOm51bGwsInJvbGVJZCI6IjY5M2ViYjM5YjQ0MTE5ODJkY2NiMmYwOCIsInJvbGVOYW1lIjoiZXZlbnRfbWFuYWdlciIsInBlcm1pc3Npb25zIjpbImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDpkZWxldGUiLCJldmVudDphcHByb3ZlIiwiZXZlbnQ6cmVqZWN0IiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246YXBwcm92ZSIsInJlZ2lzdHJhdGlvbjptYXJrX2NvbXBsZXRlIiwicG9zdDpjcmVhdGUiLCJwb3N0OnJlYWQiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZTpvd24iLCJjb21tZW50OmNyZWF0ZSIsImRhc2hib2FyZDp2aWV3IiwicmVwb3J0OnZpZXciLCJyZXBvcnQ6ZXhwb3J0Il0sImlhdCI6MTc2NTcyMTQ1MiwiZXhwIjoxNzY1NzIyMzUyfQ.Gy4jPbIiXcjcwfCMvnZC8gX4exUKRbcJWR8u-mOHNE8
 
 # sau khi event-manager submit --> chuyển qua admin để chấp nhận hoặc từ chối
 ### Approve event (ADMIN)
 ### status: APPROVED
 ### Authorization: Bearer <admin access token>
 
-POST http://localhost:8000/events/693a3ea9ba5788d2304a88b7/approve
+POST http://localhost:8000/events/693ec6e0b0cb8e6693bf3c6c/approve
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2NjUyMzU4ZjVhMjMwYWUwNjYwNWQiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MmViYWEyZGI4YjM4ZDRmOTlhZWJhZCIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJ1c2VyOmNyZWF0ZSIsInVzZXI6cmVhZCIsInVzZXI6dXBkYXRlIiwidXNlcjpkZWxldGUiLCJ1c2VyOmxvY2siLCJ1c2VyOnVubG9jayIsImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDp1cGRhdGU6b3duIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6ZGVsZXRlOm93biIsImV2ZW50OmFwcHJvdmUiLCJldmVudDpyZWplY3QiLCJyZWdpc3RyYXRpb246Y3JlYXRlIiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246Y2FuY2VsIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGUiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZSIsInBvc3Q6ZGVsZXRlOm93biIsImNvbW1lbnQ6Y3JlYXRlIiwiY29tbWVudDpkZWxldGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCIsInN5c3RlbTpzZXR0aW5ncyIsInJvbGU6bWFuYWdlIl0sImlhdCI6MTc2NTUzNDA0NywiZXhwIjoxNzY1NTM0OTQ3fQ.SM0P5lUTl-fd5jHmXjSxeyvg4QDQw5uy5_VSUHFvadM
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlNmY3NGVlNWViNDE0MWE4NTE0MDUiLCJlbWFpbCI6Im5ndXllbnRodXlsaW5oMjYwMTIwMDVAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNlNmY3NGVlNWViNDE0MWE4NTEzZmQiLCJyb2xlTmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiKiJdLCJpYXQiOjE3NjU3MDAxODcsImV4cCI6MTc2NTcwMTA4N30.kBbGZoDugRfV7DCMbXYC1bBij9zlyB08SGTjzLV9iyQ
 
 ### Reject event (ADMIN) 
 ### status: REJECTED
@@ -169,8 +169,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2N
 ###
 ### Publish event (ORGANIZER/ADMIN) - sự kiện bắt đầu đăng ký được
 ### Authorization: Bearer <event-maanger access token>
-POST http://localhost:8000/events/693bf7786a45940f8563269e/publish
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNiZjY4YTE1ZTE0NjdiMzU4ODJlZjUiLCJlbWFpbCI6ImR1b25naG9hbmdnMjYxQGdtYWlsLmNvbSIsIm5hbWUiOiJEdW9uZyBIb2FuZyIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTJlYmFhMmRiOGIzOGQ0Zjk5YWViYWYiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjU1Mzc2MDcsImV4cCI6MTc2NTUzODUwN30.TH-SCrJ_GH0jQGcpCo7eDCa8qxpyIhYCxIFC9fk5ME4
+POST http://localhost:8000/events/693ec6e0b0cb8e6693bf3c6c/publish
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlYzM3NmM2MjZhY2UyNTA4ZDIyODciLCJlbWFpbCI6InllbmtpbUBnbWFpbC5jb20iLCJuYW1lIjoiTmd1eeG7hW4gS2ltIFnhur9uIiwicGhvbmVOdW1iZXIiOm51bGwsInJvbGVJZCI6IjY5M2ViYjM5YjQ0MTE5ODJkY2NiMmYwOCIsInJvbGVOYW1lIjoiZXZlbnRfbWFuYWdlciIsInBlcm1pc3Npb25zIjpbImV2ZW50OmNyZWF0ZSIsImV2ZW50OnJlYWQiLCJldmVudDp1cGRhdGUiLCJldmVudDpkZWxldGUiLCJldmVudDphcHByb3ZlIiwiZXZlbnQ6cmVqZWN0IiwicmVnaXN0cmF0aW9uOnJlYWQiLCJyZWdpc3RyYXRpb246YXBwcm92ZSIsInJlZ2lzdHJhdGlvbjptYXJrX2NvbXBsZXRlIiwicG9zdDpjcmVhdGUiLCJwb3N0OnJlYWQiLCJwb3N0OnVwZGF0ZTpvd24iLCJwb3N0OmRlbGV0ZTpvd24iLCJjb21tZW50OmNyZWF0ZSIsImRhc2hib2FyZDp2aWV3IiwicmVwb3J0OnZpZXciLCJyZXBvcnQ6ZXhwb3J0Il0sImlhdCI6MTc2NTcyMTQ1MiwiZXhwIjoxNzY1NzIyMzUyfQ.Gy4jPbIiXcjcwfCMvnZC8gX4exUKRbcJWR8u-mOHNE8
 
 
 ###
@@ -213,3 +213,6 @@ Accept: application/json
 GET http://localhost:8000/events/admin/statistics
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM1Mzc1NTA2MTc1OWYwNGY0ZmRhMWUiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzUzNzU1MDYxNzU5ZjA0ZjRmZGExNiIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTA5OTI2MCwiZXhwIjoxNzY1MTAwMTYwfQ.bhTvtX5-NhPIa3tphDHhf-mTA4Ocy2gc3suhgmMdPqM
 Accept: application/json
+
+#####
+GET http://localhost:8000/uploads/events/default.png

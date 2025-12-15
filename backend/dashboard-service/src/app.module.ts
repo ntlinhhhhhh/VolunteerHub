@@ -1,52 +1,103 @@
+// app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+
 import { DashboardController } from './dashboard/presentation/controllers/dashboard.controller';
-import { GetTrendingEventsUseCase } from './dashboard/application/use-cases/get-trending-events.use-case';
-import { GetRecentActivitiesUseCase } from './dashboard/application/use-cases/get-recent-activities.use-case';
-import { GetUserStatsUseCase } from './dashboard/application/use-cases/get-user-stats.use-case';
-import { UpdateDashboardDataUseCase } from './dashboard/application/use-cases/update-dashboard-data.use-case';
+
+// Use cases
+import { GetVolunteerDashboardUseCase } from './dashboard/application/use-cases/get-volunteer-dashboard.usecase';
+import { GetEventManagerDashboardUseCase } from './dashboard/application/use-cases/get-event-manager-dashboard.usecase';
+import { GetAdminDashboardUseCase } from './dashboard/application/use-cases/get-admin-dashboard.usecase';
+import { ExportDashboardUseCase } from './dashboard/application/use-cases/export-dashboard.usecase';
+
+// Domain services
+import { TrendAnalysisService } from './dashboard/domain/services/trend-analysis.service';
+import { BadgeEvaluatorService } from './dashboard/domain/services/badge-evaluator.service';
+import { ScoreCalculatorService } from './dashboard/domain/services/score-calculator.service';
+
+// Infrastructure
+import { HttpClientsModule } from './dashboard/infrastructure/http/http-clients.module';
+import { RedisCacheService } from './dashboard/infrastructure/cache/redis-cache.service';
+import { ExportService } from './dashboard/infrastructure/repositories/export.service';
 import { DashboardRepository } from './dashboard/infrastructure/repositories/dashboard.repository';
-import { IDashboardRepository } from './dashboard/domain/repositories/dashboard.repository.interface';
-import { RabbitMQService } from './dashboard/infrastructure/message-bus/rabbitmq.service';
-import { DashboardConsumerService } from './dashboard/infrastructure/message-bus/dashboard-consumer.service';
-import { DatabaseService } from './dashboard/infrastructure/config/database.service';
+
+// ✅ REAL SCHEMA
 import {
-  TrendingEvent,
-  TrendingEventSchema,
-} from './dashboard/infrastructure/database/schemas/trending-event.schema';
-import {
-  RecentActivity,
-  RecentActivitySchema,
-} from './dashboard/infrastructure/database/schemas/recent-activity.schema';
-import {
-  UserStats,
-  UserStatsSchema,
-} from './dashboard/infrastructure/database/schemas/user-stats.schema';
+    DashboardSnapshot,
+    DashboardSnapshotSchema,
+} from './dashboard/infrastructure/database/schemas/dashboard-snapshot.schema';
+import { AdminDashboard, AdminDashboardSchema, ManagerDashboard, ManagerDashboardSchema, VolunteerDashboard, VolunteerDashboardSchema } from './dashboard/infrastructure/database/schemas';
+import { ScheduleModule } from '@nestjs/schedule';
+import { DashboardAggregationService } from './dashboard/infrastructure/aggregation/dashboard-aggregation.service';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRoot(
-      process.env.MONGO_URI || 'mongodb://volunteer-mongo:27017/dashboard-service'
-    ),
-    MongooseModule.forFeature([
-      { name: TrendingEvent.name, schema: TrendingEventSchema },
-      { name: RecentActivity.name, schema: RecentActivitySchema },
-      { name: UserStats.name, schema: UserStatsSchema },
-    ]),
-  ],
-  controllers: [DashboardController],
-  providers: [
-    GetTrendingEventsUseCase,
-    GetRecentActivitiesUseCase,
-    GetUserStatsUseCase,
-    UpdateDashboardDataUseCase,
-    DashboardRepository,
-    RabbitMQService,
-    DashboardConsumerService,
-    DatabaseService,
-    { provide: IDashboardRepository, useClass: DashboardRepository },
-  ],
+    imports: [
+        // ENV
+        ConfigModule.forRoot({ isGlobal: true }),
+
+        // MongoDB
+        MongooseModule.forRoot(
+            process.env.MONGO_URI || 'mongodb://localhost:27017/dashboard-service',
+        ),
+
+        MongooseModule.forFeature([
+            {
+                name: VolunteerDashboard.name,
+                schema: VolunteerDashboardSchema,
+            },
+            {
+                name: ManagerDashboard.name,
+                schema: ManagerDashboardSchema,
+            },
+            {
+                name: AdminDashboard.name,
+                schema: AdminDashboardSchema,
+            },
+            {
+                name: DashboardSnapshot.name,
+                schema: DashboardSnapshotSchema,
+            },
+        ]),
+
+        ScheduleModule.forRoot(),
+
+        // HTTP clients
+        HttpClientsModule,
+    ],
+
+    controllers: [DashboardController],
+
+    providers: [
+        // Use cases
+        GetVolunteerDashboardUseCase,
+        GetEventManagerDashboardUseCase,
+        GetAdminDashboardUseCase,
+        ExportDashboardUseCase,
+
+        // Domain services
+        ScoreCalculatorService,
+        TrendAnalysisService,
+        BadgeEvaluatorService,
+
+        // Repository
+        DashboardRepository,
+
+        // Interfaces
+        {
+            provide: 'IDashboardRepository',
+            useExisting: DashboardRepository,
+        },
+        {
+            provide: 'ICacheService',
+            useClass: RedisCacheService,
+        },
+        {
+            provide: 'IExportService',
+            useClass: ExportService,
+        },
+
+        DashboardAggregationService,
+    ],
 })
-export class AppModule {}
+export class AppModule { }
