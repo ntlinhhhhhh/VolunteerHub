@@ -57,7 +57,7 @@ const UserManagement: React.FC = () => {
             if (result.success) {
                 const processed = (result.data.users || []).map((user: any) => ({
                     ...user,
-                    status: user.isLocked ? 'inactive' : 'active',
+                    status: user.status || (user.isLocked ? 'inactive' : 'active'),
                     role: (user.roleName || user.role || 'user').toLowerCase(),
                     authId: user.authId || user.id,
                 }));
