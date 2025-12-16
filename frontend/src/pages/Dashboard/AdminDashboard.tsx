@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import AdminViewInfo from './Admin-Crud/AdminViewInfo';
 import PendingEventsNotification from './Admin-Crud/PendingEventsNotification';
 import EventsApproval from './Admin-Crud/EventsApproval';
+import DashboardStats from '../../components/Charts/AdminDashboardChart';
 
-// --- BẢNG MÀU TỐI GIẢN (GOOGLE-LIKE) ---
 const COLORS = {
     PRIMARY: '#1A73E8', 
     SECONDARY: '#4285F4', 
@@ -17,11 +17,10 @@ const COLORS = {
     DANGER: '#EA4335', 
     TEXT_SECONDARY: '#5F6368', 
     WHITE: '#FFFFFF',
-    WARNING: '#F7B200', // Vàng
-    INFO: '#4CB7A5', // Xanh ngọc
+    WARNING: '#F7B200', 
+    INFO: '#4CB7A5',
 };
 
-// MAPPING MÀU CHO CÁC TRẠNG THÁI SỰ KIỆN
 const EVENT_STATUS_COLORS: { [key: string]: string } = {
     'draft': COLORS.TEXT_SECONDARY,
     'pending_approval': COLORS.WARNING,
@@ -67,7 +66,6 @@ interface User {
     createdAt: string;
 }
 
-// <<< INTERFACE MỚI CHO EVENT STATISTICS >>>
 interface EventStatistics {
     totalEvents: number;
     byStatus: { [key: string]: number };
@@ -88,9 +86,7 @@ const AdminDashboard: React.FC = () => {
     const [totalUserCount, setTotalUserCount] = useState(0); // Đổi tên để tránh nhầm lẫn
     const [eventStats, setEventStats] = useState<EventStatistics | null>(null);
     const [loadingEvents, setLoadingEvents] = useState(true);
-
     const [actionMessage, setActionMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
-    
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState<'all' | User['status']>('all'); 
     const [filterRole, setFilterRole] = useState<'all' | User['role']>('all'); 
@@ -103,7 +99,6 @@ const AdminDashboard: React.FC = () => {
     const fetchPendingEvents = useCallback(async (token: string) => {
         setLoadingPending(true);
         try {
-             // Gọi API để lấy danh sách sự kiện có status=pending_approval
             const res = await fetch("http://localhost:8000/events/?status=pending_approval", {
                 method: "GET",
                 headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -179,7 +174,6 @@ const AdminDashboard: React.FC = () => {
             return; 
         }
 
-        // 1. Fetch Users (Logic không thay đổi nhiều, chỉ cập nhật state totalUserCount)
         try {
             const res = await fetch("http://localhost:8000/users/", {
                 method: "GET",
@@ -212,7 +206,6 @@ const AdminDashboard: React.FC = () => {
                     setUsers(processedUsers);
                     const totalFromBackend = result.data?.total; 
                     setTotalUserCount(totalFromBackend ?? processedUsers.length);
-                    // Không xóa error ở đây để giữ lại lỗi từ Event Stats nếu có
                 } else {
                     setError(result.message || "Failed to fetch user data.");
                     setTotalUserCount(0);
@@ -225,9 +218,7 @@ const AdminDashboard: React.FC = () => {
             setLoading(false);
         }
         
-        // 2. Fetch Event Statistics
         await fetchEventStatistics(token);
-
         await fetchPendingEvents(token);
 
     }, [fetchEventStatistics, fetchPendingEvents]); 
@@ -239,7 +230,7 @@ const AdminDashboard: React.FC = () => {
     const kpis = useMemo(() => [
         { title: "Total Users", value: totalUserCount.toLocaleString(), icon: FaUsers, color: COLORS.PRIMARY },
         { title: "Total Events", value: (eventStats?.totalEvents ?? 0).toLocaleString(), icon: FaCalendarAlt, color: COLORS.SECONDARY }, // Sửa KPI
-        { title: "Upcoming Events", value: (eventStats?.upcomingEvents ?? 0).toLocaleString(), icon: FaTicketAlt, color: COLORS.SUCCESS_ACCENT }, // Sửa KPI
+        { title: "Public Events", value: (eventStats?.upcomingEvents ?? 0).toLocaleString(), icon: FaTicketAlt, color: COLORS.SUCCESS_ACCENT }, // Sửa KPI
         { title: "Total Managers", value: users.filter(u => u.role === 'event_manager').length.toLocaleString(), icon: FaShieldAlt, color: COLORS.WARNING }, // Lấy từ users state
     ], [totalUserCount, eventStats, users]);
 
@@ -300,8 +291,6 @@ const AdminDashboard: React.FC = () => {
             setActionMessage({ type: 'error', text: "Token not found. Please log in again." });
             return;
         }
-        
-        // Hành động được xác định dựa trên trạng thái HIỆN TẠI (currentStatus)
         const action = currentStatus === 'active' ? 'lock' : 'unlock';
         const confirmMessage = `Bạn có chắc chắn muốn ${action === 'lock' ? 'KHÓA' : 'MỞ KHÓA'} người dùng này (Auth ID: ${userAuthId})?`;
         
@@ -328,8 +317,6 @@ const AdminDashboard: React.FC = () => {
 
             if (res.ok) {
                 setActionMessage({ type: 'success', text: `✅ User đã được ${action === 'lock' ? 'KHÓA' : 'MỞ KHÓA'} thành công!` });
-
-                // CẬP NHẬT TRẠNG THÁI TRÊN FRONTEND NGAY LẬP TỨC 
                 setUsers(prevUsers => 
                     prevUsers.map(u => 
                         u.authId === userAuthId 
@@ -337,12 +324,9 @@ const AdminDashboard: React.FC = () => {
                             : u
                     )
                 );
-                
-                // Sau đó, fetch lại data để đồng bộ hoàn toàn
                 handleRefresh(); 
                 
             } else {
-                // Hiển thị lỗi từ backend
                 setActionMessage({ 
                     type: 'error', 
                     text: `❌ Thao tác ${action === 'lock' ? 'khóa' : 'mở khóa'} thất bại: ${result.message || res.statusText || 'Lỗi không xác định.'}` 
@@ -354,25 +338,19 @@ const AdminDashboard: React.FC = () => {
             setLoading(false);
         }
     };
-
-
-    // ... (Hàm ViewInfo và Helper Styles không đổi) ...
     const [isViewInfoOpen, setIsViewInfoOpen] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-    // Hàm mở Modal
     const handleViewInfo = (userId: string) => {
         setSelectedUserId(userId);
         setIsViewInfoOpen(true);
     };
 
-    // Hàm đóng Modal
     const handleCloseViewInfo = () => {
         setIsViewInfoOpen(false);
         setSelectedUserId(null);
     };
 
-    // HÀM HELPER ĐỂ TẠO STYLE CHO ROLE BADGE
     const getRoleStyle = (role: User['role']) => {
         if (role === 'admin') return styles.roleAdmin;
         if (role === 'event_manager') return styles.roleManager;
@@ -386,11 +364,9 @@ const AdminDashboard: React.FC = () => {
         return {};
     }
 
-    // RENDER LOGIC CHO BẢNG NGƯỜI DÙNG (Không đổi)
     const renderUserTable = () => {
         if (loading && users.length === 0) return <p style={{ textAlign: 'center', padding: '20px', color: COLORS.TEXT_SECONDARY }}>Loading users...</p>;
         if (error && users.length === 0) return <p style={{ color: COLORS.DANGER, textAlign: 'center', padding: '20px' }}>Error fetching data: {error}</p>;
-        // SỬ DỤNG filteredUsers ở đây:
         if (filteredUsers.length === 0 && (searchTerm || filterStatus !== 'all' || filterRole !== 'all')) {
             return <p style={{ textAlign: 'center', padding: '20px', color: COLORS.TEXT_SECONDARY }}>No users found matching your criteria.</p>;
         }
@@ -411,13 +387,12 @@ const AdminDashboard: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredUsers.map((user) => ( // <<< DÙNG filteredUsers
+                        {filteredUsers.map((user) => ( 
                             <tr key={user.id} style={styles.tr}>
                                 <td style={styles.td}>{user.fullName || 'N/A'}</td>
                                 <td style={styles.td}>{user.email}</td>
                                 <td style={styles.td}>{user.username}</td>
                                 
-                                {/* HIỂN THỊ ROLE */}
                                 <td style={styles.td}>
                                     <span style={getRoleStyle(user.role)}>
                                         {user.role.toUpperCase().replace('_', ' ')}
@@ -425,7 +400,6 @@ const AdminDashboard: React.FC = () => {
                                 </td>
                                 
                                 <td style={styles.td}>
-                                    {/* LOGIC HIỂN THỊ STATUS BADGE */}
                                     <span style={user.status === 'active' ? styles.statusActive : styles.statusLocked}>
                                         {user.status.toUpperCase()}
                                     </span>
@@ -439,13 +413,11 @@ const AdminDashboard: React.FC = () => {
                                         <FaInfoCircle size={14} /> 
                                     </button>
                                     <button 
-                                        // LOGIC HIỂN THỊ MÀU BUTTON: active -> Đỏ (lockButton); locked -> Xanh lá (unlockButton)
                                         style={user.status === 'active' ? styles.lockButton : styles.unlockButton}
                                         onClick={() => toggleUserStatus(user.authId, user.status)} 
                                         title={user.status === 'active' ? "Khóa Người Dùng" : "Mở Khóa Người Dùng"}
                                         disabled={loading || user.role === 'admin'}
                                     >
-                                        {/* LOGIC ICON: active -> hiện Khóa (FaLock); locked -> hiện Mở Khóa (FaUnlock) */}
                                         {user.status === 'active' ? <FaLock size={14} /> : <FaUnlock size={14} />}
                                     </button>
                                 </td>
@@ -458,7 +430,6 @@ const AdminDashboard: React.FC = () => {
     };
 
 
-    // RENDER LOGIC MỚI CHO EVENT STATISTICS
     const renderEventStatistics = () => {
         if (loadingEvents && !eventStats) return <p style={{ textAlign: 'center', padding: '20px', color: COLORS.TEXT_SECONDARY }}>Loading event statistics...</p>;
         if (!eventStats) return <p style={{ color: COLORS.DANGER, textAlign: 'center', padding: '20px' }}>Could not load event statistics.</p>;
@@ -469,7 +440,6 @@ const AdminDashboard: React.FC = () => {
         return (
             <div style={styles.eventStatsGrid}>
                 
-                {/* 1. Thống kê theo trạng thái */}
                 <div style={styles.statCard}>
                     <h4 style={styles.statCardTitle}><FaChartPie size={16} style={{marginRight: '8px'}}/> Events by Status</h4>
                     <ul style={styles.statusList}>
@@ -491,7 +461,6 @@ const AdminDashboard: React.FC = () => {
                     </ul>
                 </div>
 
-                {/* 2. Danh mục phổ biến */}
                 <div style={styles.statCard}>
                     <h4 style={styles.statCardTitle}><FaTags size={16} style={{marginRight: '8px'}}/> Popular Categories</h4>
                     <ul style={styles.categoryList}>
@@ -530,7 +499,6 @@ const AdminDashboard: React.FC = () => {
                 }
             `}</style>
             
-            {/* Sidebar (Không đổi) */}
             <div style={styles.sidebar}>
                 <h2 style={styles.logo}>Kindle</h2>
                 <div style={styles.navSectionTitle}>MENU</div>
@@ -568,30 +536,8 @@ const AdminDashboard: React.FC = () => {
                 
             </div>
 
-
-
-            {/* Main Content */}
             <div style={styles.mainContent}>
-{/*                 <div style={styles.headerRow}>
-                    <h1 style={styles.mainTitle}>Admin Dashboard</h1>
-                    <PendingEventsNotification
-                            pendingCount={eventStats?.byStatus['pending_approval'] ?? 0}
-                            pendingEvents={pendingEvents}
-                            onActionSuccess={handleRefresh}
-                            token={localStorage.getItem('accessToken') || ''}
-                            loadingPending={loadingPending} // <<< THÊM PROP NÀY
-                        />
-                    <button 
-                        style={styles.refreshButton}
-                        onClick={handleRefresh}
-                        disabled={loading || loadingEvents}
-                        title="Refresh Data"
-                    >
-                        <FaSync size={14} style={{ marginRight: '8px' }} className={(loading || loadingEvents) ? 'spin' : ''}/> 
-                        {(loading || loadingEvents) ? 'Refreshing...' : 'Refresh'}
-                    </button>
-                
-                </div> */}
+
                 <div style={styles.headerRow}>
                     <h1 style={styles.mainTitle}>Admin Dashboard</h1>
                     <div style={styles.headerActions}>
@@ -614,15 +560,19 @@ const AdminDashboard: React.FC = () => {
                     </div>
                 </div>
                 <p style={styles.mainSubtitle}>System statistics and user administration.</p>
-                
-                {/* Action Message Bar */}
+                
                 {actionMessage && (
                     <div style={{...styles.actionMessageBar, ...getActionMessageStyle()}}>
                         {actionMessage.text}
                     </div>
                 )}
+                <DashboardStats 
+                    totalUsers={totalUserCount} 
+                    eventStats={eventStats} 
+                    loading={loading || loadingEvents} 
+                />
+                <br></br>
 
-                {/* 1. KPI Cards (ĐÃ CẬP NHẬT) */}
                 <div style={styles.kpiGrid}>
                     {kpis.map((kpi) => (
                         <div key={kpi.title} style={styles.kpiCard}>
@@ -635,18 +585,15 @@ const AdminDashboard: React.FC = () => {
                     ))}
                 </div>
 
-                {/* 2. EVENT STATISTICS SECTION (PHẦN MỚI) */}
                 <h3 style={{...styles.dataCardTitle, marginTop: '10px'}}><FaClipboardList size={20} style={{marginRight: '10px', color: COLORS.PRIMARY}}/> Event Statistics</h3>
                 {renderEventStatistics()}
 
 
-                {/* 3. User Management Table (Bảng Người Dùng) */}
                 <div style={{...styles.dataCard, marginTop: '40px'}}>
                     <h3 style={styles.dataCardTitle}>
                         <FaUsers size={20} style={{marginRight: '10px', color: COLORS.PRIMARY}}/> User Management
                     </h3>
                     
-                    {/* Table Toolbar (Không đổi) */}
                     <div style={styles.tableToolbar}>
                         <div style={styles.searchWrapper}>
                             <FaSearch style={styles.searchIcon} />
@@ -660,7 +607,6 @@ const AdminDashboard: React.FC = () => {
                         </div>
                         
                         <div style={styles.filterGroup}> 
-                            {/* Bộ lọc theo Status */}
                             <select 
                                 style={styles.selectFilter} 
                                 value={filterStatus}
@@ -703,12 +649,8 @@ const AdminDashboard: React.FC = () => {
     );
 };
 
-// --- STYLES (ĐÃ CẬP NHẬT/THÊM MỚI) ---
 const styles: DashboardStyles = {
-    // ... (Giữ nguyên các styles cũ)
-    
-    // LAYOUT & CHUNG
-    dashboardContainer: {
+    dashboardContainer: {
         display: 'flex', minHeight: '100vh', width: '100vw', fontFamily: 'Roboto, Arial, sans-serif', backgroundColor: COLORS.BACKGROUND,
     },
     sidebar: {
@@ -788,7 +730,6 @@ const styles: DashboardStyles = {
         fontSize: '24px', fontWeight: '400', color: COLORS.DARK_NAVY, margin: '0',
     },
 
-    // EVENT STATS (MỚI)
     eventStatsGrid: {
         display: 'grid',
         gridTemplateColumns: 'repeat(2, 1fr)',
@@ -811,7 +752,6 @@ const styles: DashboardStyles = {
         paddingBottom: '10px',
     },
 
-    // Thống kê theo Status
     statusList: {
         listStyle: 'none', 
         padding: 0, 
@@ -847,7 +787,6 @@ const styles: DashboardStyles = {
         marginLeft: '5px',
     },
 
-    // Danh mục phổ biến
     categoryList: {
         listStyle: 'none',
         padding: 0,
@@ -886,8 +825,6 @@ const styles: DashboardStyles = {
         margin: 0
     },
 
-
-    // DATA TABLE & TOOLBAR (Không đổi)
     dataCard: {
         backgroundColor: COLORS.CARD_BG, padding: '30px', borderRadius: '4px', border: `1px solid ${COLORS.BORDER}`,
     },
@@ -917,8 +854,6 @@ const styles: DashboardStyles = {
         padding: '10px 15px', border: `1px solid ${COLORS.BORDER}`, borderRadius: '4px', fontSize: '14px', marginRight: '15px', color: COLORS.DARK_NAVY, minWidth: '150px',
         backgroundColor: COLORS.CARD_BG, cursor: 'pointer'
     },
-
-    // TABLE
     tableWrapper: {
         overflowX: 'auto',
     },
@@ -934,8 +869,6 @@ const styles: DashboardStyles = {
     tr: {
         transition: 'background-color 0.15s',
     },
-    
-    // STATUS BADGES & ACTIONS (Không đổi)
     statusActive: {
         padding: '4px 8px', borderRadius: '16px', backgroundColor: '#E6F4EA', color: COLORS.SUCCESS_ACCENT, fontWeight: '500', fontSize: '12px',
     },
@@ -958,9 +891,9 @@ const styles: DashboardStyles = {
         padding: '8px', border: 'none', borderRadius: '4px', cursor: 'pointer', backgroundColor: COLORS.SUCCESS_ACCENT, color: COLORS.WHITE, transition: 'background-color 0.2s', marginRight: '5px',
     },
     actionButton: {
-        backgroundColor: COLORS.CARD_BG, // Hoặc COLORS.WHITE
+        backgroundColor: COLORS.CARD_BG, 
         border: `1px solid ${COLORS.BORDER}`, 
-        borderRadius: '4px', // Bo góc nhẹ
+        borderRadius: '4px', 
         padding: '8px',
         
         cursor: 'pointer',
