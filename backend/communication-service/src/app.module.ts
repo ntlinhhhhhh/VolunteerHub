@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
 // Domain
 import { IPostRepository } from './communication/domain/repositories/post.repository.interface';
 
 // Infrastructure
+import { DatabaseModule } from './communication/infrastructure/database/connection';
 import { PostRepository } from './communication/infrastructure/repositories/post.repository';
 import { Post, PostSchema } from './communication/infrastructure/database/schemas/post.schema';
 import { RabbitMQService } from './communication/infrastructure/message-bus/rabbitmq.service';
@@ -29,10 +29,7 @@ import { PostController } from './communication/presentation/controllers/post.co
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRoot(
-      process.env.MONGO_URI || 'mongodb://volunteer-mongo:27017/communication-service',
-    ),
+    DatabaseModule,
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
   ],
   controllers: [PostController],

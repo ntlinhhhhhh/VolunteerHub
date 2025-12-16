@@ -1,8 +1,8 @@
 
 ### Variables
 @baseUrl = http://localhost:4005
-@eventId = 67650d53c1234567890abcde
-@postId = 67650d53c1234567890abcdf
+@eventId = '67650d53c1234567890abcde'
+@postId = '67650d53c1234567890abcdf'
 @userId = user123
 @userName = John Doe
 @userRole = volunteer
