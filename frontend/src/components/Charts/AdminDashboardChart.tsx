@@ -250,7 +250,7 @@ const AdminDashboardStats: React.FC<DashboardStatsProps> = ({ totalUsers, eventS
         const fetchPending = async () => {
             try {
                 const res = await fetch(
-                    'http://localhost:8000/events/?status=pending_approval&limit=2'
+                    'http://localhost:8000/events/?status=pending_approval'
                 );
                 const json = await res.json();
 
