@@ -234,16 +234,17 @@ import {
       @Headers('x-user-name') userName: string,
       @Headers('x-user-avatar') userAvatar?: string,
     ) {
-      await this.addCommentUseCase.execute(postId, {
+      const comment = await this.addCommentUseCase.execute(postId, {
         ...dto,
         authorId: userId,
         authorName: userName,
         authorAvatar: userAvatar,
       });
-  
+
       return {
         success: true,
         message: 'Comment added successfully',
+        data: comment,
       };
     }
   

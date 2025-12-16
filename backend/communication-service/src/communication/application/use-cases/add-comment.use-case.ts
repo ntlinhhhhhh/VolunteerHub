@@ -14,7 +14,7 @@ export class AddCommentUseCase {
     private readonly rabbitMQService: RabbitMQService,
   ) {}
 
-  async execute(postId: string, dto: CreateCommentDto): Promise<void> {
+  async execute(postId: string, dto: CreateCommentDto): Promise<any> {
     this.logger.log(`Adding comment to post ${postId} by user ${dto.authorId}`);
 
     const post = await this.postRepository.findById(postId);
@@ -57,5 +57,6 @@ export class AddCommentUseCase {
     }
 
     this.logger.log(`Comment added to post ${postId}`);
+    return comment;
   }
 }
