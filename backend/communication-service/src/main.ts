@@ -1,56 +1,54 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe, BadRequestException, ValidationError, Logger } from '@nestjs/common';
-import * as dotenv from 'dotenv';
-import { AllExceptionsFilter } from './communication/presentation/filters/http-exception.filter';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Logger, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { getConnectionToken } from '@nestjs/mongoose';
+import { HttpExceptionFilter } from './communication/presentation/filters/http-exception.filter';
 
 async function bootstrap() {
-    const logger = new Logger('ComminicationService');
-    try {
+  const logger = new Logger('Bootstrap');
 
-        const app = await NestFactory.create(AppModule);
-        app.useGlobalPipes(
-            new ValidationPipe({
-                whitelist: true,
-                forbidNonWhitelisted: true,
-                transform: true,
-            }),
-        );
+  const app = await NestFactory.create(AppModule);
 
-        app.useGlobalFilters(new AllExceptionsFilter());
+  const configService = app.get(ConfigService);
 
-        app.enableCors({
-            origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-            credentials: true,
-        });
+  // Enable CORS
+  const corsOrigin = configService.get<string>('CORS_ORIGIN') || 'http://localhost:5173';
+  app.enableCors({
+    origin: corsOrigin,
+    credentials: true,
+  });
 
-        const redisHost = process.env.REDIS_HOST || 'redis';
-        const redisPort = parseInt(process.env.REDIS_PORT || '6379', 10);
+  // Global exception filter
+  app.useGlobalFilters(new HttpExceptionFilter());
 
-        const microserviceOptions: MicroserviceOptions = {
-            transport: Transport.REDIS,
-            options: {
-                host: redisHost,
-                port: redisPort,
-                retryAttempts: 5,
-                retryDelay: 3000,
-            },
-        };
+  // Global validation pipe
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
-        app.connectMicroservice(microserviceOptions);
-        await app.startAllMicroservices();
+  // Port
+  const port = configService.get<number>('PORT') || 4005;
 
-        const port = parseInt(process.env.PORT || '4010', 10);
-        await app.listen(port);
-
-        logger.log(`✅ Communication Service HTTP API: http://localhost:${port}/api`);
-        logger.log(`✅ Communication Service Microservice (Redis) at ${redisHost}:${redisPort}`);
-    } catch (error) {
-        logger.error('❌ Failed to start Auth Service:', error.message);
-        process.exit(1);
+  // Check MongoDB connection
+  try {
+    const mongooseConnection = app.get(getConnectionToken());
+    if (mongooseConnection.readyState === 1) {
+      logger.log('Connected to MongoDB successfully');
+    } else {
+      logger.warn('MongoDB connection not ready');
     }
-    
+  } catch (error) {
+    logger.error('Failed to connect to MongoDB', error);
+  }
+
+  await app.listen(port);
+  logger.log(`Communication Service running on port ${port}`);
+  logger.log(`CORS enabled for origin: ${corsOrigin}`);
 }
 
 bootstrap();

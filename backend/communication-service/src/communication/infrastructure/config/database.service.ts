@@ -4,16 +4,21 @@ import { Connection } from 'mongoose';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit {
-    private readonly logger = new Logger(DatabaseService.name);
+  private readonly logger = new Logger(DatabaseService.name);
 
-    constructor(@InjectConnection() private readonly connection: Connection) {}
+  constructor(@InjectConnection() private readonly connection: Connection) {}
 
-    onModuleInit() {
-        this.connection.on('connected', () => {
-            this.logger.log('MongoDB connected successfully');
-        });
-        this.connection.on('error', (err) => {
-            this.logger.error('MongoDB connection error: ' + err.message);
-        });
-    }
+  onModuleInit() {
+    this.connection.on('connected', () => {
+      this.logger.log(' MongoDB connected successfully');
+    });
+    
+    this.connection.on('error', (err) => {
+      this.logger.error(' MongoDB connection error: ' + err.message);
+    });
+    
+    this.connection.on('disconnected', () => {
+      this.logger.warn(' MongoDB disconnected');
+    });
+  }
 }

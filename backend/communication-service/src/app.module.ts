@@ -1,107 +1,60 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { CacheModule } from '@nestjs/cache-manager';
+import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import * as redisStore from 'cache-manager-redis-store';
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
-import { ShareModule } from '@share/share.module';
-import { ClientProxyFactory, Transport } from '@nestjs/microservices';
-import { PassportModule } from '@nestjs/passport';
 
-import { getDatabaseConfig } from './communication/infrastructure/config/database.config';
-import { PostSchema } from './communication/infrastructure/database/schemas/post.schema';
+// Domain
+import { IPostRepository } from './communication/domain/repositories/post.repository.interface';
 
-import { DatabaseModule } from './communication/infrastructure/database/connection';
+// Infrastructure
+import { PostRepository } from './communication/infrastructure/repositories/post.repository';
+import { Post, PostSchema } from './communication/infrastructure/database/schemas/post.schema';
+import { RabbitMQService } from './communication/infrastructure/message-bus/rabbitmq.service';
 import { DatabaseService } from './communication/infrastructure/config/database.service';
 
-import { PostRepository } from './communication/infrastructure/repositories/post.repository';
-import { IPostRepository } from './communication/domain/repositories/post.repository.interface';
-import { MessagePublisherService } from './communication/infrastructure/messaging/message-publisher.service';
-
+// Application
 import { CreatePostUseCase } from './communication/application/use-cases/create-post.use-case';
 import { UpdatePostUseCase } from './communication/application/use-cases/update-post.use-case';
 import { DeletePostUseCase } from './communication/application/use-cases/delete-post.use-case';
-import { ToggleLikeUseCase } from './communication/application/use-cases/toggle-like.use-case';
+import { GetPostsUseCase } from './communication/application/use-cases/get-posts.use-case';
+import { LikePostUseCase } from './communication/application/use-cases/like-post.use-case';
+import { UnlikePostUseCase } from './communication/application/use-cases/unlike-post.use-case';
+import { PinPostUseCase } from './communication/application/use-cases/pin-post.use-case';
+import { UnpinPostUseCase } from './communication/application/use-cases/unpin-post.use-case';
 import { AddCommentUseCase } from './communication/application/use-cases/add-comment.use-case';
-import { ListPostsUseCase } from './communication/application/use-cases/list-posts.use-case';
+import { UpdateCommentUseCase } from './communication/application/use-cases/update-comment.use-case';
+import { DeleteCommentUseCase } from './communication/application/use-cases/delete-comment.use-case';
 
+// Presentation
 import { PostController } from './communication/presentation/controllers/post.controller';
 
-import { JwtStrategy } from '@share/auth/jwt.strategy';
-import { JwtAuthGuard } from '@share/auth/jwt-auth.guard';
-import { Post } from './communication/domain/entities/post.entity';
-
 @Module({
-    imports: [
-        ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
-        PassportModule.register({ defaultStrategy: 'jwt' }),
-        
-        // Mongoose
-        MongooseModule.forRootAsync({
-            inject: [ConfigService],
-            useFactory: getDatabaseConfig,
-        }),
-        MongooseModule.forFeature([
-            { name: Post.name, schema: PostSchema },
-        ]),
-        
-        // Redis Cache
-        CacheModule.register({
-            store: redisStore,
-            host: 'redis',
-            port: 6379,
-            ttl: 0,
-        }),
-        
-        DatabaseModule,
-        
-        // RabbitMQ
-        RabbitMQModule.forRootAsync({
-            useFactory: () => ({
-                uri: 'amqp://rabbitmq:5672',
-                exchanges: [
-                    { name: 'notification_exchange', type: 'topic' },
-                ],
-            }),
-        }),
-        
-        ShareModule,
-    ],
-    controllers: [PostController],
-    providers: [
-        // Microservice clients
-        {
-            provide: 'EVENT_SERVICE',
-            useFactory: () =>
-                ClientProxyFactory.create({
-                    transport: Transport.REDIS,
-                    options: { host: 'redis', port: 6379 },
-                }),
-        },
-        
-        DatabaseService,
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    MongooseModule.forRoot(
+      process.env.MONGO_URI || 'mongodb://volunteer-mongo:27017/communication-service',
+    ),
+    MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
+  ],
+  controllers: [PostController],
+  providers: [
+    // Infrastructure
+    DatabaseService,
+    RabbitMQService,
+    PostRepository,
+    { provide: IPostRepository, useClass: PostRepository },
 
-        // Repository Providers
-        { provide: IPostRepository, useClass: PostRepository },
-
-        // Use Cases
-        CreatePostUseCase,
-        UpdatePostUseCase,
-        DeletePostUseCase,
-        ToggleLikeUseCase,
-        AddCommentUseCase,
-        ListPostsUseCase,
-
-        // Repository
-        PostRepository,
-
-        // Messaging
-        MessagePublisherService,
-
-        // Auth
-        JwtStrategy,
-        JwtAuthGuard,
-    ],
-    exports: [RabbitMQModule, CacheModule],
+    // Use Cases
+    CreatePostUseCase,
+    UpdatePostUseCase,
+    DeletePostUseCase,
+    GetPostsUseCase,
+    LikePostUseCase,
+    UnlikePostUseCase,
+    PinPostUseCase,
+    UnpinPostUseCase,
+    AddCommentUseCase,
+    UpdateCommentUseCase,
+    DeleteCommentUseCase,
+  ],
 })
 export class AppModule {}
