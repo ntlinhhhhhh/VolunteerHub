@@ -165,25 +165,15 @@ const styles: { [key: string]: React.CSSProperties } = {
         transition: 'background-color 0.2s',
     },
     
-    // // *** SỬA LAYOUT Ở ĐÂY ***
-    // mainContent: {
-    //     // Loại bỏ flexGrow: 1 (vì Sidebar là fixed)
-    //     marginLeft: '280px', // Bù trừ cho Sidebar
-    //     padding: '30px',
-    //     transition: 'margin-left 0.3s',
-    //     // Thiết lập chiều rộng dựa trên Viewport để nó không bị thụt lề
-    //     width: 'calc(100vw - 280px)', 
-    // },
-    // // ***********************
-    
     mainContent: {
-        flex: 1,                    // 🔥 Quan trọng – cho phép chiếm toàn bộ phần còn lại
-        marginLeft: '280px',        // 🔥 Bù khoảng sidebar cố định
+        // Loại bỏ flexGrow: 1 (vì Sidebar là fixed)
+        marginLeft: '280px', // Bù trừ cho Sidebar
         padding: '30px',
-        minWidth: 0,                // 🔥 Ngăn overflow ngang
-        boxSizing: 'border-box',
-        overflowX: 'hidden',
+        transition: 'margin-left 0.3s',
+        // Thiết lập chiều rộng dựa trên Viewport để nó không bị thụt lề
+        width: 'calc(100vw - 280px)', 
     },
+    
     contentTitle: {
         color: COLORS.DARK_NAVY,
         margin: '0 0 5px 0',

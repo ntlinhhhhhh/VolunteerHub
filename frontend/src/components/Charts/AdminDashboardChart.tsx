@@ -243,6 +243,30 @@ const AdminDashboardStats: React.FC<DashboardStatsProps> = ({ totalUsers, eventS
     
     const pendingCount = eventStats?.byStatus?.['pending_approval'] || 0;
     const realPendingEvents = eventStats?.pendingEventsList || [];
+    const [pendingEvents, setPendingEvents] = React.useState<any[]>([]);
+    const [loadingPending, setLoadingPending] = React.useState(true);
+
+    React.useEffect(() => {
+        const fetchPending = async () => {
+            try {
+                const res = await fetch(
+                    'http://localhost:8000/events/?status=pending_approval'
+                );
+                const json = await res.json();
+
+                if (json.success) {
+                    setPendingEvents(json.data || []);
+                }
+            } catch (err) {
+                console.error('Fetch pending events failed', err);
+            } finally {
+                setLoadingPending(false);
+            }
+        };
+
+        fetchPending();
+    }, []);
+
 
     if (loading) return <div style={{...styles.loading, fontFamily: COLORS.fontFamily}}>Đang tải dữ liệu hệ thống...</div>;
 
@@ -294,42 +318,46 @@ const AdminDashboardStats: React.FC<DashboardStatsProps> = ({ totalUsers, eventS
                     </div>
 
                     <div style={styles.scrollWrapper}>
-                        <div style={styles.pendingList}>
-                            {realPendingEvents.length > 0 ? (
-                                realPendingEvents.slice(0, 2).map((event: any) => (
-                                    <div 
-                                        key={event.id} 
-                                        style={styles.pendingItem}
-                                        onClick={() => navigate('/admin/event-approvals')}
-                                        onMouseOver={(e) => (e.currentTarget.style.transform = 'translateX(4px)')}
-                                        onMouseOut={(e) => (e.currentTarget.style.transform = 'translateX(0)')}
-                                    >
-                                        <div style={styles.pendingIcon}>
-                                            <FaClock size={16} color={COLORS.warning} />
+                        {loadingPending ? (
+                            <div style={styles.emptyState}>Đang tải...</div>
+                        ) : pendingEvents.length > 0 ? (
+                            pendingEvents.map(event => (
+                                <div
+                                    key={event.id}
+                                    style={styles.pendingItem}
+                                    onClick={() => navigate('/admin/event-approvals')}
+                                >
+                                    <div style={styles.pendingIcon}>
+                                        <FaClock size={16} color={COLORS.warning} />
+                                    </div>
+
+                                    <div style={styles.pendingBody}>
+                                        <div style={styles.pTitle}>
+                                            {event.title}
                                         </div>
-                                        <div style={styles.pendingBody}>
-                                            <div style={styles.pTitle}>{event.title}</div>
-                                            <div style={styles.pMetaRow}>
-                                                <span style={styles.pMeta}>
-                                                    <FaUserCircle /> {event.organizerName || event.organizer?.name || 'N/A'}
-                                                </span>
-                                                <span style={styles.pMeta}>
-                                                    <FaMapMarkerAlt /> {event.location?.address || 'N/A'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div style={styles.pDate}>
-                                            {event.createdAt ? new Date(event.createdAt).toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit'}) : '--/--'}
+
+                                        <div style={styles.pMetaRow}>
+                                            <span style={styles.pMeta}>
+                                                <FaUserCircle /> {event.organizerName}
+                                            </span>
+                                            <span style={styles.pMeta}>
+                                                <FaMapMarkerAlt /> {event.location?.address}
+                                            </span>
                                         </div>
                                     </div>
-                                ))
-                            ) : (
-                                <div style={styles.emptyState}>
-                                    🎉 Tất cả sự kiện đã được xử lý!
+
+                                    <div style={styles.pDate}>
+                                        {new Date(event.createdAt).toLocaleDateString('vi-VN')}
+                                    </div>
                                 </div>
-                            )}
-                        </div>
+                            ))
+                        ) : (
+                            <div style={styles.emptyState}>
+                                🎉 Tất cả sự kiện đã được xử lý!
+                            </div>
+                        )}
                     </div>
+
                 </div>
             </div>
 
