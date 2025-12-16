@@ -198,7 +198,7 @@ const AdminDashboard: React.FC = () => {
                         return {
                             ...user,
                             status: determinedStatus, 
-                            role: (user.roleName || user.role || 'user').toLowerCase() === 'admin' ? 'admin' : ((user.roleName || user.role || 'user').toLowerCase() === 'event_manager' ? 'event_manager' : 'user'),
+                            role: (user.roleName || user.role || 'user').toLowerCase() === 'admin' ? 'admin' : ((user.roleName || user.role || 'user').toLowerCase() === 'event_manager' ? 'event_manager' : 'volunteer'),
                             authId: user.authId || user.id, 
                         };
                     }) as User[];
@@ -626,7 +626,7 @@ const AdminDashboard: React.FC = () => {
                                 <option value="all">Role: All</option>
                                 <option value="admin">Admin</option>
                                 <option value="event_manager">Event Manager</option>
-                                <option value="user">User</option>
+                                <option value="volunteer">Volunteer</option>
                             </select>
 
                             <button style={styles.filterButton}>

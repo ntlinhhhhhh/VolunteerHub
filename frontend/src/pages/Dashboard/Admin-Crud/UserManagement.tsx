@@ -221,7 +221,7 @@ const UserManagement: React.FC = () => {
                                 <option value="all">All Roles</option>
                                 <option value="admin">Admin</option>
                                 <option value="event_manager">Manager</option>
-                                <option value="user">User</option>
+                                <option value="volunteer">Volunteer</option>
                             </select>
                         </div>
                     </div>
