@@ -112,7 +112,7 @@ export class EventController {
                     cb(null, `${uniqueSuffix}${ext}`);
                 },
             }),
-            limits: { fileSize: 10 * 1024 * 1024 }, // 10MB/ảnh
+            limits: { fileSize: 50 * 1024 * 1024 }, // 50MB/ảnh
             fileFilter: (req, file, cb) => {
                 if (!file.mimetype.startsWith('image/')) {
                     return cb(new BadRequestException('Only images are allowed'), false);
@@ -149,45 +149,6 @@ export class EventController {
             data: event,
         };
     }
-
-
-    // @Post(':id/avatar')
-    // @UseInterceptors(
-    //     FileInterceptor('file', {
-    //         storage: diskStorage({
-    //             destination: './uploads/avatars',
-    //             filename: (req, file, cb) => {
-    //                 const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    //                 const ext = extname(file.originalname);
-    //                 cb(null, `${uniqueSuffix}${ext}`);
-    //             },
-    //         }),
-    //         limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-    //         fileFilter: (req, file, cb) => {
-    //             if (!file.mimetype.startsWith('image/')) {
-    //                 return cb(new BadRequestException('Only image files are allowed'), false);
-    //             }
-    //             cb(null, true);
-    //         },
-    //     }),
-    // )
-    // async uploadAvatar(
-    //     @Param('id') userId: string,
-    //     @UploadedFile() file: MulterFile,     // ✔ DÙNG TYPE MỚI
-    // ) {
-    //     if (!file) {
-    //         throw new BadRequestException('No file uploaded');
-    //     }
-
-    //     const filePath = `/uploads/avatars/${file.filename}`;
-
-    //     return {
-    //         success: true,
-    //         userId,
-    //         avatar: filePath,
-    //     };
-    // }
-
 
     /**
      * ORGANIZER: Update event
