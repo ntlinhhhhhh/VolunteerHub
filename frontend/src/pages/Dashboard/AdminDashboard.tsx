@@ -540,7 +540,10 @@ const AdminDashboard: React.FC = () => {
                     Dashboard
                 </div>
                 
-                <div style={styles.navItem}>
+                <div style={
+                styles.navItem}
+                    onClick={() => navigate("/admin/user-management")}
+                >
                     <FaUsers size={14} style={{ marginRight: '15px' }} />
                     User Management
                 </div>
@@ -591,7 +594,6 @@ const AdminDashboard: React.FC = () => {
                 </div> */}
                 <div style={styles.headerRow}>
                     <h1 style={styles.mainTitle}>Admin Dashboard</h1>
-                    {/* <<< NHÓM CÁC ACTIONS VÀO ĐÂY >>> */}
                     <div style={styles.headerActions}>
                         <PendingEventsNotification
                             pendingCount={eventStats?.byStatus['pending_approval'] ?? 0}

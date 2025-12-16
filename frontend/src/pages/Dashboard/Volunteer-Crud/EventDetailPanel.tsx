@@ -12,7 +12,7 @@ import {
     FaExpandAlt,
     FaCompressAlt,
 } from "react-icons/fa";
-import { Maximize2, ChevronRight } from "lucide-react";
+// import { Maximize2, ChevronRight } from "lucide-react";
 import RegistrationForm from "./RegistrationForm";
 
 const COLORS = {

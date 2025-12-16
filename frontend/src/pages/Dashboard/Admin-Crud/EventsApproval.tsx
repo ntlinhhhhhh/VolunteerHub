@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { FaUsers, FaCalendarAlt, FaFilter, FaSearch, FaChevronRight, FaSync, FaArrowAltCircleLeft, FaInfoCircle, FaCheckCircle, FaTimesCircle, FaClock, FaClipboardList, FaMapMarkerAlt, FaShieldAlt } from 'react-icons/fa';
+import { FaUsers, FaCalendarAlt, FaFilter, FaSearch, FaChevronRight, FaSync, FaArrowAltCircleLeft, FaInfoCircle, FaCheckCircle, FaTimesCircle, FaClock, FaClipboardList, FaMapMarkerAlt, FaShieldAlt, FaHouseUser } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 import EventDetailSidePanel from './EventDetailSidePanel';
 
@@ -408,11 +408,11 @@ const EventsApproval: React.FC = () => {
                 <div style={styles.navSectionTitle}>MENU</div>
                 
                 <div style={styles.navItem} onClick={() => navigate("/admin/dashboard")}>
-                    <FaChevronRight size={10} style={{ marginRight: '15px', opacity: 0 }} /> 
+                    <FaHouseUser size={14} style={{ marginRight: '15px' }} /> 
                     Dashboard
                 </div>
                 
-                <div style={styles.navItem} onClick={() => navigate("/admin/dashboard")}> 
+                <div style={styles.navItem} onClick={() => navigate("/admin/user-management")}> 
                     <FaUsers size={14} style={{ marginRight: '15px' }} />
                     User Management
                 </div>
@@ -421,7 +421,7 @@ const EventsApproval: React.FC = () => {
                     style={styles.navItemActive} 
                     onClick={() => navigate("/admin/event-approvals")} 
                 >
-                    <FaChevronRight size={10} style={{ marginRight: '15px' }} />
+                    <FaChevronRight size={14} style={{ marginRight: '15px' }} />
                     Event Approvals
                 </div>
                 <div style={styles.navItem}>
@@ -558,7 +558,7 @@ const styles: DashboardStyles = {
     },
     searchBar: {
         padding: '10px 10px 10px 40px', border: `1px solid ${COLORS.BORDER}`, borderRadius: '4px', width: '100%', fontSize: '14px', 
-        transition: 'border-color 0.2s, box-shadow 0.2s',
+        transition: 'border-color 0.2s, box-shadow 0.2s',  backgroundColor: '#FFFFFF', color: '#000000',
         ...({ ':focus': { borderColor: COLORS.PRIMARY, boxShadow: '0 0 0 1px ' + COLORS.PRIMARY } } as React.CSSProperties),
     },
     searchIcon: {
