@@ -58,6 +58,7 @@ const AdminViewInfo: React.FC<AdminViewInfoProps> = ({ userId, onClose }) => {
             });
             const data = await res.json();
             if (res.ok && data.success) {
+                data.data.avatar = `http://localhost:8000${data.data.avatar}`;
                 setUserInfo(data.data);
             } else {
                 setError(data.message || "Không thể tải thông tin người dùng.");
