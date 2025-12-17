@@ -24,6 +24,7 @@ export class CreatePostUseCase {
       authorAvatar: dto.authorAvatar || null,
       content: dto.content,
       images: dto.images || [],
+      videos: dto.videos || [],
       isPinned: false,
       likesCount: 0,
       commentsCount: 0,

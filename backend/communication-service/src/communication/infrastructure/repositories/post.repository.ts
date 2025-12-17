@@ -25,6 +25,7 @@ export class PostRepository implements IPostRepository {
       doc.authorAvatar,
       doc.content,
       doc.images,
+      doc.videos,
       doc.isPinned,
       doc.likesCount,
       doc.commentsCount,

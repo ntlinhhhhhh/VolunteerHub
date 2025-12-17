@@ -27,7 +27,8 @@ x-user-name: {{userName}}
   "authorId": "{{userId}}",
   "authorName": "{{userName}}",
   "content": "Chào mọi người! Mình rất vui được tham gia sự kiện này. Hẹn gặp các bạn! 🎉",
-  "images": ["https://example.com/image1.jpg"]
+  "images": ["https://example.com/image1.jpg"],
+  "videos": ["https://example.com/video1.mp4"]
 }
 
 ### Set postId from create response
@@ -44,7 +45,8 @@ x-user-id: {{userId}}
 
 {
   "content": "Nội dung đã được cập nhật",
-  "images": []
+  "images": [],
+  "videos": ["https://example.com/updated-video.mp4"]
 }
 
 ### 6. Like Post

@@ -25,6 +25,10 @@ export class CreatePostDto {
   @IsArray()
   @IsOptional()
   images?: string[];
+
+  @IsArray()
+  @IsOptional()
+  videos?: string[];
 }
 
 export class UpdatePostDto {
@@ -36,6 +40,10 @@ export class UpdatePostDto {
   @IsArray()
   @IsOptional()
   images?: string[];
+
+  @IsArray()
+  @IsOptional()
+  videos?: string[];
 }
 
 export class CreateCommentDto {

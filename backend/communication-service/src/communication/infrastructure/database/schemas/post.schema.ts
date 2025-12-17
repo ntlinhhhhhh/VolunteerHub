@@ -49,6 +49,9 @@ export class Post {
   @Prop({ type: [String], default: [] })
   images: string[];
 
+  @Prop({ type: [String], default: [] })
+  videos: string[];
+
   @Prop({ default: false, index: true })
   isPinned: boolean;
 

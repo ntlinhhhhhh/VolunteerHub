@@ -27,6 +27,7 @@ export class UpdatePostUseCase {
     const updated = await this.postRepository.update(postId, {
       content: dto.content,
       images: dto.images !== undefined ? dto.images : post.images,
+      videos: dto.videos !== undefined ? dto.videos : post.videos,
     });
 
     if (!updated) {

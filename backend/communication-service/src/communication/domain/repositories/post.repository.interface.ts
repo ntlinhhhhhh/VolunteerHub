@@ -8,6 +8,7 @@ export enum PostSortBy {
 export type PostUpdateData = {
   content?: string;
   images?: string[];
+  videos?: string[];
 };
 
 export interface IPostRepository {

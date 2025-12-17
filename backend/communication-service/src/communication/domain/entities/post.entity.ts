@@ -7,6 +7,7 @@ export class Post {
       public readonly authorAvatar: string | null,
       public readonly content: string,
       public readonly images: string[],
+      public readonly videos: string[],
       public readonly isPinned: boolean,
       public readonly likesCount: number,
       public readonly commentsCount: number,
