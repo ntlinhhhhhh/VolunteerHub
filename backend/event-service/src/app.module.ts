@@ -9,15 +9,18 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 
 import { getDatabaseConfig } from './event/infrastructure/config/database.config';
 import { EventSchema } from './event/infrastructure/database/schemas/event.schema';
+import { FeedbackSchema } from './event/infrastructure/database/schemas/feedback.schema';
 
 import { DatabaseModule } from './event/infrastructure/database/connection';
 import { DatabaseService } from './event/infrastructure/config/database.service';
 
 import { EventRepository } from './event/infrastructure/repositories/event.repository';
 import { EventCategoryRepository } from './event/infrastructure/repositories/event-category.repository'; // ⬅ thêm
+import { FeedbackRepository } from './event/infrastructure/repositories/feedback.repository';
 
 import { IEventRepository } from './event/domain/repositories/event.repository.interface';
 import { IEventCategoryRepository } from './event/domain/repositories/event-category.repository.interface'; // ⬅ thêm
+import { IFeedbackRepository } from './event/domain/repositories/feedback.repository.interface';
 
 import { CreateEventUseCase } from './event/application/use-cases/create-event.use-case';
 import { UpdateEventUseCase } from './event/application/use-cases/update-event.use-case';
@@ -27,8 +30,10 @@ import { CreateCategoryUseCase } from './event/application/use-cases/create-cate
 
 import { EventController } from './event/presentation/controllers/event.controller';
 import { CategoryController } from './event/presentation/controllers/category.controller';
+import { FeedbackController } from './event/presentation/controllers/feedback.controller';
 import { EventCategory } from './event/domain/entities/event-category.entity';
 import { EventCategorySchema } from './event/infrastructure/database/schemas/event-category.schema';
+import { Feedback } from './event/infrastructure/database/schemas/feedback.schema';
 import { SubmitEventForApprovalUseCase } from './event/application/use-cases/submit-event-for-approval.use-case';
 import { PublishEventUseCase } from './event/application/use-cases/publish-event.use-case';
 import { CancelEventUseCase } from './event/application/use-cases/cancel-event.use-case';
@@ -38,6 +43,9 @@ import { GetEventBySlugUseCase } from './event/application/use-cases/get-event-b
 import { ListEventsUseCase } from './event/application/use-cases/list-events.use-case';
 import { GetEventStatisticsUseCase } from './event/application/use-cases/get-event-statistics.use-case';
 import { ListCategoriesUseCase } from './event/application/use-cases/list-categories.use-case';
+import { CreateFeedbackUseCase } from './event/application/use-cases/create-feedback.use-case';
+import { GetFeedbackForVolunteerUseCase } from './event/application/use-cases/get-feedback-for-volunteer.use-case';
+import { GetFeedbackForEventUseCase } from './event/application/use-cases/get-feedback-for-event.use-case';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from '@share/auth/jwt.strategy';
 import { JwtAuthGuard } from '@share/auth/jwt-auth.guard';
@@ -57,6 +65,7 @@ import { MessagePublisherService } from './event/infrastructure/messaging/messag
         MongooseModule.forFeature([
             { name: Event.name, schema: EventSchema },
             { name: EventCategory.name, schema: EventCategorySchema },
+            { name: Feedback.name, schema: FeedbackSchema },
         ]),
         CacheModule.register({
             store: redisStore,
@@ -73,7 +82,7 @@ import { MessagePublisherService } from './event/infrastructure/messaging/messag
         }),
         ShareModule,
     ],
-    controllers: [EventController, CategoryController],
+    controllers: [EventController, CategoryController, FeedbackController],
     providers: [
         {
             provide: 'USER_SERVICE',
@@ -96,6 +105,7 @@ import { MessagePublisherService } from './event/infrastructure/messaging/messag
         // Repository Providers
         { provide: IEventRepository, useClass: EventRepository },
         { provide: IEventCategoryRepository, useClass: EventCategoryRepository },
+        { provide: IFeedbackRepository, useClass: FeedbackRepository },
 
         // Use Cases
         CreateEventUseCase,
@@ -112,6 +122,9 @@ import { MessagePublisherService } from './event/infrastructure/messaging/messag
         GetEventStatisticsUseCase,
         CreateCategoryUseCase,
         ListCategoriesUseCase,
+        CreateFeedbackUseCase,
+        GetFeedbackForVolunteerUseCase,
+        GetFeedbackForEventUseCase,
         EventCategorySeeder,
         IncrementRoleFilledUseCase,
         EventRepository,
