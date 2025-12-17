@@ -32,7 +32,7 @@ async function bootstrap() {
   );
 
   // Port
-  const port = configService.get<number>('PORT') || 4005;
+  const port = configService.get<number>('PORT') || 4010;
 
   // Check MongoDB connection
   try {

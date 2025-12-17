@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+
 
 // Domain
 import { IPostRepository } from './communication/domain/repositories/post.repository.interface';
@@ -28,30 +30,41 @@ import { DeleteCommentUseCase } from './communication/application/use-cases/dele
 import { PostController } from './communication/presentation/controllers/post.controller';
 
 @Module({
-  imports: [
-    DatabaseModule,
-    MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
-  ],
-  controllers: [PostController],
-  providers: [
-    // Infrastructure
-    DatabaseService,
-    RabbitMQService,
-    PostRepository,
-    { provide: IPostRepository, useClass: PostRepository },
+    imports: [
+        DatabaseModule,
+        MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
+        RabbitMQModule.forRootAsync({
+            useFactory: () => ({
+                uri: 'amqp://rabbitmq:5672',
+                exchanges: [
+                    {
+                        name: 'notification_exchange',
+                        type: 'topic',
+                    },
+                ],
+            }),
+        }),
+    ],
+    controllers: [PostController],
+    providers: [
+        // Infrastructure
+        DatabaseService,
+        RabbitMQService,
+        PostRepository,
+        { provide: IPostRepository, useClass: PostRepository },
 
-    // Use Cases
-    CreatePostUseCase,
-    UpdatePostUseCase,
-    DeletePostUseCase,
-    GetPostsUseCase,
-    LikePostUseCase,
-    UnlikePostUseCase,
-    PinPostUseCase,
-    UnpinPostUseCase,
-    AddCommentUseCase,
-    UpdateCommentUseCase,
-    DeleteCommentUseCase,
-  ],
+        // Use Cases
+        CreatePostUseCase,
+        UpdatePostUseCase,
+        DeletePostUseCase,
+        GetPostsUseCase,
+        LikePostUseCase,
+        UnlikePostUseCase,
+        PinPostUseCase,
+        UnpinPostUseCase,
+        AddCommentUseCase,
+        UpdateCommentUseCase,
+        DeleteCommentUseCase,
+    ],
 })
-export class AppModule {}
+export class AppModule { }
