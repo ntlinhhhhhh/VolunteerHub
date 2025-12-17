@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 
 // Domain
 import { IPostRepository } from './communication/domain/repositories/post.repository.interface';
@@ -39,6 +40,16 @@ import { PostController } from './communication/presentation/controllers/post.co
     RabbitMQService,
     PostRepository,
     { provide: IPostRepository, useClass: PostRepository },
+
+    // Microservice Clients
+    {
+      provide: 'EVENT_SERVICE',
+      useFactory: () =>
+        ClientProxyFactory.create({
+          transport: Transport.REDIS,
+          options: { host: 'redis', port: 6379 },
+        }),
+    },
 
     // Use Cases
     CreatePostUseCase,
