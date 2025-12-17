@@ -1,66 +1,109 @@
-### Lấy danh sách posts cho một event (public)
-GET http://localhost:4010/posts?eventId=some-event-id&page=1&limit=10
+### Variables
+@baseUrl = http://localhost:4010
+@eventId = 6935a50f1a51c72418085e99
+@postId = 67650d53c1234567890abcdf
+@commentId = comment123
+@userId = user123
+@userName = John Doe
+@userRole = volunteer
 
-### Lấy post theo ID (public)
-GET http://localhost:4010/posts/some-post-id
-
-### Tạo post mới (authenticated)
-POST http://localhost:4010/posts/event/6939bc11a51303dc97d03313
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM5YjkyNDFlNmZkNWY5NTY3MTgxOTIiLCJlbWFpbCI6ImR1b25naG9hbmdnMjYxQGdtYWlsLmNvbSIsIm5hbWUiOiJEdW9uZyBIb2FuZyIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTM5YjkyNDFlNmZkNWY5NTY3MTgxODciLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjUzOTE1ODgsImV4cCI6MTc2NTM5MjQ4OH0.wx9WbtwuHmkpOMz2jczpfxUj-1CefcA1igXMF5SGt5E
+### 1. Get Posts (Latest)
+GET {{baseUrl}}/events/{{eventId}}/posts?sortBy=latest&limit=10
 Content-Type: application/json
 
-{
-  "content": "Đây là nội dung bài post",
-  "images": ["https://example.com/image1.jpg"],
-  "videos": ["https://example.com/video1.mp4"]
-}
-
-### Cập nhật post (authenticated)
-PUT http://localhost:8000/posts/some-post-id
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
+### 2. Get Posts (Most Active)
+GET {{baseUrl}}/events/{{eventId}}/posts?sortBy=most_active&limit=10
 Content-Type: application/json
 
+### 3. Create Post
+# @name createPost
+POST {{baseUrl}}/events/{{eventId}}/posts
+Content-Type: application/json
+x-user-id: {{userId}}
+x-user-name: {{userName}}
+
 {
-  "content": "Nội dung đã cập nhật"
+  "eventId": "{{eventId}}",
+  "authorId": "{{userId}}",
+  "authorName": "{{userName}}",
+  "content": "Chào mọi người! Mình rất vui được tham gia sự kiện này. Hẹn gặp các bạn! 🎉",
+  "images": ["https://example.com/image1.jpg"]
 }
 
-### Xóa post (authenticated)
-DELETE http://localhost:8000/posts/some-post-id
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
+### Set postId from create response
+@postId = {{createPost.response.body.data.id}}
 
-### Thích/Bỏ thích post (authenticated)
-POST http://localhost:8000/posts/some-post-id/like
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
-
-### Thêm comment vào post (authenticated)
-POST http://localhost:8000/posts/some-post-id/comments
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
+### 4. Get Post by ID
+GET {{baseUrl}}/events/{{eventId}}/posts/{{postId}}
 Content-Type: application/json
 
+### 5. Update Post
+PUT {{baseUrl}}/events/{{eventId}}/posts/{{postId}}
+Content-Type: application/json
+x-user-id: {{userId}}
+
 {
-  "content": "Đây là comment"
+  "content": "Nội dung đã được cập nhật",
+  "images": []
 }
 
-### Lấy comments của post (public)
-GET http://localhost:8000/posts/some-post-id/comments?page=1&limit=20
+### 6. Like Post
+POST {{baseUrl}}/events/{{eventId}}/posts/{{postId}}/like
+Content-Type: application/json
+x-user-id: {{userId}}
+x-user-name: {{userName}}
 
-### Cập nhật comment (authenticated)
-PUT http://localhost:8000/posts/some-post-id/comments/some-comment-id
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
+### 7. Add Comment
+# @name addComment
+POST {{baseUrl}}/events/{{eventId}}/posts/{{postId}}/comments
+Content-Type: application/json
+x-user-id: {{userId}}
+x-user-name: {{userName}}
+
+{
+  "authorId": "{{userId}}",
+  "authorName": "{{userName}}",
+  "content": "Comment rất hay! Mình cũng nghĩ vậy."
+}
+
+### Set commentId from add comment response
+@commentId = {{addComment.response.body.data.id}}
+
+### 8. Update Comment
+PUT {{baseUrl}}/events/{{eventId}}/posts/{{postId}}/comments/{{commentId}}
+Content-Type: application/json
+x-user-id: {{userId}}
+
+{
+  "content": "Comment đã được chỉnh sửa"
+}
+
+### 9. Delete Comment
+DELETE {{baseUrl}}/events/{{eventId}}/posts/{{postId}}/comments/{{commentId}}
+x-user-id: {{userId}}
+x-user-role: {{userRole}}
+
+### 10. Unlike Post
+DELETE {{baseUrl}}/events/{{eventId}}/posts/{{postId}}/like
+x-user-id: {{userId}}
+
+### 11. Pin Post (Event Manager / Admin only)
+PATCH {{baseUrl}}/events/{{eventId}}/posts/{{postId}}/pin
+x-user-role: event_manager
+
+### 12. Unpin Post (Event Manager / Admin only)
+PATCH {{baseUrl}}/events/{{eventId}}/posts/{{postId}}/unpin
+x-user-role: event_manager
+
+### 13. Delete Post
+DELETE {{baseUrl}}/events/{{eventId}}/posts/{{postId}}
+x-user-id: {{userId}}
+x-user-role: {{userRole}}
+
+### 14. Get Posts with Pagination
+GET {{baseUrl}}/events/{{eventId}}/posts?limit=5&skip=0
 Content-Type: application/json
 
-{
-  "content": "Comment đã cập nhật"
-}
-
-### Xóa comment (authenticated)
-DELETE http://localhost:8000/posts/some-post-id/comments/some-comment-id
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
-
-### Ghim post (admin/event_manager)
-POST http://localhost:8000/posts/some-post-id/pin
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
-
-### Bỏ ghim post (admin/event_manager)
-POST http://localhost:8000/posts/some-post-id/unpin
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM3YTdiMzJkZDliMzc5NDdkMWQ5MjkiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzdhN2IzMmRkOWIzNzk0N2QxZDkyMSIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTI3MTIyMiwiZXhwIjoxNzY1MjcyMTIyfQ.A7cqKiGz9vgtHNd3Y1urmbfnYjvulcklB8JYkGOlQH4
+### 15. Load More Posts
+GET {{baseUrl}}/events/{{eventId}}/posts?limit=5&skip=5
+Content-Type: application/json

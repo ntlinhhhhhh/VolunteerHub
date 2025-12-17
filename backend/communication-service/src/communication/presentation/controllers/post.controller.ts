@@ -4,327 +4,290 @@ import {
     Post,
     Put,
     Delete,
-    Body,
+    Patch,
     Param,
+    Body,
     Query,
-    UseGuards,
+    Headers,
     HttpCode,
     HttpStatus,
-} from '@nestjs/common';
-import { CreatePostUseCase } from '../../application/use-cases/create-post.use-case';
-import { UpdatePostUseCase } from '../../application/use-cases/update-post.use-case';
-import { DeletePostUseCase } from '../../application/use-cases/delete-post.use-case';
-import { ToggleLikeUseCase } from '../../application/use-cases/toggle-like.use-case';
-import { AddCommentUseCase } from '../../application/use-cases/add-comment.use-case';
-import { ListPostsUseCase } from '../../application/use-cases/list-posts.use-case';
-import { CreatePostDto } from '../../application/dto/create-post.dto';
-import { UpdatePostDto } from '../../application/dto/update-post.dto';
-import { CreateCommentDto } from '../../application/dto/create-comment.dto';
-import { FilterPostDto } from '../../application/dto/filter-post.dto';
-import { Public } from '@share/auth/public.decorator';
-import { Roles } from '@share/auth/roles.decorator';
-import { GetUser } from '@share/auth/get-user.decorator';
-import { JwtAuthGuard } from '@share/auth/jwt-auth.guard';
-import { IPostRepository } from '../../domain/repositories/post.repository.interface';
-import { Inject } from '@nestjs/common';
-import { NotFoundException, ForbiddenException } from '@nestjs/common';
-import { UpdateCommentDto } from '../../application/dto/update-comment.dto';
-
-@Controller('posts')
-export class PostController {
+  } from '@nestjs/common';
+  import { CreatePostUseCase } from '../../application/use-cases/create-post.use-case';
+  import { UpdatePostUseCase } from '../../application/use-cases/update-post.use-case';
+  import { DeletePostUseCase } from '../../application/use-cases/delete-post.use-case';
+  import { GetPostsUseCase } from '../../application/use-cases/get-posts.use-case';
+  import { LikePostUseCase } from '../../application/use-cases/like-post.use-case';
+  import { UnlikePostUseCase } from '../../application/use-cases/unlike-post.use-case';
+  import { PinPostUseCase } from '../../application/use-cases/pin-post.use-case';
+  import { UnpinPostUseCase } from '../../application/use-cases/unpin-post.use-case';
+  import { AddCommentUseCase } from '../../application/use-cases/add-comment.use-case';
+  import { UpdateCommentUseCase } from '../../application/use-cases/update-comment.use-case';
+  import { DeleteCommentUseCase } from '../../application/use-cases/delete-comment.use-case';
+  import {
+    CreatePostDto,
+    UpdatePostDto,
+    CreateCommentDto,
+    UpdateCommentDto,
+    GetPostsQueryDto,
+  } from '../../application/dto/post.dto';
+  import { PostSortBy } from '../../domain/repositories/post.repository.interface';
+  
+  @Controller('events/:eventId/posts')
+  export class PostController {
     constructor(
-        private readonly createPostUseCase: CreatePostUseCase,
-        private readonly updatePostUseCase: UpdatePostUseCase,
-        private readonly deletePostUseCase: DeletePostUseCase,
-        private readonly toggleLikeUseCase: ToggleLikeUseCase,
-        private readonly addCommentUseCase: AddCommentUseCase,
-        private readonly listPostsUseCase: ListPostsUseCase,
-        @Inject(IPostRepository)
-        private readonly postRepository: IPostRepository,
+      private readonly createPostUseCase: CreatePostUseCase,
+      private readonly updatePostUseCase: UpdatePostUseCase,
+      private readonly deletePostUseCase: DeletePostUseCase,
+      private readonly getPostsUseCase: GetPostsUseCase,
+      private readonly likePostUseCase: LikePostUseCase,
+      private readonly unlikePostUseCase: UnlikePostUseCase,
+      private readonly pinPostUseCase: PinPostUseCase,
+      private readonly unpinPostUseCase: UnpinPostUseCase,
+      private readonly addCommentUseCase: AddCommentUseCase,
+      private readonly updateCommentUseCase: UpdateCommentUseCase,
+      private readonly deleteCommentUseCase: DeleteCommentUseCase,
     ) {}
-
+  
     /**
-     * PUBLIC: Get posts for an event
-     * GET /api/posts?eventId=...
+     * GET /events/:eventId/posts
+     * Lấy tất cả posts của event (có pagination và sorting)
      */
-    @Public()
     @Get()
-    async listPosts(@Query() filterDto: FilterPostDto) {
-        const result = await this.listPostsUseCase.execute(filterDto);
-
-        return {
-            success: true,
-            data: result.data,
-            pagination: {
-                page: result.page,
-                limit: result.limit,
-                total: result.total,
-                totalPages: result.totalPages,
-            },
-        };
+    async getPosts(
+      @Param('eventId') eventId: string,
+      @Query() query: GetPostsQueryDto,
+    ) {
+      const limit = query.limit ? parseInt(query.limit) : 20;
+      const skip = query.skip ? parseInt(query.skip) : 0;
+      const sortBy = query.sortBy === 'most_active' ? PostSortBy.MOST_ACTIVE : PostSortBy.LATEST;
+  
+      const result = await this.getPostsUseCase.execute(eventId, limit, skip, sortBy);
+  
+      return {
+        success: true,
+        data: result,
+      };
     }
-
+  
     /**
-     * PUBLIC: Get post by ID
-     * GET /api/posts/:id
+     * GET /events/:eventId/posts/:postId
+     * Lấy chi tiết 1 post
      */
-    @Public()
-    @Get(':id')
-    async getPostById(@Param('id') id: string) {
-        const post = await this.postRepository.findById(id);
-
-        return {
-            success: true,
-            data: post,
-        };
+    @Get(':postId')
+    async getPostById(@Param('postId') postId: string) {
+      const post = await this.getPostsUseCase.getById(postId);
+      return {
+        success: true,
+        data: post,
+      };
     }
-
+  
     /**
-     * AUTHENTICATED: Create post
-     * POST /api/posts/event/:eventId
+     * POST /events/:eventId/posts
+     * Tạo post mới
      */
-    @Post('event/:eventId')
-    @UseGuards(JwtAuthGuard)
+    @Post()
     async createPost(
-        @Param('eventId') eventId: string,
-        @Body() createPostDto: CreatePostDto,
-        @GetUser('userId') userId: string,
-        @GetUser() user: any
+      @Param('eventId') eventId: string,
+      @Body() dto: CreatePostDto,
+      @Headers('x-user-id') userId: string,
+      @Headers('x-user-name') userName: string,
+      @Headers('x-user-avatar') userAvatar?: string,
     ) {
-        const post = await this.createPostUseCase.execute({
-            dto: createPostDto,
-            eventId,
-            userId,
-            userName: user.name,
-            userAvatar: user.avatar,
-        });
-
-        return {
-            success: true,
-            message: 'Post created successfully',
-            data: post,
-        };
+      const post = await this.createPostUseCase.execute({
+        ...dto,
+        eventId,
+        authorId: userId,
+        authorName: userName,
+        authorAvatar: userAvatar,
+      });
+  
+      return {
+        success: true,
+        message: 'Post created successfully',
+        data: post,
+      };
     }
-
+  
     /**
-     * AUTHENTICATED: Update post
-     * PUT /api/posts/:id
+     * PUT /events/:eventId/posts/:postId
+     * Cập nhật post
      */
-    @Put(':id')
-    @UseGuards(JwtAuthGuard)
+    @Put(':postId')
     async updatePost(
-        @Param('id') id: string,
-        @Body() updatePostDto: UpdatePostDto,
-        @GetUser('userId') userId: string
+      @Param('postId') postId: string,
+      @Body() dto: UpdatePostDto,
+      @Headers('x-user-id') userId: string,
     ) {
-        const post = await this.updatePostUseCase.execute(id, updatePostDto, userId);
-
-        return {
-            success: true,
-            message: 'Post updated successfully',
-            data: post,
-        };
+      const post = await this.updatePostUseCase.execute(postId, userId, dto);
+  
+      return {
+        success: true,
+        message: 'Post updated successfully',
+        data: post,
+      };
     }
-
+  
     /**
-     * AUTHENTICATED: Delete post
-     * DELETE /api/posts/:id
+     * DELETE /events/:eventId/posts/:postId
+     * Xóa post
      */
-    @Delete(':id')
-    @UseGuards(JwtAuthGuard)
+    @Delete(':postId')
     @HttpCode(HttpStatus.NO_CONTENT)
     async deletePost(
-        @Param('id') id: string,
-        @GetUser('userId') userId: string,
-        @GetUser('roleName') role: string
+      @Param('postId') postId: string,
+      @Headers('x-user-id') userId: string,
+      @Headers('x-user-role') userRole?: string,
     ) {
-        const isAdmin = role === 'admin';
-        await this.deletePostUseCase.execute(id, userId, isAdmin);
+      const isAdmin = userRole === 'admin';
+      const isEventManager = userRole === 'event_manager';
+  
+      await this.deletePostUseCase.execute(postId, userId, isEventManager, isAdmin);
     }
-
+  
     /**
-     * AUTHENTICATED: Toggle like on post
-     * POST /api/posts/:id/like
+     * POST /events/:eventId/posts/:postId/like
+     * Like post
      */
-    @Post(':id/like')
-    @UseGuards(JwtAuthGuard)
+    @Post(':postId/like')
     @HttpCode(HttpStatus.OK)
-    async toggleLike(
-        @Param('id') id: string,
-        @GetUser('userId') userId: string,
-        @GetUser('name') userName: string
+    async likePost(
+      @Param('postId') postId: string,
+      @Headers('x-user-id') userId: string,
+      @Headers('x-user-name') userName: string,
     ) {
-        const liked = await this.toggleLikeUseCase.execute(id, userId, userName);
-
-        return {
-            success: true,
-            message: liked ? 'Post liked' : 'Post unliked',
-            data: { liked },
-        };
+      await this.likePostUseCase.execute(postId, userId, userName);
+  
+      return {
+        success: true,
+        message: 'Post liked successfully',
+      };
     }
-
+  
     /**
-     * AUTHENTICATED: Add comment to post
-     * POST /api/posts/:id/comments
+     * DELETE /events/:eventId/posts/:postId/like
+     * Unlike post
      */
-    @Post(':id/comments')
-    @UseGuards(JwtAuthGuard)
+    @Delete(':postId/like')
+    @HttpCode(HttpStatus.OK)
+    async unlikePost(
+      @Param('postId') postId: string,
+      @Headers('x-user-id') userId: string,
+    ) {
+      await this.unlikePostUseCase.execute(postId, userId);
+  
+      return {
+        success: true,
+        message: 'Post unliked successfully',
+      };
+    }
+  
+    /**
+     * PATCH /events/:eventId/posts/:postId/pin
+     * Ghim post
+     */
+    @Patch(':postId/pin')
+    async pinPost(
+      @Param('postId') postId: string,
+      @Headers('x-user-role') userRole?: string,
+    ) {
+      const isAdmin = userRole === 'admin';
+      const isEventManager = userRole === 'event_manager';
+  
+      await this.pinPostUseCase.execute(postId, isEventManager, isAdmin);
+  
+      return {
+        success: true,
+        message: 'Post pinned successfully',
+      };
+    }
+  
+    /**
+     * PATCH /events/:eventId/posts/:postId/unpin
+     * Bỏ ghim post
+     */
+    @Patch(':postId/unpin')
+    async unpinPost(
+      @Param('postId') postId: string,
+      @Headers('x-user-role') userRole?: string,
+    ) {
+      const isAdmin = userRole === 'admin';
+      const isEventManager = userRole === 'event_manager';
+  
+      await this.unpinPostUseCase.execute(postId, isEventManager, isAdmin);
+  
+      return {
+        success: true,
+        message: 'Post unpinned successfully',
+      };
+    }
+  
+    /**
+     * POST /events/:eventId/posts/:postId/comments
+     * Thêm comment vào post
+     */
+    @Post(':postId/comments')
     async addComment(
-        @Param('id') id: string,
-        @Body() createCommentDto: CreateCommentDto,
-        @GetUser('userId') userId: string,
-        @GetUser() user: any
+      @Param('postId') postId: string,
+      @Body() dto: CreateCommentDto,
+      @Headers('x-user-id') userId: string,
+      @Headers('x-user-name') userName: string,
+      @Headers('x-user-avatar') userAvatar?: string,
     ) {
-        const comment = await this.addCommentUseCase.execute(
-            id,
-            createCommentDto,
-            userId,
-            user.name,
-            user.avatar
-        );
+      const comment = await this.addCommentUseCase.execute(postId, {
+        ...dto,
+        authorId: userId,
+        authorName: userName,
+        authorAvatar: userAvatar,
+      });
 
-        return {
-            success: true,
-            message: 'Comment added successfully',
-            data: comment,
-        };
+      return {
+        success: true,
+        message: 'Comment added successfully',
+        data: comment,
+      };
     }
-
+  
     /**
-     * PUBLIC: Get comments for a post
-     * GET /api/posts/:id/comments
-     */
-    @Public()
-    @Get(':id/comments')
-    async getComments(
-        @Param('id') id: string,
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 20
-    ) {
-        const result = await this.postRepository.getComments(id, page, limit);
-
-        return {
-            success: true,
-            data: result.data,
-            pagination: {
-                page: result.page,
-                limit: result.limit,
-                total: result.total,
-                totalPages: result.totalPages,
-            },
-        };
-    }
-
-    /**
-     * ADMIN/EVENT_MANAGER: Pin post
-     * POST /api/posts/:id/pin
-     */
-    @Post(':id/pin')
-    @UseGuards(JwtAuthGuard)
-    @Roles('admin', 'event_manager')
-    @HttpCode(HttpStatus.OK)
-    async pinPost(@Param('id') id: string) {
-        const post = await this.postRepository.findById(id);
-        
-        if (!post) {
-            throw new NotFoundException('Post not found');
-        }
-
-        await this.postRepository.pinPost(post.eventId, id);
-
-        return {
-            success: true,
-            message: 'Post pinned successfully',
-        };
-    }
-
-    /**
-     * ADMIN/EVENT_MANAGER: Unpin post
-     * POST /api/posts/:id/unpin
-     */
-    @Post(':id/unpin')
-    @UseGuards(JwtAuthGuard)
-    @Roles('admin', 'event_manager')
-    @HttpCode(HttpStatus.OK)
-    async unpinPost(@Param('id') id: string) {
-        await this.postRepository.unpinPost(id);
-
-        return {
-            success: true,
-            message: 'Post unpinned successfully',
-        };
-    }
-
-    /**
-     * AUTHENTICATED: Update comment
-     * PUT /api/posts/:postId/comments/:commentId
+     * PUT /events/:eventId/posts/:postId/comments/:commentId
+     * Cập nhật comment
      */
     @Put(':postId/comments/:commentId')
-    @UseGuards(JwtAuthGuard)
     async updateComment(
-        @Param('postId') postId: string,
-        @Param('commentId') commentId: string,
-        @Body() updateCommentDto: UpdateCommentDto,
-        @GetUser('userId') userId: string
+      @Param('postId') postId: string,
+      @Param('commentId') commentId: string,
+      @Body() dto: UpdateCommentDto,
+      @Headers('x-user-id') userId: string,
     ) {
-        const post = await this.postRepository.findById(postId);
-        
-        if (!post) {
-            throw new NotFoundException('Post not found');
-        }
-
-        const comment = post.comments.find(c => c.id === commentId);
-        
-        if (!comment) {
-            throw new NotFoundException('Comment not found');
-        }
-
-        if (comment.author.userId !== userId) {
-            throw new ForbiddenException('You can only edit your own comments');
-        }
-
-        await this.postRepository.updateComment(postId, commentId, updateCommentDto.content);
-
-        return {
-            success: true,
-            message: 'Comment updated successfully',
-        };
+      await this.updateCommentUseCase.execute(postId, commentId, userId, dto);
+  
+      return {
+        success: true,
+        message: 'Comment updated successfully',
+      };
     }
-
+  
     /**
-     * AUTHENTICATED: Delete comment
-     * DELETE /api/posts/:postId/comments/:commentId
+     * DELETE /events/:eventId/posts/:postId/comments/:commentId
+     * Xóa comment
      */
     @Delete(':postId/comments/:commentId')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     async deleteComment(
-        @Param('postId') postId: string,
-        @Param('commentId') commentId: string,
-        @GetUser('userId') userId: string,
-        @GetUser('roleName') role: string
+      @Param('postId') postId: string,
+      @Param('commentId') commentId: string,
+      @Headers('x-user-id') userId: string,
+      @Headers('x-user-role') userRole?: string,
     ) {
-        const post = await this.postRepository.findById(postId);
-        
-        if (!post) {
-            throw new NotFoundException('Post not found');
-        }
-
-        const comment = post.comments.find(c => c.id === commentId);
-        
-        if (!comment) {
-            throw new NotFoundException('Comment not found');
-        }
-
-        const isAdmin = role === 'admin';
-        const isPostOwner = post.author.userId === userId;
-        const isCommentOwner = comment.author.userId === userId;
-
-        if (!isAdmin && !isPostOwner && !isCommentOwner) {
-            throw new ForbiddenException('You can only delete your own comments');
-        }
-
-        await this.postRepository.deleteComment(postId, commentId);
+      const isAdmin = userRole === 'admin';
+      const isEventManager = userRole === 'event_manager';
+  
+      await this.deleteCommentUseCase.execute(
+        postId,
+        commentId,
+        userId,
+        isEventManager,
+        isAdmin,
+      );
     }
-}
-
+  }

@@ -1,183 +1,64 @@
-export interface PostAuthor {
-    userId: string;
-    name: string;
-    avatar?: string;
-}
-
-export interface Comment {
-    id: string;
-    author: PostAuthor;
-    content: string;
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-export interface Like {
-    userId: string;
-    userName: string;
-    createdAt: Date;
-}
-
 export class Post {
     constructor(
-        public readonly id: string,
-        public readonly eventId: string,
-        public readonly author: PostAuthor,
-        public readonly content: string,
-        public readonly media: {
-            images: string[];
-            videos: string[];
-        },
-        public readonly comments: Comment[],
-        public readonly likes: Like[],
-        public readonly isPinned: boolean,
-        public readonly isEdited: boolean,
-        public readonly createdAt: Date,
-        public readonly updatedAt: Date
+      public readonly id: string,
+      public readonly eventId: string,
+      public readonly authorId: string,
+      public readonly authorName: string,
+      public readonly authorAvatar: string | null,
+      public readonly content: string,
+      public readonly images: string[],
+      public readonly isPinned: boolean,
+      public readonly likesCount: number,
+      public readonly commentsCount: number,
+      public readonly likedBy: string[], // Array of userIds who liked
+      public readonly comments: Comment[],
+      public readonly createdAt: Date,
+      public readonly updatedAt: Date,
+      public readonly lastActivityAt: Date, // For sorting by latest activity
     ) {}
-
-    // Business logic methods
-    isOwnedBy(userId: string): boolean {
-        return this.author.userId === userId;
+  
+    isAuthor(userId: string): boolean {
+      return this.authorId === userId;
     }
-
+  
     hasLikedBy(userId: string): boolean {
-        return this.likes.some(like => like.userId === userId);
+      return this.likedBy.includes(userId);
     }
-
-    getLikesCount(): number {
-        return this.likes.length;
+  
+    canBeEditedBy(userId: string): boolean {
+      return this.isAuthor(userId);
     }
-
-    getCommentsCount(): number {
-        return this.comments.length;
+  
+    canBeDeletedBy(userId: string, isEventManager: boolean, isAdmin: boolean): boolean {
+      return this.isAuthor(userId) || isEventManager || isAdmin;
     }
-
-    // chi cho sua trong vong 30 phut dau sau khi dang bai
-    canBeEdited(): boolean {
-        const thirtyMinutes = 30 * 60 * 1000;
-        const elapsed = Date.now() - this.createdAt.getTime();
-        return elapsed < thirtyMinutes;
+  
+    canBePinnedBy(isEventManager: boolean, isAdmin: boolean): boolean {
+      return isEventManager || isAdmin;
     }
-
-    // Immutable update methods
-    addLike(userId: string, userName: string): Post {
-        if (this.hasLikedBy(userId)) {
-            return this;
-        }
-
-        return new Post(
-            this.id,
-            this.eventId,
-            this.author,
-            this.content,
-            this.media,
-            this.comments,
-            [...this.likes, { userId, userName, createdAt: new Date() }],
-            this.isPinned,
-            this.isEdited,
-            this.createdAt,
-            new Date()
-        );
+  }
+  
+  export class Comment {
+    constructor(
+      public readonly id: string,
+      public readonly postId: string,
+      public readonly authorId: string,
+      public readonly authorName: string,
+      public readonly authorAvatar: string | null,
+      public readonly content: string,
+      public readonly createdAt: Date,
+      public readonly updatedAt: Date,
+    ) {}
+  
+    isAuthor(userId: string): boolean {
+      return this.authorId === userId;
     }
-
-    removeLike(userId: string): Post {
-        return new Post(
-            this.id,
-            this.eventId,
-            this.author,
-            this.content,
-            this.media,
-            this.comments,
-            this.likes.filter(like => like.userId !== userId),
-            this.isPinned,
-            this.isEdited,
-            this.createdAt,
-            new Date()
-        );
+  
+    canBeEditedBy(userId: string): boolean {
+      return this.isAuthor(userId);
     }
-
-    addComment(comment: Comment): Post {
-        return new Post(
-            this.id,
-            this.eventId,
-            this.author,
-            this.content,
-            this.media,
-            [...this.comments, comment],
-            this.likes,
-            this.isPinned,
-            this.isEdited,
-            this.createdAt,
-            new Date()
-        );
+  
+    canBeDeletedBy(userId: string, isEventManager: boolean, isAdmin: boolean): boolean {
+      return this.isAuthor(userId) || isEventManager || isAdmin;
     }
-
-    updateComment(commentId: string, newContent: string): Post {
-        return new Post(
-            this.id,
-            this.eventId,
-            this.author,
-            this.content,
-            this.media,
-            this.comments.map(c =>
-                c.id === commentId
-                    ? { ...c, content: newContent, updatedAt: new Date() }
-                    : c
-            ),
-            this.likes,
-            this.isPinned,
-            this.isEdited,
-            this.createdAt,
-            new Date()
-        );
-    }
-
-    deleteComment(commentId: string): Post {
-        return new Post(
-            this.id,
-            this.eventId,
-            this.author,
-            this.content,
-            this.media,
-            this.comments.filter(c => c.id !== commentId),
-            this.likes,
-            this.isPinned,
-            this.isEdited,
-            this.createdAt,
-            new Date()
-        );
-    }
-
-    pin(): Post {
-        return new Post(
-            this.id,
-            this.eventId,
-            this.author,
-            this.content,
-            this.media,
-            this.comments,
-            this.likes,
-            true,
-            this.isEdited,
-            this.createdAt,
-            new Date()
-        );
-    }
-
-    unpin(): Post {
-        return new Post(
-            this.id,
-            this.eventId,
-            this.author,
-            this.content,
-            this.media,
-            this.comments,
-            this.likes,
-            false,
-            this.isEdited,
-            this.createdAt,
-            new Date()
-        );
-    }
-}
+  }

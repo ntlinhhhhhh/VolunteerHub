@@ -2,8 +2,8 @@ import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } fro
 import { IPostRepository } from '../../domain/repositories/post.repository.interface';
 
 @Injectable()
-export class DeletePostUseCase {
-  private readonly logger = new Logger(DeletePostUseCase.name);
+export class UnpinPostUseCase {
+  private readonly logger = new Logger(UnpinPostUseCase.name);
 
   constructor(
     @Inject(IPostRepository)
@@ -12,26 +12,26 @@ export class DeletePostUseCase {
 
   async execute(
     postId: string,
-    userId: string,
     isEventManager: boolean = false,
     isAdmin: boolean = false,
   ): Promise<void> {
-    this.logger.log(`Deleting post ${postId} by user ${userId}`);
+    this.logger.log(`Unpinning post ${postId}`);
 
     const post = await this.postRepository.findById(postId);
     if (!post) {
       throw new NotFoundException('Post not found');
     }
 
-    if (!post.canBeDeletedBy(userId, isEventManager, isAdmin)) {
-      throw new ForbiddenException('You do not have permission to delete this post');
+    if (!post.canBePinnedBy(isEventManager, isAdmin)) {
+      throw new ForbiddenException('Only event managers or admins can unpin posts');
     }
 
-    const deleted = await this.postRepository.delete(postId);
-    if (!deleted) {
-      throw new Error('Failed to delete post');
+    if (!post.isPinned) {
+      this.logger.warn(`Post ${postId} is not pinned`);
+      return;
     }
 
-    this.logger.log(` Post deleted successfully: ${postId}`);
+    await this.postRepository.unpinPost(postId);
+    this.logger.log(`Post ${postId} unpinned successfully`);
   }
 }

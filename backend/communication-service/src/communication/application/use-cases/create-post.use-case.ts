@@ -1,74 +1,57 @@
-import { Injectable, Inject, ForbiddenException, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { IPostRepository } from '../../domain/repositories/post.repository.interface';
 import { Post } from '../../domain/entities/post.entity';
-import { CreatePostDto } from '../dto/create-post.dto';
-import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
-import { MessagePublisherService } from '../../infrastructure/messaging/message-publisher.service';
-
-interface CreatePostParams {
-    dto: CreatePostDto;
-    eventId: string;
-    userId: string;
-    userName: string;
-    userAvatar?: string;
-}
+import { CreatePostDto } from '../dto/post.dto';
+import { RabbitMQService } from '../../infrastructure/message-bus/rabbitmq.service';
 
 @Injectable()
 export class CreatePostUseCase {
-    private readonly logger = new Logger(CreatePostUseCase.name);
+  private readonly logger = new Logger(CreatePostUseCase.name);
 
-    constructor(
-        @Inject(IPostRepository)
-        private readonly postRepository: IPostRepository,
-        @Inject('EVENT_SERVICE')
-        private readonly eventClient: ClientProxy,
-        private readonly messagePublisher: MessagePublisherService,
-    ) {}
+  constructor(
+    @Inject(IPostRepository)
+    private readonly postRepository: IPostRepository,
+    private readonly rabbitMQService: RabbitMQService,
+  ) {}
 
-    async execute(params: CreatePostParams): Promise<Post> {
-        const { dto, eventId, userId, userName, userAvatar } = params;
+  async execute(dto: CreatePostDto): Promise<Post> {
+    this.logger.log(`Creating post for event ${dto.eventId} by user ${dto.authorId}`);
 
-        // 1. Verify user is registered for this event
-        try {
-            const isRegistered = await firstValueFrom(
-                this.eventClient.send('check_registration', { eventId, userId })
-            );
+    const post = await this.postRepository.create({
+      eventId: dto.eventId,
+      authorId: dto.authorId,
+      authorName: dto.authorName,
+      authorAvatar: dto.authorAvatar || null,
+      content: dto.content,
+      images: dto.images || [],
+      isPinned: false,
+      likesCount: 0,
+      commentsCount: 0,
+      likedBy: [],
+      comments: [],
+      lastActivityAt: new Date(),
+    } as any);
 
-            if (!isRegistered) {
-                throw new ForbiddenException('You must be registered for this event to post');
-            }
-        } catch (error) {
-            this.logger.error(`Failed to verify registration: ${error.message}`);
-            throw new ForbiddenException('Unable to verify event registration');
-        }
+    // Publish event to RabbitMQ for notifications
+    await this.rabbitMQService.publishMessage(
+      {
+        type: 'new_post_on_event',
+        userId: dto.authorId,
+        channels: {
+          inApp: true,
+        },
+        data: {
+          eventId: dto.eventId,
+          postId: post.id,
+          postTitle: dto.content.substring(0, 50),
+          postContent: dto.content,
+          authorName: dto.authorName,
+        },
+      },
+      'event.post.created',
+    );
 
-        // 2. Create post
-        const postData = {
-            eventId,
-            author: {
-                userId,
-                name: userName,
-                avatar: userAvatar,
-            },
-            content: dto.content,
-            media: {
-                images: dto.images || [],
-                videos: dto.videos || [],
-            },
-            comments: [],
-            likes: [],
-            isPinned: false,
-            isEdited: false,
-        };
-
-        const post = await this.postRepository.create(postData as any);
-
-        // 3. Publish event to message bus
-        await this.messagePublisher.publishPostCreated(post.id, eventId, userId, userName, dto.content);
-
-        this.logger.log(`Post created: ${post.id} in event: ${eventId}`);
-
-        return post;
-    }
+    this.logger.log(`✅ Post created successfully: ${post.id}`);
+    return post;
+  }
 }

@@ -1,105 +1,80 @@
-// src/communication/infrastructure/database/schemas/post.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
 export type PostDocument = Post & Document;
 
 @Schema({ _id: false })
-class PostAuthor {
-    @Prop({ required: true, index: true })
-    userId: string;
+export class CommentSchema {
+  @Prop({ required: true })
+  id: string;
 
-    @Prop({ required: true })
-    name: string;
+  @Prop({ required: true })
+  authorId: string;
 
-    @Prop()
-    avatar?: string;
+  @Prop({ required: true })
+  authorName: string;
+
+  @Prop({ default: null })
+  authorAvatar: string;
+
+  @Prop({ required: true })
+  content: string;
+
+  @Prop({ default: Date.now })
+  createdAt: Date;
+
+  @Prop({ default: Date.now })
+  updatedAt: Date;
 }
 
-@Schema({ _id: false })
-class Comment {
-    @Prop({ required: true })
-    id: string;
-
-    @Prop({ type: PostAuthor, required: true })
-    author: PostAuthor;
-
-    @Prop({ required: true })
-    content: string;
-
-    @Prop({ type: Date, default: Date.now })
-    createdAt: Date;
-
-    @Prop({ type: Date, default: Date.now })
-    updatedAt: Date;
-}
-
-@Schema({ _id: false })
-class Like {
-    @Prop({ required: true, index: true })
-    userId: string;
-
-    @Prop({ required: true })
-    userName: string;
-
-    @Prop({ type: Date, default: Date.now })
-    createdAt: Date;
-}
-
-@Schema({ _id: false })
-class Media {
-    @Prop({ type: [String], default: [] })
-    images: string[];
-
-    @Prop({ type: [String], default: [] })
-    videos: string[];
-}
+const CommentSchemaFactory = SchemaFactory.createForClass(CommentSchema);
 
 @Schema({ collection: 'posts', timestamps: true })
 export class Post {
-    @Prop({ required: true, index: true })
-    eventId: string;
+  @Prop({ required: true, index: true })
+  eventId: string;
 
-    @Prop({ type: PostAuthor, required: true })
-    author: PostAuthor;
+  @Prop({ required: true, index: true })
+  authorId: string;
 
-    @Prop({ required: true, maxlength: 5000 })
-    content: string;
+  @Prop({ required: true })
+  authorName: string;
 
-    @Prop({ type: Media })
-    media: Media;
+  @Prop({ default: null })
+  authorAvatar: string;
 
-    @Prop({ type: [Comment], default: [] })
-    comments: Comment[];
+  @Prop({ required: true })
+  content: string;
 
-    @Prop({ type: [Like], default: [] })
-    likes: Like[];
+  @Prop({ type: [String], default: [] })
+  images: string[];
 
-    @Prop({ default: false, index: true })
-    isPinned: boolean;
+  @Prop({ default: false, index: true })
+  isPinned: boolean;
 
-    @Prop({ default: false })
-    isEdited: boolean;
+  @Prop({ default: 0 })
+  likesCount: number;
 
-    createdAt: Date;
-    updatedAt: Date;
+  @Prop({ default: 0 })
+  commentsCount: number;
+
+  @Prop({ type: [String], default: [] })
+  likedBy: string[];
+
+  @Prop({ type: [CommentSchemaFactory], default: [] })
+  comments: CommentSchema[];
+
+  @Prop({ default: Date.now, index: true })
+  lastActivityAt: Date;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);
 
-// Indexes for performance
+// Indexes for better query performance
 PostSchema.index({ eventId: 1, createdAt: -1 });
+PostSchema.index({ eventId: 1, lastActivityAt: -1 });
 PostSchema.index({ eventId: 1, isPinned: -1, createdAt: -1 });
-PostSchema.index({ 'author.userId': 1, createdAt: -1 });
-PostSchema.index({ content: 'text' });
-PostSchema.index({ 'likes.userId': 1 });
-
-// Virtual for likes count
-PostSchema.virtual('likesCount').get(function() {
-    return this.likes?.length || 0;
-});
-
-// Virtual for comments count
-PostSchema.virtual('commentsCount').get(function() {
-    return this.comments?.length || 0;
-});
+PostSchema.index({ authorId: 1 });
