@@ -189,19 +189,4 @@ export class UserController {
         );
         return user?.toSafeObject() || null;
     }
-
-    // @MessagePattern('user.findByRole')
-    // async findByRole(@Payload() data: {
-    //     status?: UserStatus;
-    //     role?: string,
-    //     page?: number;
-    //     limit?: number;
-    // }) {
-    //     return await this.getUserProfileUseCase.executeAll({ 
-    //         status: data.status,
-    //         role: data.role,
-    //         page: data.page,
-    //         limit: data.limit
-    //     });
-    // }
 }
