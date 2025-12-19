@@ -62,19 +62,7 @@ export class AuthController {
     async register(@Body() registerDto: RegisterDto) {
         const token = await this.registerUseCase.execute(registerDto);
 
-        try {
-            await firstValueFrom(
-                this.userClient.send('user.create', {
-                    authId: token.authId,
-                    email: registerDto.email,
-                    username: registerDto.username,
-                    fullName: registerDto.fullName
-                }));
-        } catch (err) {
-            console.error('Error calling user service:', err);
-        }
-
-
+        console.log(token);
         return {
             success: true,
             message: 'register succesful',
@@ -84,6 +72,7 @@ export class AuthController {
                 expiresIn: token.expiresIn,
             }
         };
+
     }
 
     @Public()

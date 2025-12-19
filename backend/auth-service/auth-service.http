@@ -3,8 +3,8 @@ POST http://localhost:8000/auth/register
 Content-Type: application/json
 
 {
-    "email": "23021610@vnu.edu.vn",
-    "username": "hehe",
+    "email": "111@vnu.edu.vn",
+    "username": "11221",
     "fullName": "Duong Hoang",
     "password": "123456"
 }
@@ -14,7 +14,7 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "23021610@vnu.edu.vn",
+    "email": "111@vnu.edu.vn",
     "password": "123456"
 }
 
@@ -23,7 +23,7 @@ POST http://localhost:8000/auth/admin/login
 Content-Type: application/json
 
 {
-    "email": "nguyenthuylinh26012005@gmail.com",
+    "email": "tlinh@gmail.com",
     "password": "tlinh123"
 }
 
@@ -32,7 +32,7 @@ POST http://localhost:8000/auth/event-manager/login
 Content-Type: application/json
 
 {
-    "email": "duonghoangg261@gmail.com",
+    "email": "tlinh_manager@gmail.com",
     "password": "tlinh123"
 }
 

@@ -39,3 +39,21 @@ Content-Type: application/json
 }
 ### avatar
 GET http://localhost:8000/uploads/avatars/default.png
+
+###
+### Upload avatar
+### Upload avatar
+POST http://localhost:8000/users/693a7fcdf4aa83b6e52f753e/avatar
+
+file: C:/Users/THUY LINH/OneDrive/Hình ảnh/hehe.jpg
+
+### Upload avatar - Success
+POST http://localhost:8000/users/693a7fcdf4aa83b6e52f753e/avatar
+Content-Type: multipart/form-data; boundary=---BOUNDARY
+
+---BOUNDARY
+Content-Disposition: form-data; name="file"; filename="hehe.jpg"
+Content-Type: image/jpeg
+
+< C:\Users/THUY LINH/Downloads/hehe.jpg
+---BOUNDARY--

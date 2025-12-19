@@ -10,10 +10,13 @@ import { ROLE_REPOSITORY } from "../../domain/repositories/role.repository.inter
 import type { IRoleRepository } from "../../domain/repositories/role.repository.interface";
 import { RegisterDto } from '../dto/register.dto';
 import { MessagePublisherService } from 'src/auth/infrastructure/messaging/message-publisher.service';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class RegisterUseCase {
     constructor(
+        @Inject('USER_SERVICE') private userClient: ClientProxy,
         @Inject(AUTH_REPOSITORY) private readonly authRepository: IAuthRepository,
         @Inject(ROLE_REPOSITORY) private readonly roleRepository: IRoleRepository,
         private readonly configService: ConfigService,
@@ -33,6 +36,17 @@ export class RegisterUseCase {
             throw new ConflictException('Email is already in use');
         }
 
+        const userProfile = await firstValueFrom(
+            this.userClient.send('user.findByUsername', {
+                username: registerDto.username
+            }));
+
+        if (userProfile) {
+            throw new ConflictException('Username is exist');
+        }
+
+        console.log("userProfile", userProfile);
+
         const volunteerRole = await this.roleRepository.findByName('volunteer');
         if (!volunteerRole) {
             throw new NotFoundException('Volunteer role does not exist');
@@ -46,8 +60,16 @@ export class RegisterUseCase {
             volunteerRole.id
         );
 
+        await firstValueFrom(
+            this.userClient.send('user.create', {
+                authId: auth.id,
+                email: registerDto.email,
+                username: registerDto.username,
+                fullName: registerDto.fullName
+            }));
+
         await this.messagePublisherService.publishUserRegistered(auth.id, registerDto.email, registerDto.fullName);
-        
+
         const accessToken = this.jwtService.sign(
             {
                 userId: auth.id,

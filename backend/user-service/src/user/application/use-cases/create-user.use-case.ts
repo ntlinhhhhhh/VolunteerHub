@@ -12,7 +12,7 @@ export class CreateUserUseCase {
     async execute(authId: string, email: string, username: string, fullName: string): Promise<User> {
         const existing = await this.userRepository.findByAuthId(authId);
         if (existing) {
-            throw new ConflictException('User profile đã tồn tại');
+            throw new ConflictException('User profile is exist');
         }
 
         // Tạo user profile
