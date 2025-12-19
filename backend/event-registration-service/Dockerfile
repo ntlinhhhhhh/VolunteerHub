@@ -37,6 +37,7 @@ COPY --from=builder /app/share/dist ./share/dist
 # Copy script chờ các service sẵn sàng
 COPY wait-for-services.sh ./
 RUN chmod +x wait-for-services.sh
+RUN apk add --no-cache netcat-openbsd
 
 EXPOSE 4008
 

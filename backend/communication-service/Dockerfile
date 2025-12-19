@@ -37,6 +37,7 @@
     # Copy wait script
     COPY wait-for-services.sh ./
     RUN chmod +x wait-for-services.sh
+    RUN apk add --no-cache netcat-openbsd
     
     EXPOSE 4005
     

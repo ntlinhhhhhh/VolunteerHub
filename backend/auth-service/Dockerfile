@@ -37,10 +37,12 @@ COPY --from=builder /app/share/dist ./share/dist
 # Copy script chờ các service sẵn sàng
 COPY wait-for-services.sh ./
 RUN chmod +x wait-for-services.sh
+RUN apk add --no-cache netcat-openbsd
 
 EXPOSE 4000
 
-# CMD chạy với wait script
-CMD ["./wait-for-services.sh", "node", "dist/auth-service/src/main.js"]
+# ENTRYPOINT và CMD
+ENTRYPOINT ["./wait-for-services.sh"]
+CMD ["node", "dist/auth-service/src/main.js"]
 
 

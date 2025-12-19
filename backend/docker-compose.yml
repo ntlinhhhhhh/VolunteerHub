@@ -72,7 +72,7 @@ services:
       - rabbitmq
     restart: unless-stopped
     volumes:
-      - D:/volunteer_hub/volunteerhub/media-storage:/app/uploads
+      - ./volunteerhub/media-storage:/app/uploads
 
 
   notification-service:
@@ -92,7 +92,7 @@ services:
       - rabbitmq
     restart: unless-stopped
     volumes:
-      - D:/volunteer_hub/volunteerhub/media-storage:/app/uploads
+      - ./volunteerhub/media-storage:/app/uploads
 
   event-service:
     build:
@@ -111,7 +111,7 @@ services:
       - rabbitmq
     restart: unless-stopped
     volumes:
-      - D:/volunteer_hub/volunteerhub/media-storage:/app/uploads
+      - ./volunteerhub/media-storage:/app/uploads
 
   event-registration-service:
     build:
@@ -130,7 +130,7 @@ services:
       - rabbitmq
     restart: unless-stopped
     volumes:
-      - D:/volunteer_hub/volunteerhub/media-storage:/app/uploads
+      - ./volunteerhub/media-storage:/app/uploads
   
 
   communication-service:
