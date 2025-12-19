@@ -16,11 +16,15 @@ import ManagerDashboard from './pages/Dashboard/ManagerDashboard';
 import EventsApproval from './pages/Dashboard/Admin-Crud/EventsApproval';
 import UserManagement from './pages/Dashboard/Admin-Crud/UserManagement';
 import CreateEvent from './pages/CreateEvent';
+import EventDetail from './pages/Home/Eventdetail';
+import Profile from './pages/Home/Profile';
 
 function App() {
     return (
         <Router>
             <Routes>
+                <Route path="/events/:id" element={<EventDetail />} />
+
                 {/* <Route path="/" element={<GoogleLoginButton />} /> */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/login-success" element={<LoginSuccess />} />
@@ -38,8 +42,8 @@ function App() {
                 <Route path="/admin/event-approvals" element={<EventsApproval />} />
                 <Route path="/admin/user-management" element={<UserManagement />} />
                 <Route path="/create" element={<CreateEvent />} />
-
                 <Route path="/google/callback" element={<GoogleCallback />} />
+                <Route path="/me/profile" element={< Profile />} />
             </Routes>
         </Router>
     );
