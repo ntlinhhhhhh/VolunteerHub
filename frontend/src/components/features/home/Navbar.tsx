@@ -34,10 +34,10 @@ export const Navbar = () => {
             Sự kiện
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#5FC1D1] transition-all duration-300 group-hover:w-full"></span>
           </button>
-          <a href="#" className="relative text-[#2C3E50] font-medium transition-colors hover:text-[#34729C] group">
+          <button onClick={() => navigate('/eventwall')} className="relative text-[#2C3E50] font-medium transition-colors hover:text-[#34729C] group">
             Cộng đồng
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#5FC1D1] transition-all duration-300 group-hover:w-full"></span>
-          </a>
+          </button>
 
           <button onClick={() => navigate('/login')} className="px-5 py-2.5 text-[#34729C] font-semibold hover:bg-[#D1ECFF]/50 rounded-full transition-colors">
             Đăng nhập
@@ -65,9 +65,9 @@ export const Navbar = () => {
             <button onClick={() => { navigate('/events'); setIsOpen(false); }} className="text-[#2C3E50] font-medium p-3 hover:bg-[#F5F7FA] rounded-xl text-left">
               Sự kiện
             </button>
-            <a href="#" className="text-[#2C3E50] font-medium p-3 hover:bg-[#F5F7FA] rounded-xl">
+            <button onClick={() => { navigate('/eventwall'); setIsOpen(false); }} className="text-[#2C3E50] font-medium p-3 hover:bg-[#F5F7FA] rounded-xl text-left">
               Cộng đồng
-            </a>
+            </button>
             <button onClick={() => navigate('/register')} className="w-full py-3 bg-[#34729C] text-white rounded-xl font-bold shadow-lg">
               Tham gia ngay
             </button>

@@ -1,10 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Heart, MessageCircle, MoreVertical, MapPin, 
-  Users, Calendar, Image as ImageIcon, X, 
+import {
+  Heart, MessageCircle, MoreVertical, MapPin,
+  Users, Calendar, Image as ImageIcon, X,
   ChevronDown, Check, Bell, User, Pin,
-  Edit3, Search, Shield, BadgeCheck, Mail
+  Edit3, Search, Shield, BadgeCheck, Video
 } from 'lucide-react';
+
+// --- Type Definitions ---
+interface Post {
+  id: number;
+  type: string;
+  author: {
+    name: string;
+    avatar: string;
+    role: string;
+    roleColor: string;
+  };
+  content: string;
+  time: string;
+  likes: number;
+  comments: Comment[];
+  images: string[];
+  isLiked: boolean;
+}
+
+interface Comment {
+  id: number;
+  author: string;
+  avatar?: string;
+  content: string;
+  time: string;
+  likes: number;
+}
+
+interface Member {
+  id: number;
+  name: string;
+  role: string;
+  avatar: string;
+  email: string;
+  status: string;
+}
+
+interface User {
+  id: string;
+  name: string;
+  avatar: string;
+  role: string;
+}
 
 // --- Theme Configuration & Mock Data ---
 
@@ -26,14 +69,14 @@ const THEME = {
   }
 };
 
-const MOCK_USER = {
+const MOCK_USER: User = {
   id: 'me',
   name: 'Nguyễn Văn A',
   avatar: 'https://i.pravatar.cc/150?img=11',
   role: 'Volunteer'
 };
 
-const MOCK_MEMBERS = [
+const MOCK_MEMBERS: Member[] = [
   { id: 1, name: 'Trần Quản Lý', role: 'Event Manager', avatar: 'https://i.pravatar.cc/150?img=33', email: 'manager@event.com', status: 'Online' },
   { id: 2, name: 'Lê Điều Phối', role: 'Volunteer', avatar: 'https://i.pravatar.cc/150?img=12', email: 'coor@event.com', status: 'Offline' },
   { id: 3, name: 'Nguyễn Văn A', role: 'Volunteer', avatar: 'https://i.pravatar.cc/150?img=11', email: 'nguyenvana@gmail.com', status: 'Online' },
@@ -43,7 +86,7 @@ const MOCK_MEMBERS = [
   { id: 7, name: 'Vũ Văn E', role: 'Volunteer', avatar: 'https://i.pravatar.cc/150?img=60', email: 'vue@gmail.com', status: 'Online' },
 ];
 
-const MOCK_POSTS = [
+const MOCK_POSTS: Post[] = [
   {
     id: 1,
     type: 'pinned',
@@ -78,7 +121,7 @@ const MOCK_POSTS = [
     images: [
       'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=800'
     ],
     isLiked: true
   },
@@ -105,26 +148,27 @@ const MOCK_POSTS = [
 
 // --- Custom Components ---
 
-const Avatar = ({ src, size = 'md', className = '' }) => {
-  const sizeClasses = {
+const Avatar = ({ src, size = 'md', className = '' }: { src: string; size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl'; className?: string }) => {
+  const sizeClasses: Record<'sm' | 'md' | 'lg' | 'xl' | 'xxl', string> = {
     sm: 'w-8 h-8',
     md: 'w-10 h-10',
     lg: 'w-12 h-12',
     xl: 'w-16 h-16',
     xxl: 'w-24 h-24'
   };
-  
+
   return (
-    <img 
-      src={src} 
-      alt="User Avatar" 
-      className={`${sizeClasses[size]} rounded-full ring-2 ring-[#5FC1D1] object-cover ${className}`}
+    <img
+      src={src}
+      alt="User Avatar"
+      className={`${sizeClasses[size]} rounded-full object-cover border-2 border-[${THEME.colors.primary}] ${className}`}
+      style={{ borderColor: THEME.colors.primary }}
     />
   );
 };
 
-const Badge = ({ text, color, className = '' }) => (
-  <span 
+const Badge = ({ text, color, className = '' }: { text: string; color?: string; className?: string }) => (
+  <span
     className={`px-2 py-0.5 rounded-full text-xs font-medium text-white flex items-center ${className}`}
     style={{ backgroundColor: color || THEME.colors.textGray }}
   >
@@ -132,9 +176,9 @@ const Badge = ({ text, color, className = '' }) => (
   </span>
 );
 
-const Button = ({ children, variant = 'primary', className = '', onClick, disabled }) => {
+const Button = ({ children, variant = 'primary', className = '', onClick, disabled }: { children: React.ReactNode; variant?: 'primary' | 'secondary' | 'ghost' | 'success'; className?: string; onClick?: () => void; disabled?: boolean }) => {
   const baseStyle = "px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2";
-  const variants = {
+  const variants: Record<'primary' | 'secondary' | 'ghost' | 'success', string> = {
     primary: `text-white shadow-md hover:brightness-110 active:scale-95 disabled:opacity-50`,
     secondary: `bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 active:scale-95`,
     ghost: `bg-transparent hover:bg-gray-100 text-gray-600`,
@@ -146,7 +190,7 @@ const Button = ({ children, variant = 'primary', className = '', onClick, disabl
   } : {};
 
   return (
-    <button 
+    <button
       onClick={onClick}
       disabled={disabled}
       className={`${baseStyle} ${variants[variant]} ${className}`}
@@ -161,17 +205,17 @@ const Button = ({ children, variant = 'primary', className = '', onClick, disabl
 
 export default function EventWallApp() {
   const [activeTab, setActiveTab] = useState('wall');
-  const [posts, setPosts] = useState(MOCK_POSTS);
+  const [posts, setPosts] = useState<Post[]>(MOCK_POSTS);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null); 
-  const [notifications, setNotifications] = useState([]);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [notifications, setNotifications] = useState<{ id: number; type: string; message: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setTimeout(() => setIsLoading(false), 800);
   }, []);
 
-  const addNotification = (type, message) => {
+  const addNotification = (type: string, message: string) => {
     const id = Date.now();
     setNotifications(prev => [...prev, { id, type, message }]);
     setTimeout(() => {
@@ -179,8 +223,8 @@ export default function EventWallApp() {
     }, 5000);
   };
 
-  const handleCreatePost = (content, images) => {
-    const newPost = {
+  const handleCreatePost = (content: string, images?: string[]) => {
+    const newPost: Post = {
       id: Date.now(),
       type: 'regular',
       author: { ...MOCK_USER, roleColor: THEME.colors.primary },
@@ -196,7 +240,7 @@ export default function EventWallApp() {
     addNotification('success', 'Đã đăng bài viết thành công!');
   };
 
-  const toggleLike = (postId) => {
+  const toggleLike = (postId: number) => {
     setPosts(posts.map(post => {
       if (post.id === postId) {
         const isLiked = !post.isLiked;
@@ -368,6 +412,7 @@ export default function EventWallApp() {
                   <div className="flex justify-between items-center border-t border-gray-100 pt-3 px-2">
                     <div className="flex gap-2">
                       <ActionIcon label="Thêm ảnh" icon={<ImageIcon size={20} className="text-green-500" />} />
+                      <ActionIcon label="Thêm video" icon={<Video size={20} className="text-red-500" />} />
                     </div>
                   </div>
                 </div>
@@ -455,23 +500,23 @@ export default function EventWallApp() {
 
 // --- Sub-Components ---
 
-function MembersList({ members }) {
+function MembersList({ members }: { members: Member[] }) {
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const managers = members.filter(m => m.role === 'Event Manager');
-  const volunteers = members.filter(m => m.role !== 'Event Manager');
 
-  const filteredManagers = managers.filter(m => m.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  const filteredVolunteers = volunteers.filter(m => m.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const managers = members.filter((m: Member) => m.role === 'Event Manager');
+  const volunteers = members.filter((m: Member) => m.role !== 'Event Manager');
+
+  const filteredManagers = managers.filter((m: Member) => m.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredVolunteers = volunteers.filter((m: Member) => m.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <div className="space-y-6 animate-slide-in">
        {/* Search Header */}
        <div className="bg-white rounded-[16px] p-4 shadow-sm border border-gray-100 flex items-center gap-3">
          <Search className="text-gray-400" size={20} />
-         <input 
-           type="text" 
-           placeholder="Tìm kiếm thành viên..." 
+         <input
+           type="text"
+           placeholder="Tìm kiếm thành viên..."
            className="flex-1 outline-none text-gray-700 placeholder-gray-400"
            value={searchTerm}
            onChange={(e) => setSearchTerm(e.target.value)}
@@ -486,7 +531,7 @@ function MembersList({ members }) {
              <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full ml-auto">{managers.length}</span>
           </div>
           <div className="divide-y divide-gray-50">
-             {filteredManagers.map(member => (
+             {filteredManagers.map((member: Member) => (
                 <MemberRow key={member.id} member={member} isManager />
              ))}
           </div>
@@ -501,7 +546,7 @@ function MembersList({ members }) {
           </div>
           <div className="divide-y divide-gray-50">
              {filteredVolunteers.length > 0 ? (
-                filteredVolunteers.map(member => (
+                filteredVolunteers.map((member: Member) => (
                    <MemberRow key={member.id} member={member} />
                 ))
              ) : (
@@ -513,7 +558,7 @@ function MembersList({ members }) {
   );
 }
 
-function MemberRow({ member, isManager }) {
+function MemberRow({ member, isManager }: { member: Member; isManager?: boolean }) {
   return (
     <div className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
        <div className="flex items-center gap-4">
@@ -523,7 +568,7 @@ function MemberRow({ member, isManager }) {
           </div>
           <div>
              <div className="font-semibold text-gray-800 flex items-center gap-2">
-                {member.name} 
+                {member.name}
                 {isManager && <BadgeCheck size={16} className="text-blue-500" fill="transparent" />}
              </div>
              <div className="text-xs text-gray-500 flex items-center gap-2">
@@ -537,7 +582,7 @@ function MemberRow({ member, isManager }) {
   );
 }
 
-function SidebarCard({ title, children }) {
+function SidebarCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="bg-white rounded-[16px] p-5 shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-gray-100">
       <h3 className="font-bold text-gray-800 mb-4 uppercase text-xs tracking-wider border-b border-gray-100 pb-2">{title}</h3>
@@ -546,7 +591,7 @@ function SidebarCard({ title, children }) {
   );
 }
 
-function InfoRow({ icon, label, value }) {
+function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-center gap-3 text-sm">
       <div className="text-gray-400">{icon}</div>
@@ -558,7 +603,7 @@ function InfoRow({ icon, label, value }) {
   );
 }
 
-function StatBox({ label, value }) {
+function StatBox({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="bg-gray-50 p-3 rounded-lg text-center">
       <div className="font-bold text-xl" style={{ color: THEME.colors.primaryDark }}>{value}</div>
@@ -567,7 +612,7 @@ function StatBox({ label, value }) {
   );
 }
 
-function ActionIcon({ label, icon }) {
+function ActionIcon({ label, icon }: { label: string; icon: React.ReactNode }) {
   return (
     <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 text-gray-600 text-sm transition-colors">
       {icon}
@@ -576,9 +621,9 @@ function ActionIcon({ label, icon }) {
   );
 }
 
-function NavIcon({ icon, active, onClick }) {
+function NavIcon({ icon, active, onClick }: { icon: React.ReactNode; active: boolean; onClick?: () => void }) {
   return (
-    <button 
+    <button
       onClick={onClick}
       className={`p-2 rounded-xl transition-colors ${active ? 'text-blue-600 bg-blue-50' : 'text-gray-400'}`}
     >
@@ -589,15 +634,15 @@ function NavIcon({ icon, active, onClick }) {
 
 // --- Post Card Component ---
 
-function PostCard({ post, onLike, onCommentClick }) {
+function PostCard({ post, onLike, onCommentClick }: { post: Post; onLike: () => void; onCommentClick: () => void }) {
   const isPinned = post.type === 'pinned';
-  
+
   return (
-    <div 
+    <div
       className={`bg-white rounded-[16px] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg
         ${isPinned ? 'border-l-4' : 'border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'}
       `}
-      style={isPinned ? { 
+      style={isPinned ? {
         borderLeftColor: THEME.colors.warning,
         background: `linear-gradient(135deg, ${THEME.colors.primaryLight}20 0%, #FFFFFF 100%)`
       } : {}}
@@ -623,7 +668,7 @@ function PostCard({ post, onLike, onCommentClick }) {
 
         {/* Post Content */}
         <div className="text-gray-800 text-[15px] leading-relaxed mb-4 whitespace-pre-line">
-            {post.content.split(' ').map((word, idx) => {
+            {post.content.split(' ').map((word: string, idx: number) => {
               if (word.startsWith('#')) return <span key={idx} className="font-semibold cursor-pointer hover:underline" style={{color: THEME.colors.primaryDark}}>{word} </span>;
               if (word.startsWith('**')) return <strong key={idx}>{word.replace(/\*\*/g, '')} </strong>;
               return word + ' ';
@@ -633,11 +678,11 @@ function PostCard({ post, onLike, onCommentClick }) {
         {/* Images Grid */}
         {post.images.length > 0 && (
           <div className={`grid gap-1 mb-4 rounded-xl overflow-hidden ${
-            post.images.length === 1 ? 'grid-cols-1' : 
-            post.images.length === 2 ? 'grid-cols-2' : 
+            post.images.length === 1 ? 'grid-cols-1' :
+            post.images.length === 2 ? 'grid-cols-2' :
             post.images.length === 3 ? 'grid-cols-2' : 'grid-cols-2'
           }`}>
-             {post.images.slice(0, 4).map((img, idx) => (
+             {post.images.slice(0, 4).map((img: string, idx: number) => (
                <div key={idx} className={`relative group overflow-hidden cursor-pointer ${post.images.length === 3 && idx === 0 ? 'row-span-2 h-full' : 'h-48'}`}>
                  <img src={img} alt="Post content" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                  {idx === 3 && post.images.length > 4 && (
@@ -665,10 +710,10 @@ function PostCard({ post, onLike, onCommentClick }) {
 
         {/* Action Buttons - Removed Share Button, Like Icon is now Heart */}
         <div className="flex border-t border-gray-100 pt-1">
-          <ActionButton 
-            active={post.isLiked} 
-            icon={<Heart size={18} fill={post.isLiked ? THEME.colors.error : 'none'} />} 
-            label="Thích" 
+          <ActionButton
+            active={post.isLiked}
+            icon={<Heart size={18} fill={post.isLiked ? THEME.colors.error : 'none'} />}
+            label="Thích"
             color={post.isLiked ? 'text-red-500' : 'text-gray-500'}
             onClick={onLike}
             className={post.isLiked ? 'animate-heart-pop' : ''}
@@ -676,12 +721,12 @@ function PostCard({ post, onLike, onCommentClick }) {
           <ActionButton icon={<MessageCircle size={18} />} label="Bình luận" onClick={onCommentClick} />
         </div>
       </div>
-      
+
       {/* Short Comment Preview (1 comment) */}
       {post.comments.length > 0 && (
         <div className="bg-gray-50 p-4 rounded-b-[16px] border-t border-gray-100">
            <div className="flex gap-2">
-             <Avatar src={post.comments[0].authorAvatar || `https://i.pravatar.cc/150?img=${post.comments[0].id}`} size="sm" />
+             <Avatar src={post.comments[0].avatar || `https://i.pravatar.cc/150?img=${post.comments[0].id}`} size="sm" />
              <div className="bg-white p-2 px-3 rounded-2xl rounded-tl-none shadow-sm text-sm">
                 <span className="font-semibold block text-gray-900">{post.comments[0].author}</span>
                 <span className="text-gray-700">{post.comments[0].content}</span>
@@ -693,9 +738,9 @@ function PostCard({ post, onLike, onCommentClick }) {
   );
 }
 
-function ActionButton({ icon, label, color = 'text-gray-500', onClick, className = '', active }) {
+function ActionButton({ icon, label, color = 'text-gray-500', onClick, className = '', active }: { icon: React.ReactNode; label: string; color?: string; onClick: () => void; className?: string; active?: boolean }) {
   return (
-    <button 
+    <button
       onClick={onClick}
       className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg hover:bg-gray-50 transition-all active:scale-95 ${color} ${className} ${active ? 'bg-red-50' : ''}`}
     >
@@ -726,10 +771,10 @@ function PostSkeleton() {
 
 // --- Create Post Modal ---
 
-function CreatePostModal({ onClose, onSubmit, user }) {
+function CreatePostModal({ onClose, onSubmit, user }: { onClose: () => void; onSubmit: (content: string, images?: string[]) => void; user: User }) {
   const [content, setContent] = useState('');
   const [isClosing, setIsClosing] = useState(false);
-  
+
   const handleClose = () => {
     setIsClosing(true);
     setTimeout(onClose, 200);
@@ -742,14 +787,14 @@ function CreatePostModal({ onClose, onSubmit, user }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-opacity">
-      <div 
+      <div
         className={`bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}
       >
         <div className="flex justify-between items-center p-4 border-b border-gray-100">
           <h3 className="font-bold text-lg text-gray-800">Tạo bài viết</h3>
           <button onClick={handleClose} className="bg-gray-100 p-2 rounded-full hover:bg-gray-200"><X size={20} /></button>
         </div>
-        
+
         <div className="p-4">
            <div className="flex items-center gap-3 mb-4">
               <Avatar src={user.avatar} />
@@ -760,7 +805,7 @@ function CreatePostModal({ onClose, onSubmit, user }) {
                 </div>
               </div>
            </div>
-           
+
            <textarea
              className="w-full min-h-[150px] resize-none text-lg text-gray-700 placeholder-gray-400 focus:outline-none scrollbar-hide"
              placeholder="Bạn đang nghĩ gì thế?"
@@ -769,19 +814,20 @@ function CreatePostModal({ onClose, onSubmit, user }) {
              autoFocus
            />
 
-           {/* Removed Tag, Smile, Location buttons. Only Image remains */}
+           {/* Added Video button back next to Image button */}
            <div className="border border-gray-200 rounded-xl p-3 flex justify-between items-center mt-4 shadow-sm">
               <span className="text-sm font-medium text-gray-600 pl-2">Thêm vào bài viết</span>
               <div className="flex gap-1">
                  <button className="p-2 hover:bg-gray-100 rounded-full text-green-500"><ImageIcon size={20} /></button>
+                 <button className="p-2 hover:bg-gray-100 rounded-full text-red-500"><Video size={20} /></button>
               </div>
            </div>
         </div>
 
         <div className="p-4 pt-0">
-          <Button 
-            className="w-full py-3 text-lg" 
-            disabled={!content.trim()} 
+          <Button
+            className="w-full py-3 text-lg"
+            disabled={!content.trim()}
             onClick={handleSubmit}
           >
             Đăng bài
@@ -794,7 +840,7 @@ function CreatePostModal({ onClose, onSubmit, user }) {
 
 // --- Post Detail Modal (Full View) ---
 
-function PostDetailModal({ post, onClose, onLike }) {
+function PostDetailModal({ post, onClose, onLike }: { post: Post; onClose: () => void; onLike: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-8 animate-fade-in">
        <div className="bg-white w-full max-w-5xl h-full md:h-[90vh] md:rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row relative">
@@ -843,7 +889,7 @@ function PostDetailModal({ post, onClose, onLike }) {
                   <p>Chưa có bình luận nào.</p>
                 </div>
               ) : (
-                post.comments.map(comment => (
+                post.comments.map((comment: Comment) => (
                   <div key={comment.id} className="flex gap-3 group">
                      <Avatar src={comment.avatar || `https://i.pravatar.cc/150?img=${comment.id}`} size="sm" />
                      <div className="flex-1">
@@ -875,11 +921,11 @@ function PostDetailModal({ post, onClose, onLike }) {
                  </div>
                </div>
                <div className="font-semibold text-sm mb-2 px-1">{post.likes} lượt thích</div>
-               
+
                <div className="flex items-center gap-2">
-                 <input 
-                   type="text" 
-                   placeholder="Thêm bình luận..." 
+                 <input
+                   type="text"
+                   placeholder="Thêm bình luận..."
                    className="flex-1 bg-transparent text-sm py-2 px-1 focus:outline-none"
                  />
                  <button className="text-blue-500 font-semibold text-sm disabled:opacity-50" disabled>Đăng</button>
