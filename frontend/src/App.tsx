@@ -13,7 +13,12 @@ import LoginAdmin from './pages/Auth/Login/LoginAdmin';
 import LoginManager from './pages/Auth/Login/LoginManager';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import ManagerDashboard from './pages/Dashboard/ManagerDashboard';
+import VolunteerDashboard from './pages/Dashboard/VolunteerDashboard';
 import EventsApproval from './pages/Dashboard/Admin-Crud/EventsApproval';
+import EventsPage from './pages/Events/EventsPage';
+import EventDetailPage from './pages/Events/EventDetailPage';
+import EventWallPage from './components/features/communication/EventWall';
+
 
 function App() {
     return (
@@ -24,8 +29,12 @@ function App() {
                 <Route path="/login-success" element={<LoginSuccess />} />
 
                 <Route path="/dashboard" element={<ProtectedRoute> <Dashboard /></ProtectedRoute>} />
+                <Route path="/volunteer/dashboard" element={<VolunteerDashboard />} />
                 {/* <Route path="/dashboard" element={ <Dashboard />}/> */}
                 <Route path="/" element={<Home />} />
+                <Route path="/events" element={<EventsPage />} />
+                <Route path="/event/:id" element={<EventDetailPage />} />
+                <Route path="/event/:id/wall" element={<EventWallPage />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
