@@ -12,7 +12,7 @@ import ResetPassword from './pages/Auth/Password/ResetPassword';
 import LoginAdmin from './pages/Auth/Login/LoginAdmin';
 import LoginManager from './pages/Auth/Login/LoginManager';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
-import ManagerDashboard from './pages/Dashboard/ManagerDashboard';
+import ManagerDashboard from './pages/Manager/ManagerDashboard';
 import EventsApproval from './pages/Dashboard/Admin-Crud/EventsApproval';
 import UserManagement from './pages/Dashboard/Admin-Crud/UserManagement';
 import CreateEvent from './pages/CreateEvent';
@@ -44,6 +44,8 @@ function App() {
                 <Route path="/manager/login" element={<LoginManager />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/manager/dashboard" element={<ManagerDashboard />} />
+                <Route path="/manager/create-event" element={<CreateEvent />} />
+
                 <Route path="/admin/event-approvals" element={<EventsApproval />} />
                 <Route path="/admin/user-management" element={<UserManagement />} />
                 <Route path="/create" element={<CreateEvent />} />
