@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { 
     FaArrowLeft, FaSave, FaMapMarkerAlt, FaCalendarAlt, 
-    FaInfoCircle, FaUsers, FaTag, FaClipboardCheck, FaUserFriends, FaSignOutAlt, FaClipboardList, FaLayerGroup 
+    FaInfoCircle, FaUsers, FaTag, FaClipboardCheck, FaUserFriends, FaSignOutAlt, FaClipboardList, FaLayerGroup, 
+    FaPaperPlane
 } from 'react-icons/fa';
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -70,6 +71,30 @@ const EditEvent: React.FC = () => {
             }
         } catch (err) { console.error(err); } finally { setFetching(false); }
     }, [id]);
+
+    const handleSubmitForApproval = async () => {
+        if (!window.confirm("Bạn có chắc chắn muốn gửi sự kiện này để Admin phê duyệt? Sau khi gửi, bạn sẽ không thể chỉnh sửa cho đến khi có kết quả.")) return;
+        
+        setLoading(true);
+        const token = localStorage.getItem("accessToken");
+        try {
+            const res = await fetch(`${API_BASE_URL}/events/${id}/submit`, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const result = await res.json();
+            if (result.success) {
+                alert("Sự kiện đã được gửi duyệt thành công!");
+                navigate("/manager/my-events");
+            } else {
+                alert(result.message || "Lỗi khi gửi duyệt");
+            }
+        } catch (err) {
+            alert("Lỗi kết nối server");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         fetchUserProfile();
@@ -180,6 +205,14 @@ const EditEvent: React.FC = () => {
                         <button type="submit" disabled={loading} style={styles.submitBtn}>
                             <FaSave /> {loading ? "Đang xử lý..." : "Cập nhật sự kiện"}
                         </button>
+                            <button 
+                            type="button" 
+                            onClick={handleSubmitForApproval} 
+                            disabled={loading} 
+                            style={styles.submitApprovalBtn}
+                        >
+                            <FaPaperPlane /> Gửi duyệt Admin
+                        </button>
                     </div>
                 </form>
             </main>
@@ -197,6 +230,8 @@ const styles = {
     submitBtn: { padding: '14px 30px', backgroundColor: COLORS.PRIMARY, color: COLORS.WHITE, border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' } as React.CSSProperties,
     cancelBtn: { padding: '14px 30px', backgroundColor: '#E8EAED', color: COLORS.TEXT_MAIN, border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' } as React.CSSProperties,
     iconBtn: { width: '40px', height: '40px', borderRadius: '50%', border: 'none', backgroundColor: COLORS.WHITE, cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' } as React.CSSProperties,
+    saveBtn: { padding: '14px 25px', backgroundColor: '#F8F9FA', color: COLORS.TEXT_MAIN, border: `1px solid ${COLORS.BORDER}`, borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' } as React.CSSProperties,
+    submitApprovalBtn: { padding: '14px 25px', backgroundColor: COLORS.PRIMARY, color: COLORS.WHITE, border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(26, 115, 232, 0.3)' } as React.CSSProperties,
 };
 
 export default EditEvent;

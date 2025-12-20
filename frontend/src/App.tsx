@@ -15,13 +15,13 @@ import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import ManagerDashboard from './pages/Manager/ManagerDashboard';
 import EventsApproval from './pages/Dashboard/Admin-Crud/EventsApproval';
 import UserManagement from './pages/Dashboard/Admin-Crud/UserManagement';
-import CreateEvent from './pages/CreateEvent';
 import EventDetail from './pages/Home/Eventdetail';
 import Profile from './pages/Home/Profile';
 import VolunteerDashboard from './pages/Home/VolunteerDashboard';
 import BrowseEvents from './pages/Home/BrowseEvents';
 import MyEvents from './pages/Manager/MyEvents';
 import EditEvent from './pages/Manager/EditEvent';
+import CreateEvent from './pages/Manager/CreateEvent';
 
 function App() {
     return (
@@ -49,7 +49,6 @@ function App() {
 
                 <Route path="/admin/event-approvals" element={<EventsApproval />} />
                 <Route path="/admin/user-management" element={<UserManagement />} />
-                <Route path="/create" element={<CreateEvent />} />
                 <Route path="/google/callback" element={<GoogleCallback />} />
                 <Route path="/me/profile" element={< Profile />} />
                 <Route path="/volunteer/dashboard" element={< VolunteerDashboard />} />
