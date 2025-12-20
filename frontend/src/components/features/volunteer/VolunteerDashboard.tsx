@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Heart, LayoutDashboard, Calendar, Search, MessageSquare,
@@ -7,6 +7,11 @@ import {
   CheckCircle, Hourglass, ThumbsUp
 } from 'lucide-react';
 import { NotificationDropdown } from '../notification/NotificationDropdown';
+import { getMyRegistrations } from '../../../services/event-registration.service';
+import { getEventById, type FullBackendEvent } from '../../../services/event.service';
+import { getVolunteerDashboard, getFeedback } from '../../../services/dashboard.service';
+import type { DashboardData, FeedbackItem } from '../../../services/dashboard.service';
+import { getMyProfile, updateMyProfile, type UserProfile as BackendUserProfile } from '../../../services/user.service';
 
 
 /* --- UTILS HOOK (Dành cho Dashboard) --- */
@@ -184,40 +189,55 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
       const fetchMyEvents = async () => {
         try {
           setCalendarLoading(true);
-          // For now, we'll use mock data as the calendar API might not be fully implemented
-          // In a real implementation, this would call an API to get user's events by status
-          const mockEvents = [
-            {
-              id: 1,
-              title: "Chiến dịch Xanh: Làm sạch bãi biển Đà Nẵng",
-              date: "20/12/2024",
-              time: "07:00 - 11:00",
-              location: "Bãi biển Mỹ Khê, Đà Nẵng",
-              status: "upcoming",
-              image: "https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
-            },
-            {
-              id: 2,
-              title: "Dạy tiếng Anh cho trẻ em vùng cao",
-              date: "15/01/2025",
-              time: "08:00 - 17:00",
-              location: "Mộc Châu, Sơn La",
-              status: "pending",
-              image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
-            },
-            {
-              id: 3,
-              title: "Hiến máu nhân đạo: Giọt hồng yêu thương",
-              date: "10/11/2024",
-              time: "08:00 - 11:30",
-              location: "Viện Huyết học, Hà Nội",
-              status: "completed",
-              hours: 4,
-              rating: 5,
-              image: "https://images.unsplash.com/photo-1584515933487-779824d29309?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
-            }
-          ];
-          setMyEvents(mockEvents);
+          const registrations = await getMyRegistrations();
+
+          // Transform registrations to calendar events
+          const events = await Promise.all(
+            registrations.map(async (reg) => {
+              // Fetch event details to get image
+              let eventImage = "https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80";
+              try {
+                const eventDetails: FullBackendEvent = await getEventById(reg.eventId);
+                if (eventDetails.media?.images?.[0]) {
+                  eventImage = eventDetails.media.images[0];
+                }
+              } catch (error) {
+                console.warn('Could not fetch event details for', reg.eventId, error);
+              }
+
+              // Map registration status to calendar status
+              let calendarStatus: 'upcoming' | 'pending' | 'completed';
+              if (reg.status === 'pending') {
+                calendarStatus = 'pending';
+              } else if (['accepted', 'confirmed', 'checked_in'].includes(reg.status)) {
+                calendarStatus = 'upcoming';
+              } else if (['completed', 'rated'].includes(reg.status)) {
+                calendarStatus = 'completed';
+              } else {
+                calendarStatus = 'upcoming'; // fallback
+              }
+
+              // Format date and time
+              const eventDate = new Date(reg.eventDate);
+              const dateStr = eventDate.toLocaleDateString('vi-VN');
+              // For time, we'll use a default format since exact times aren't in registration
+              const timeStr = '08:00 - 17:00'; // Default working hours
+
+              return {
+                id: reg.id,
+                title: reg.eventTitle,
+                date: dateStr,
+                time: timeStr,
+                location: reg.eventLocation,
+                status: calendarStatus,
+                image: eventImage,
+                hours: reg.completion?.actualHours || reg.attendance?.actualHours || 0,
+                rating: reg.completion?.volunteerRating?.stars || 0,
+              };
+            })
+          );
+
+          setMyEvents(events);
         } catch (error) {
           console.error('Error fetching my events:', error);
           setMyEvents([]);

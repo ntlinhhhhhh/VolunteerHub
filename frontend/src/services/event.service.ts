@@ -23,6 +23,71 @@ export interface BackendEvent {
   updatedAt: string;
 }
 
+// Full backend event type for detailed operations
+export interface FullBackendEvent {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  organizerId: string;
+  organizerName: string;
+  organizerEmail: string;
+  organizerPhone: string;
+  categoryId: string;
+  categoryName: string;
+  location: {
+    address: string;
+    city: string;
+    district: string;
+    ward?: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+  };
+  schedule: {
+    startDate: string;
+    endDate: string;
+    registrationDeadline: string;
+  };
+  requirements: {
+    minAge?: number;
+    maxAge?: number;
+    skills: string[];
+    experience?: string;
+    healthRequirements?: string;
+  };
+  capacity: {
+    maxVolunteers: number;
+    currentVolunteers: number;
+    minVolunteers: number;
+  };
+  roles: Array<{
+    id: string;
+    name: string;
+    description: string;
+    slots: number;
+    filled: number;
+  }>;
+  status: string;
+  approval: {
+    approvedBy?: string;
+    approvedAt?: string;
+    rejectionReason?: string;
+    reviewedAt?: string;
+  };
+  media: {
+    images: string[];
+    videos: string[];
+    documents: string[];
+  };
+  visibility: 'public' | 'private';
+  featured: boolean;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Additional types for other files (to avoid breaking them)
 export interface BackendCategory {
   id: string;
@@ -106,7 +171,7 @@ export const getCategories = async (): Promise<BackendCategory[]> => {
 };
 
 // Get event by ID
-export const getEventById = async (eventId: string): Promise<BackendEvent> => {
+export const getEventById = async (eventId: string): Promise<FullBackendEvent> => {
   console.log('Fetching event by ID:', eventId);
   const url = `${API_BASE_URL}/events/${eventId}`;
   console.log('GET:', url);
@@ -115,5 +180,5 @@ export const getEventById = async (eventId: string): Promise<BackendEvent> => {
     headers: getAuthHeaders(),
   });
 
-  return handleResponse<BackendEvent>(response);
+  return handleResponse<FullBackendEvent>(response);
 };

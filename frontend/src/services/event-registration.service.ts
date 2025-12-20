@@ -66,6 +66,20 @@ const handleResponse = async <T>(response: Response): Promise<T> => {
   return data.data!;
 };
 
+// Get volunteer's registrations
+export const getMyRegistrations = async (): Promise<BackendRegistration[]> => {
+  console.log('Fetching my registrations');
+  const url = `${API_BASE_URL}/registrations/my-registrations?limit=1000`;
+  console.log('GET:', url);
+
+  const response = await fetch(url, {
+    headers: getAuthHeaders(),
+  });
+
+  const result = await handleResponse<{ data: BackendRegistration[]; pagination: any }>(response);
+  return result.data;
+};
+
 // Get event participants (accepted/confirmed registrations)
 export const getEventParticipants = async (eventId: string): Promise<BackendRegistration[]> => {
   console.log('Fetching participants for event:', eventId);

@@ -8,6 +8,7 @@ import {
 import { Reveal } from '../../hooks/Reveal';
 import { getEvents, getCategories } from '../../services/event.service';
 import type { BackendEvent, BackendCategory } from '../../services/event.service';
+import { NotificationDropdown } from '../../components/features/notification/NotificationDropdown';
 
 // Frontend event format for EventCard component
 interface FrontendEvent {
@@ -141,12 +142,29 @@ const EventsPage = () => {
   const sortRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
 
-  // Mock user data (in real app, this would come from auth context/store)
-  const userProfile = {
-    name: "Nguyễn Thu Hà",
-    role: "Tình nguyện viên",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-  };
+  // Auth state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userProfile, setUserProfile] = useState({
+    name: "",
+    role: "",
+    avatar: ""
+  });
+
+  // Check authentication on mount
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    const userId = localStorage.getItem('userId');
+    setIsLoggedIn(!!token);
+
+    if (token && userId) {
+      // Fetch user profile (simplified, in real app use proper service)
+      setUserProfile({
+        name: "Nguyễn Thu Hà", // This should come from API
+        role: "Tình nguyện viên",
+        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+      });
+    }
+  }, []);
 
   // Transform backend event to frontend format
   const transformEvent = (event: BackendEvent): FrontendEvent => {
@@ -324,44 +342,52 @@ const EventsPage = () => {
               Sự kiện
               <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-[#5FC1D1]"></span>
             </button>
-            <a href="#" className="relative text-[#2C3E50] font-medium transition-colors hover:text-[#34729C] group">
-              Cộng đồng
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#5FC1D1] transition-all duration-300 group-hover:w-full"></span>
-            </a>
 
-            {/* Notification Button */}
-            <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
-              <Bell size={20} />
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
+            {isLoggedIn ? (
+              <>
+                {/* Notification Dropdown */}
+                <NotificationDropdown userId={localStorage.getItem('userId') || ''} />
 
-            {/* User Avatar & Info */}
-            <div
-              className="flex items-center gap-3 pl-4 border-l border-gray-200 cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition-colors"
-              onClick={() => navigate('/volunteer/dashboard')}
-            >
-              <div className="text-right hidden md:block">
-                <p className="text-sm font-bold text-[#2C3E50]">{userProfile.name}</p>
-                <p className="text-xs text-gray-500">{userProfile.role}</p>
-              </div>
-              <img src={userProfile.avatar} alt="Avatar" className="w-10 h-10 rounded-full ring-2 ring-[#5FC1D1] object-cover" />
-            </div>
+                {/* User Avatar & Info */}
+                <div
+                  className="flex items-center gap-3 pl-4 border-l border-gray-200 cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition-colors"
+                  onClick={() => navigate('/volunteer/dashboard')}
+                >
+                  <div className="text-right hidden md:block">
+                    <p className="text-sm font-bold text-[#2C3E50]">{userProfile.name}</p>
+                    <p className="text-xs text-gray-500">{userProfile.role}</p>
+                  </div>
+                  <img src={userProfile.avatar} alt="Avatar" className="w-10 h-10 rounded-full ring-2 ring-[#5FC1D1] object-cover" />
+                </div>
+              </>
+            ) : (
+              <>
+                <button onClick={() => navigate('/login')} className="px-5 py-2.5 text-[#34729C] font-semibold hover:bg-[#D1ECFF]/50 rounded-full transition-colors">
+                  Đăng nhập
+                </button>
+                <button onClick={() => navigate('/register')} className="relative px-6 py-2.5 bg-[#34729C] text-white font-semibold rounded-full overflow-hidden group shadow-lg shadow-[#34729C]/30 hover:shadow-[#34729C]/50 transition-all">
+                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
+                  <span className="relative">Tham gia ngay</span>
+                </button>
+              </>
+            )}
           </div>
 
           <div className="md:hidden flex items-center gap-4">
-            {/* Mobile Notification */}
-            <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full">
-              <Bell size={20} />
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
+            {isLoggedIn && (
+              <>
+                {/* Mobile Notification */}
+                <NotificationDropdown userId={localStorage.getItem('userId') || ''} />
 
-            {/* Mobile Avatar */}
-            <div
-              className="cursor-pointer"
-              onClick={() => navigate('/volunteer/dashboard')}
-            >
-              <img src={userProfile.avatar} alt="Avatar" className="w-8 h-8 rounded-full ring-2 ring-[#5FC1D1] object-cover" />
-            </div>
+                {/* Mobile Avatar */}
+                <div
+                  className="cursor-pointer"
+                  onClick={() => navigate('/volunteer/dashboard')}
+                >
+                  <img src={userProfile.avatar} alt="Avatar" className="w-8 h-8 rounded-full ring-2 ring-[#5FC1D1] object-cover" />
+                </div>
+              </>
+            )}
 
             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-[#2C3E50] p-2 hover:bg-gray-100 rounded-lg">
               <Menu size={28} />
@@ -379,20 +405,25 @@ const EventsPage = () => {
               <button onClick={() => { navigate('/events'); setIsMobileMenuOpen(false); }} className="text-[#34729C] font-medium p-3 hover:bg-[#F5F7FA] rounded-xl text-left">
                 Sự kiện
               </button>
-              <a href="#" className="text-[#2C3E50] font-medium p-3 hover:bg-[#F5F7FA] rounded-xl">
-                Cộng đồng
-              </a>
 
-              {/* Mobile User Info */}
-              <div className="border-t border-gray-100 pt-4 mt-4">
-                <div className="flex items-center gap-3 p-3">
-                  <img src={userProfile.avatar} alt="Avatar" className="w-12 h-12 rounded-full ring-2 ring-[#5FC1D1] object-cover" />
-                  <div>
-                    <p className="text-sm font-bold text-[#2C3E50]">{userProfile.name}</p>
-                    <p className="text-xs text-gray-500">{userProfile.role}</p>
+              {!isLoggedIn ? (
+                <div className="border-t border-gray-100 pt-4 mt-4 space-y-3">
+                  <button onClick={() => { navigate('/register'); setIsMobileMenuOpen(false); }} className="w-full py-3 bg-[#34729C] text-white rounded-xl font-bold shadow-lg">
+                    Tham gia ngay
+                  </button>
+                </div>
+              ) : (
+                /* Mobile User Info */
+                <div className="border-t border-gray-100 pt-4 mt-4">
+                  <div className="flex items-center gap-3 p-3">
+                    <img src={userProfile.avatar} alt="Avatar" className="w-12 h-12 rounded-full ring-2 ring-[#5FC1D1] object-cover" />
+                    <div>
+                      <p className="text-sm font-bold text-[#2C3E50]">{userProfile.name}</p>
+                      <p className="text-xs text-gray-500">{userProfile.role}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         )}
@@ -409,6 +440,11 @@ const EventsPage = () => {
         .animation-delay-4000 { animation-delay: 4s; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        .animate-shimmer { animation: shimmer 1.5s infinite; }
       `}</style>
 
       {/* --- HERO / HEADER SECTION --- */}
