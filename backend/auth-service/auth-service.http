@@ -32,8 +32,8 @@ POST http://localhost:8000/auth/event-manager/login
 Content-Type: application/json
 
 {
-    "email": "duonghoangg261@gmail.com",
-    "password": "tlinh123"
+    "email": "halinh@gmail.com",
+    "password": "1111111111"
 }
 
 ### gg login
