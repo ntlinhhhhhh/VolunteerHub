@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from "react";
 import { 
     FaArrowLeft, FaSave, FaMapMarkerAlt, FaCalendarAlt, 
     FaInfoCircle, FaUsers, FaTag, FaClipboardCheck, FaUserFriends, FaSignOutAlt, FaClipboardList, FaLayerGroup, 
-    FaPaperPlane, FaTrash
+    FaPaperPlane, FaTrash,
+    FaChartBar
 } from 'react-icons/fa';
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -190,7 +191,10 @@ const EditEvent: React.FC = () => {
                     <h1 style={{ fontSize: '22px', margin: 0, display: 'flex', alignItems: 'center', gap: '12px', color: COLORS.DARK_NAVY }}><FaUsers color={COLORS.PRIMARY} /> Manager</h1>
                 </div>
                 <nav style={{ flex: 1, padding: '20px 12px' }}>
-                    <div onClick={() => navigate("/manager/dashboard")} style={styles.navItem}><FaClipboardList style={{ marginRight: '12px' }} /> Pending Applications</div>
+                    <div onClick={() => navigate("/manager/statistics")} style={styles.navItem}>
+                                            <FaChartBar style={{ marginRight: '12px' }} /> Statistics
+                                        </div>
+                    <div onClick={() => navigate("/manager/pending-applications")} style={styles.navItem}><FaClipboardList style={{ marginRight: '12px' }} /> Pending Applications</div>
                     <div onClick={() => navigate("/manager/my-events")} style={{ ...styles.navItem, backgroundColor: 'rgba(26, 115, 232, 0.15)', color: COLORS.PRIMARY }}><FaLayerGroup style={{ marginRight: '12px' }} /> My Events</div>
                 </nav>
             </aside>
