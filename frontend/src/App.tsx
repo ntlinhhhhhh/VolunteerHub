@@ -48,6 +48,9 @@ function App() {
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/manager/dashboard" element={<ManagerDashboard />} />
                 <Route path="/manager/create-event" element={<CreateEvent />} />
+                <Route path="/manager/my-events" element={< MyEvents />} />
+                <Route path="/manager/edit-event/:id" element={<EditEvent />} />
+
 
                 <Route path="/admin/event-approvals" element={<EventsApproval />} />
                 <Route path="/admin/user-management" element={<UserManagement />} />
@@ -59,7 +62,6 @@ function App() {
                 <Route path="/event/communication/:eventId" element={<Communication /> } />
                 <Route path="/volunteer/events/:eventId" element={<ForumEventDetail /> } />
                 <Route path="/volunteer/communication" element={<MyEventsCommunication /> } />
-                MyEventsCommunication
             </Routes>
         </Router>
     );

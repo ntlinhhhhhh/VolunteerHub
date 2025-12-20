@@ -219,7 +219,7 @@ const styles = {
     formGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' } as React.CSSProperties,
     label: { display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 'bold', color: COLORS.TEXT_SECONDARY },
     input: { width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${COLORS.BORDER}`, fontSize: '14px', boxSizing: 'border-box', outlineColor: COLORS.PRIMARY, backgroundColor: COLORS.BACKGROUND, color: COLORS.TEXT_MAIN } as React.CSSProperties,
-    iconBtn: { width: '40px', height: '40px', borderRadius: '50%', border: 'none', backgroundColor: COLORS.WHITE, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' } as React.CSSProperties,
+    iconBtn: { padding: 0, width: '40px', height: '40px', borderRadius: '50%', border: 'none', backgroundColor: COLORS.WHITE, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' } as React.CSSProperties,
     addBtn: { background: 'none', border: `1px dashed ${COLORS.PRIMARY}`, color: COLORS.PRIMARY, padding: '10px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', width: '100%', marginTop: '10px' } as React.CSSProperties,
     deleteBtn: { padding: '12px', backgroundColor: '#FCE8E6', color: COLORS.DANGER, border: 'none', borderRadius: '8px', cursor: 'pointer' } as React.CSSProperties,
     submitBtn: { padding: '12px 30px', backgroundColor: COLORS.PRIMARY, color: COLORS.WHITE, border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' } as React.CSSProperties,

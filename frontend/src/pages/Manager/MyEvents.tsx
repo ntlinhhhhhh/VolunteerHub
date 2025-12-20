@@ -225,7 +225,7 @@ const styles = {
     th: { padding: '16px 24px', textAlign: 'left', fontSize: '12px', color: COLORS.TEXT_SECONDARY, fontWeight: 'bold', textTransform: 'uppercase' } as React.CSSProperties,
     td: { padding: '20px 24px', fontSize: '14px', color: COLORS.TEXT_MAIN, verticalAlign: 'middle' } as React.CSSProperties,
     createBtn: { padding: '10px 20px', backgroundColor: COLORS.PRIMARY, color: COLORS.WHITE, border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' } as React.CSSProperties,
-    actionBtn: { width: '32px', height: '32px', borderRadius: '6px', border: 'none', backgroundColor: '#F1F3F4', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: COLORS.TEXT_SECONDARY } as React.CSSProperties,
+    actionBtn: { width: '32px', height: '32px', borderRadius: '6px', border: 'none', backgroundColor: '#F1F3F4', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: COLORS.TEXT_SECONDARY, padding: 0} as React.CSSProperties,
 };
 
 export default MyEvents;

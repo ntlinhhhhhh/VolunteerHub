@@ -192,7 +192,7 @@ const ManagerDashboard: React.FC = () => {
                                             </span>
                                         </td>
                                         <td style={{ ...styles.tdStyle, textAlign: 'right' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px',  }}>
                                                 <button onClick={() => setShowDetails(showDetails === reg.id ? null : reg.id)} style={styles.iconBtnStyle(COLORS.PRIMARY, COLORS.LIGHT_PRIMARY)}>
                                                     {showDetails === reg.id ? <FaChevronUp /> : <FaEye />}
                                                 </button>
@@ -310,7 +310,7 @@ const styles = {
     tdStyle: { padding: '18px 24px', fontSize: '14px', color: COLORS.TEXT_MAIN, verticalAlign: 'middle' } as React.CSSProperties,
     navItemStyle: { display: 'flex', alignItems: 'center', padding: '14px 18px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500' } as React.CSSProperties,
     logoutBtnStyle: { width: '100%', padding: '12px', borderRadius: '8px', border: 'none', backgroundColor: '#FCE8E6', color: COLORS.DANGER, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 'bold' } as React.CSSProperties,
-    iconBtnStyle: (color: string, bg: string): React.CSSProperties => ({ width: '36px', height: '36px', borderRadius: '8px', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: color, backgroundColor: bg }),
+    iconBtnStyle: (color: string, bg: string): React.CSSProperties => ({ width: '36px', height: '36px', borderRadius: '8px', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: color, backgroundColor: bg, padding: 0 }),
     
     // Detail Styles
     detailRow: { backgroundColor: '#FAFBFC' } as React.CSSProperties,
