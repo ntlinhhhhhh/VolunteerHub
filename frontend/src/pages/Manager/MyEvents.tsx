@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
     FaPlus, FaUsers, FaSignOutAlt, FaClipboardList, FaCalendarAlt,
-    FaMapMarkerAlt, FaEdit, FaEye, FaFilter, FaLayerGroup
+    FaMapMarkerAlt, FaEdit, FaEye, FaFilter, FaLayerGroup, FaCheckCircle, FaTimesCircle,
+    FaChartBar
 } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 
@@ -80,6 +81,36 @@ const MyEvents: React.FC = () => {
         navigate("/manager/login");
     };
 
+    // Hàm xử lý Publish hoặc Cancel
+    const handleEventAction = async (eventId: string, action: 'publish' | 'cancel') => {
+        const token = localStorage.getItem("accessToken");
+        const confirmMsg = action === 'publish' ? "Bạn có chắc chắn muốn publish sự kiện này?" : "Bạn có chắc chắn muốn hủy sự kiện này?";
+        
+        if (!window.confirm(confirmMsg)) return;
+
+        try {
+            const body = action === 'cancel' ? JSON.stringify({ cancellationReason: "Organizer cancelled" }) : null;
+            const res = await fetch(`${API_BASE_URL}/events/${eventId}/${action}`, {
+                method: 'POST',
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: body
+            });
+            const result = await res.json();
+            if (result.success) {
+                alert(result.message || `Event ${action}ed successfully`);
+                fetchMyEvents(); // Refresh danh sách
+            } else {
+                alert(result.message || "Action failed");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("An error occurred");
+        }
+    };
+
     // Helper: Màu sắc cho Badge trạng thái
     const getStatusStyle = (status: string) => {
         const s = status.toLowerCase();
@@ -100,8 +131,11 @@ const MyEvents: React.FC = () => {
                         <FaUsers color={COLORS.PRIMARY} /> Manager
                     </h1>
                 </div>
-                <nav style={{ flex: 1, padding: '20px 12px' }}>
-                    <div onClick={() => navigate("/manager/dashboard")} style={styles.navItem}>
+                <nav style={{ flex: 1, padding: '20px 12px' }}> 
+                    <div onClick={() => navigate("/manager/statistics")} style={styles.navItem}>
+                        <FaChartBar style={{ marginRight: '12px' }} /> Statistics
+                    </div>
+                    <div onClick={() => navigate("/manager/pending-applications")} style={styles.navItem}>
                         <FaClipboardList style={{ marginRight: '12px' }} /> Pending Applications
                     </div>
                     <div onClick={() => navigate("/manager/my-events")} style={{ ...styles.navItem, backgroundColor: 'rgba(26, 115, 232, 0.15)', color: COLORS.PRIMARY }}>
@@ -192,7 +226,38 @@ const MyEvents: React.FC = () => {
                                             </td>
                                             <td style={{ ...styles.td, textAlign: 'right' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                                                    <button title="View Details" style={styles.actionBtn}><FaEye /></button>
+                                                    {/* <button title="View Details" style={styles.actionBtn}><FaEye /></button>
+                                                     */}
+
+                                                    <button 
+                                                        title="View Details" 
+                                                        onClick={() => navigate(`/manager/event-details/${event.id}`)} // Điều hướng đến trang chi tiết
+                                                        style={styles.actionBtn}
+                                                    >
+                                                        <FaEye />
+                                                    </button> 
+                                                    {/* Nút Publish: Chỉ hiện khi trạng thái là approved */}
+                                                    {event.status === 'approved' && (
+                                                        <button 
+                                                            onClick={() => handleEventAction(event.id, 'publish')}
+                                                            title="Publish Event" 
+                                                            style={{ ...styles.actionBtn, color: COLORS.SUCCESS_ACCENT, backgroundColor: '#E6F4EA' }}
+                                                        >
+                                                            <FaCheckCircle />
+                                                        </button>
+                                                    )}
+
+                                                    {/* Nút Cancel: Chỉ hiện khi trạng thái là published */}
+                                                    {event.status === 'published' && (
+                                                        <button 
+                                                            onClick={() => handleEventAction(event.id, 'cancel')}
+                                                            title="Cancel Event" 
+                                                            style={{ ...styles.actionBtn, color: COLORS.DANGER, backgroundColor: '#FCE8E6' }}
+                                                        >
+                                                            <FaTimesCircle />
+                                                        </button>
+                                                    )}
+
                                                     {event.status === 'draft' && (
                                                         <button 
                                                             onClick={() => navigate(`/manager/edit-event/${event.id}`)} 

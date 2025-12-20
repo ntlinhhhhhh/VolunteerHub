@@ -26,6 +26,8 @@ import Communication from './pages/Home/CommunicationEvent';
 import MyRegistrationsPage from './pages/Home/RegistrationEvents';
 import ForumEventDetail from './pages/Home/ForumEventDetail';
 import MyEventsCommunication from './pages/Home/Communication';
+import ManagerStatistics from './pages/Manager/ManagerStatistics';
+import EventDetails from './pages/Manager/EventDetails';
 
 function App() {
     return (
@@ -46,10 +48,13 @@ function App() {
                 <Route path="/admin/login" element={<LoginAdmin />} />
                 <Route path="/manager/login" element={<LoginManager />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/manager/dashboard" element={<ManagerDashboard />} />
+                <Route path="/manager/pending-applications" element={<ManagerDashboard />} />
                 <Route path="/manager/create-event" element={<CreateEvent />} />
                 <Route path="/manager/my-events" element={< MyEvents />} />
                 <Route path="/manager/edit-event/:id" element={<EditEvent />} />
+                <Route path="/manager/statistics" element={< ManagerStatistics />} />
+                <Route path="/manager/event-details/:id" element={< EventDetails />} />
+
 
 
                 <Route path="/admin/event-approvals" element={<EventsApproval />} />

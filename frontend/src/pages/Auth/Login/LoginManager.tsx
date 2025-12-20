@@ -50,7 +50,7 @@ const LoginManager: React.FC = () => {
                 });
                 
                 setTimeout(() => {
-                    navigate("/manager/dashboard"); 
+                    navigate("/manager/statistics"); 
                 }, 1500);
 
             } else {

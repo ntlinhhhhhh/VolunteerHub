@@ -3,7 +3,9 @@ import {
     FaClipboardList, FaUsers, FaUser, FaSignOutAlt, FaEye, FaCheckCircle, FaExclamationTriangle,
     FaTimesCircle, FaCommentDots, FaChevronUp, FaPhoneAlt, FaMapMarkerAlt,
     FaClipboard,
-    FaPlus
+    FaPlus,
+    FaLayerGroup,
+    FaChartBar
 } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 
@@ -265,8 +267,14 @@ const ManagerDashboard: React.FC = () => {
                         <FaClipboardList style={{ marginRight: '12px' }} /> Pending Applications
                     </div> */}
                     <div 
-                            onClick={() => navigate("/manager/dashboard")} // Giả định path dashboard
+                            onClick={() => navigate("/manager/statistics")} // Giả định path dashboard
                             style={{ ...styles.navItemStyle, marginBottom: '8px', cursor: 'pointer' }}
+                        >
+                            <FaChartBar style={{ marginRight: '12px' }} /> Statistics
+                        </div>
+                        <div 
+                            onClick={() => navigate("/manager/pending-applications")} // Giả định path dashboard
+                            style={{ ...styles.navItemStyle, backgroundColor: 'rgba(26, 115, 232, 0.15)', color: COLORS.PRIMARY, marginBottom: '8px', cursor: 'pointer' }}
                         >
                             <FaClipboardList style={{ marginRight: '12px' }} /> Pending Applications
                         </div>
@@ -274,7 +282,7 @@ const ManagerDashboard: React.FC = () => {
                             onClick={() => navigate("/manager/my-events")}
                             style={{ ...styles.navItemStyle, cursor: 'pointer' }}
                         >
-                            <FaPlus style={{ marginRight: '12px' }} /> My Events
+                            <FaLayerGroup style={{ marginRight: '12px' }} /> My Events
                         </div>
                 </nav>
                 <div style={{ padding: '20px', borderTop: `1px solid ${COLORS.SIDEBAR_BORDER}` }}>

@@ -2,7 +2,7 @@
 GET http://localhost:8000/registrations
 
 ### GET sự kiện theo id
-GET http://localhost:8000/registrations?eventId=69392b3ccd19460aadf9f53d
+GET http://localhost:8000/registrations?eventId=6941830d0c43de3da5dda574
 
 ### lọc theo volunteerid
 GET http://localhost:8000/registrations?volunteerId=693bef0948558080fd0ebd3e
@@ -105,7 +105,7 @@ Content-Type: application/json
   "cancellationReason": "Cannot attend due to personal reasons"
 }
 
-### Cancel Registration by Organizer
+### Cancel Registration (registration id) by Organizer
 DELETE http://localhost:8000/registrations/6936e16ccfaf9a63064e71ec/cancel-by-organizer
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM2OGM2MTk0NjE5MzMzYTIxMDAxMjAiLCJlbWFpbCI6InRsaW5oX21hbmFnZXJAZ21haWwuY29tIiwibmFtZSI6IlRodXkgTGluaCBNYW5hZ2VyIiwicGhvbmVOdW1iZXIiOiIrODQ5MDk4NzY1NDMiLCJyb2xlSWQiOiI2OTM2OGM2MDk0NjE5MzMzYTIxMDAxMTIiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjUyMTA1NDYsImV4cCI6MTc2NTIxMTQ0Nn0.oEBpBpUdUa8isHkdeVaJghLOrITtBVWripkt3dScUiE
 Content-Type: application/json
