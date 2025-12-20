@@ -68,7 +68,7 @@ const Login: React.FC = () => {
                 localStorage.setItem("accessToken", result.data.accessToken);
                 localStorage.setItem("refreshToken", result.data.refreshToken);
 
-                navigate("/dashboard");
+                navigate("/volunteer/dashboard");
             } else {
                 setMessage(`Login failed: ${result.message || "Unknown error"}`);
             }

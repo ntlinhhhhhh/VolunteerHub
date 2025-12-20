@@ -23,6 +23,7 @@ import BrowseEvents from './pages/Home/BrowseEvents';
 import Communication from './pages/Home/CommunicationEvent';
 import MyRegistrationsPage from './pages/Home/RegistrationEvents';
 import ForumEventDetail from './pages/Home/ForumEventDetail';
+import MyEventsCommunication from './pages/Home/Communication';
 
 function App() {
     return (
@@ -50,12 +51,14 @@ function App() {
                 <Route path="/admin/user-management" element={<UserManagement />} />
                 <Route path="/create" element={<CreateEvent />} />
                 <Route path="/google/callback" element={<GoogleCallback />} />
-                <Route path="/me/profile" element={< Profile />} />
+                <Route path="/volunteer/profile" element={< Profile />} />
                 <Route path="/volunteer/dashboard" element={< VolunteerDashboard />} />
                 <Route path="/volunteer/events" element={< BrowseEvents />} />
                 <Route path="/event/registrations" element={< MyRegistrationsPage />} />
                 <Route path="/event/communication/:eventId" element={<Communication /> } />
                 <Route path="/volunteer/events/:eventId" element={<ForumEventDetail /> } />
+                <Route path="/volunteer/communication" element={<MyEventsCommunication /> } />
+                MyEventsCommunication
             </Routes>
         </Router>
     );

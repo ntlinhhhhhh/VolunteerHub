@@ -1,17 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
     LayoutDashboard, Search, Users, UserCircle, Bell, Menu, ChevronLeft,
-    Clock, Award, Star, TrendingUp, CheckCircle, AlertCircle,
-    Calendar, MapPin, ArrowRight, Loader2, LogOut, X, Check, XCircle
+    MessageSquare, Calendar, MapPin, ArrowRight, Loader2, LogOut, X,
+    AlertCircle, Clock, Check
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-interface Statistics {
-    totalHours: number;
-    completedEvents: number;
-    averageRating: number;
-    rank?: string;
-}
 
 interface Registration {
     id: string;
@@ -20,18 +13,10 @@ interface Registration {
     eventTitle: string;
     eventDate: string;
     eventLocation: string;
-    status: 'pending' | 'accepted' | 'rejected' | 'completed' | 'cancelled' | 'confirmed' | 'checked_in' | 'checked_out' | 'rated' | 'no_show' | 'cancelled_by_volunteer' | 'cancelled_by_organizer';
+    status: string;
     roleName: string;
     createdAt: string;
     updatedAt: string;
-    approval?: {
-        reviewedBy?: string;
-        reviewedAt?: string;
-    };
-    attendance?: any;
-    completion?: {
-        certificateIssued: boolean;
-    };
 }
 
 interface InAppNotification {
@@ -44,14 +29,13 @@ interface InAppNotification {
     data: {
         eventTitle?: string;
         eventId?: string;
-        fullName?: string;
         registrationId?: string;
         eventDate?: string;
         eventLocation?: string;
     };
 }
 
-const VolunteerDashboard: React.FC = () => {
+const MyEventsCommunication: React.FC = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
     const [loading, setLoading] = useState(true);
@@ -59,25 +43,19 @@ const VolunteerDashboard: React.FC = () => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loadingNotifications, setLoadingNotifications] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     const [confirmingRegistrationId, setConfirmingRegistrationId] = useState<string | null>(null);
 
     const logoutPopupRef = useRef<HTMLDivElement>(null);
     const notificationRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
-    const [statistics, setStatistics] = useState<Statistics>({
-        totalHours: 0,
-        completedEvents: 0,
-        averageRating: 0,
-        rank: 'Newbie'
-    });
-
-    const [registrations, setRegistrations] = useState<Registration[]>([]);
+    const [confirmedEvents, setConfirmedEvents] = useState<Registration[]>([]);
     const [inAppNotis, setInAppNotis] = useState<InAppNotification[]>([]);
     const [userData, setUserData] = useState<any>(null);
 
     useEffect(() => {
-        fetchDashboardData();
+        fetchConfirmedEvents();
         fetchNotifications();
 
         const handleResize = () => {
@@ -104,7 +82,7 @@ const VolunteerDashboard: React.FC = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showLogoutPopup, showNotifications]);
 
-    const fetchDashboardData = async () => {
+    const fetchConfirmedEvents = async () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('accessToken');
@@ -125,28 +103,8 @@ const VolunteerDashboard: React.FC = () => {
 
             setUserData(finalData);
 
-            // Fetch statistics
-            const statsRes = await fetch('http://localhost:8000/registrations/my-statistics', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const statsJson = await statsRes.json();
-            const s = statsJson.data || {};
-
-            let rank = 'Newbie';
-            const hours = s.totalHours || 0;
-            if (hours >= 100) rank = 'Legend';
-            else if (hours >= 50) rank = 'Expert';
-            else if (hours >= 20) rank = 'Intermediate';
-
-            setStatistics({
-                totalHours: s.totalHours || 0,
-                completedEvents: s.completedEvents || 0,
-                averageRating: s.averageRating || 0,
-                rank
-            });
-
             // Fetch registrations
-            const regRes = await fetch('http://localhost:8000/registrations/my-registrations?limit=50', {
+            const regRes = await fetch('http://localhost:8000/registrations/my-registrations?limit=100', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const regJson = await regRes.json();
@@ -161,10 +119,18 @@ const VolunteerDashboard: React.FC = () => {
                 registrationsList = regJson;
             }
 
-            setRegistrations(registrationsList);
+            // Filter only confirmed events
+            const confirmed = registrationsList.filter((r: Registration) =>
+                r.status === 'confirmed' ||
+                r.status === 'checked_in' ||
+                r.status === 'checked_out' ||
+                r.status === 'completed'
+            );
+
+            setConfirmedEvents(confirmed);
 
         } catch (error) {
-            console.error('Error fetching dashboard data:', error);
+            console.error('Error fetching confirmed events:', error);
         } finally {
             setLoading(false);
         }
@@ -259,7 +225,7 @@ const VolunteerDashboard: React.FC = () => {
         }
 
         if (notification.data?.eventId) {
-            window.location.href = `/events/${notification.data.eventId}`;
+            navigate(`/event/communication/${notification.data.eventId}`);
         }
     };
 
@@ -287,7 +253,7 @@ const VolunteerDashboard: React.FC = () => {
             if (response.ok) {
                 alert('✅ Đã xác nhận tham gia sự kiện thành công!');
                 await markNotificationAsRead(notification.id);
-                await fetchDashboardData();
+                await fetchConfirmedEvents();
                 await fetchNotifications();
             } else {
                 const error = await response.json();
@@ -301,35 +267,6 @@ const VolunteerDashboard: React.FC = () => {
         }
     };
 
-    const handleConfirmRegistration = async (registrationId: string) => {
-        try {
-            setConfirmingRegistrationId(registrationId);
-            const token = localStorage.getItem('accessToken');
-
-            const response = await fetch(`http://localhost:8000/registrations/${registrationId}/confirm`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                alert('✅ Đã xác nhận tham gia sự kiện!');
-                await fetchDashboardData();
-                await fetchNotifications();
-            } else {
-                const error = await response.json();
-                alert(`❌ Lỗi: ${error.message || 'Không thể xác nhận tham gia'}`);
-            }
-        } catch (error) {
-            console.error('Error confirming registration:', error);
-            alert('❌ Có lỗi xảy ra khi xác nhận!');
-        } finally {
-            setConfirmingRegistrationId(null);
-        }
-    };
-
     const handleLogout = () => {
         localStorage.removeItem('accessToken');
         window.location.href = '/login';
@@ -337,14 +274,9 @@ const VolunteerDashboard: React.FC = () => {
 
     const closeSidebar = () => setSidebarOpen(false);
 
-    // Filter registrations by status
-    const needConfirmation = registrations.filter(r => r.status === 'accepted');
-    const needRating = registrations.filter(r => r.status === 'completed');
-    const pendingRegistrations = registrations.filter(r => r.status === 'pending');
-    const confirmedRegistrations = registrations.filter(r => r.status === 'confirmed');
-    const upcomingEvents = registrations.filter(r =>
-        r.status === 'confirmed' && new Date(r.eventDate) > new Date()
-    ).slice(0, 3);
+    const handleEventClick = (eventId: string) => {
+        navigate(`/event/communication/${eventId}`);
+    };
 
     const getNotificationIcon = (type: string) => {
         switch (type) {
@@ -380,6 +312,23 @@ const VolunteerDashboard: React.FC = () => {
         return notification.type === 'registration_approved' && notification.data?.registrationId;
     };
 
+    const getStatusBadge = (status: string) => {
+        const statusConfig: { [key: string]: { label: string; color: string; bg: string } } = {
+            confirmed: { label: 'Đã xác nhận', color: '#10B981', bg: '#ECFDF5' },
+            checked_in: { label: 'Đã check-in', color: '#3B82F6', bg: '#EFF6FF' },
+            checked_out: { label: 'Đã check-out', color: '#8B5CF6', bg: '#F5F3FF' },
+            completed: { label: 'Hoàn thành', color: '#F59E0B', bg: '#FFF7ED' }
+        };
+
+        return statusConfig[status] || { label: status, color: '#64748B', bg: '#F1F5F9' };
+    };
+
+    // Filter events based on search
+    const filteredEvents = confirmedEvents.filter(event =>
+        event.eventTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.eventLocation.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     if (loading) {
         return (
             <div style={styles.loadingFull}>
@@ -391,7 +340,7 @@ const VolunteerDashboard: React.FC = () => {
     return (
         <div style={styles.layout}>
             {sidebarOpen && isMobile && (
-                <div style={styles.overlay} onClick={closeSidebar} />
+                <div style={styles.overlay} onClick={() => setSidebarOpen(false)} />
             )}
 
             {/* Sidebar */}
@@ -411,7 +360,9 @@ const VolunteerDashboard: React.FC = () => {
                 </div>
 
                 <nav style={styles.navMenu}>
-                    <SidebarLink icon={<LayoutDashboard size={20} />} label="Overview" active />
+                    <SidebarLink
+                        icon={<LayoutDashboard size={20} />}
+                        label="Overview" />
                     <SidebarLink
                         icon={<Search size={20} />}
                         onClick={() => navigate('/volunteer/events')}
@@ -419,7 +370,7 @@ const VolunteerDashboard: React.FC = () => {
                     <SidebarLink
                         icon={<Users size={20} />}
                         onClick={() => navigate('/volunteer/communication')}
-                        label="Communication" />
+                        label="Communication" active />
                     <SidebarLink
                         icon={<UserCircle size={20} />}
                         onClick={() => navigate('/volunteer/profile')}
@@ -462,12 +413,12 @@ const VolunteerDashboard: React.FC = () => {
                             </button>
                         )}
                         <div>
-                            <h2 style={styles.headerTitle}>Dashboard</h2>
-                            <p style={styles.headerSub}>Welcome back, {userData?.fullName?.split(' ')[0] || 'Volunteer'}!</p>
+                            <h2 style={styles.headerTitle}>Diễn Đàn Sự Kiện</h2>
+                            <p style={styles.headerSub}>Tham gia thảo luận với các sự kiện bạn đã xác nhận</p>
                         </div>
                     </div>
                     <div style={styles.headerRight}>
-                        {/* Notification Button */}
+                        {/* Notification Bell */}
                         <div style={{ position: 'relative' }} ref={notificationRef}>
                             <button
                                 style={styles.iconBtn}
@@ -479,15 +430,12 @@ const VolunteerDashboard: React.FC = () => {
                                 )}
                             </button>
 
-                            {/* Notification Popup */}
                             {showNotifications && (
                                 <div style={styles.notificationPopup}>
                                     <div style={styles.notificationHeader}>
-                                        <div>
-                                            <h3 style={styles.notificationTitle}>
-                                                🔔 Thông báo {unreadCount > 0 && `(${unreadCount})`}
-                                            </h3>
-                                        </div>
+                                        <h3 style={styles.notificationTitle}>
+                                            🔔 Thông báo {unreadCount > 0 && `(${unreadCount})`}
+                                        </h3>
                                         <button
                                             style={styles.closeNotificationBtn}
                                             onClick={() => setShowNotifications(false)}
@@ -499,7 +447,7 @@ const VolunteerDashboard: React.FC = () => {
                                     <div style={styles.notificationList}>
                                         {loadingNotifications ? (
                                             <div style={styles.notificationLoading}>
-                                                <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} color="#007bff" />
+                                                <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} />
                                                 <span>Đang tải...</span>
                                             </div>
                                         ) : inAppNotis.length === 0 ? (
@@ -588,180 +536,122 @@ const VolunteerDashboard: React.FC = () => {
                             )}
                         </div>
 
-                        {!isMobile && (
+                        {!isMobile && userData && (
                             <div style={styles.userProfileMini}>
-                                <span style={styles.miniEmail}>{userData?.email}</span>
-                                <img
-                                    src={userData?.avatar || "https://ui-avatars.com/api/?name=User"}
-                                    style={styles.miniAvatar}
-                                    alt="avatar"
-                                />
+                                <span style={styles.miniEmail}>{userData.email}</span>
+                                <img src={userData.avatar} style={styles.miniAvatar} alt="avatar" />
                             </div>
                         )}
                     </div>
                 </header>
 
                 <div style={styles.scrollArea}>
-                    {/* Action Alerts */}
-                    {(needConfirmation.length > 0 || needRating.length > 0) && (
-                        <div style={styles.alertsSection}>
-                            {needConfirmation.length > 0 && (
-                                <div style={styles.alertCard}>
-                                    <div style={styles.alertIcon}>
-                                        <CheckCircle size={24} color="#F59E0B" />
-                                    </div>
-                                    <div style={styles.alertContent}>
-                                        <h4 style={styles.alertTitle}>Xác nhận tham gia</h4>
-                                        <p style={styles.alertText}>
-                                            Bạn có {needConfirmation.length} sự kiện mới được duyệt, hãy xác nhận tham gia ngay!
-                                        </p>
-                                    </div>
-                                    <button
-                                        style={styles.alertBtn}
-                                        onClick={() => handleConfirmRegistration(needConfirmation[0].id)}
-                                        disabled={confirmingRegistrationId === needConfirmation[0].id}
-                                    >
-                                        {confirmingRegistrationId === needConfirmation[0].id ? (
-                                            <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
-                                        ) : (
-                                            'Xác nhận'
-                                        )}
-                                    </button>
-                                </div>
-                            )}
+                    {/* Search Section */}
+                    <div style={styles.searchSection}>
+                        <div style={styles.searchBox}>
+                            <Search size={20} style={styles.searchIcon} />
+                            <input
+                                type="text"
+                                placeholder="Tìm kiếm sự kiện theo tên hoặc địa điểm..."
+                                style={styles.searchInput}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                    </div>
 
-                            {needRating.length > 0 && (
-                                <div style={{ ...styles.alertCard, borderColor: '#10B981' }}>
-                                    <div style={styles.alertIcon}>
-                                        <Star size={24} color="#10B981" />
-                                    </div>
-                                    <div style={styles.alertContent}>
-                                        <h4 style={styles.alertTitle}>Đánh giá sự kiện</h4>
-                                        <p style={styles.alertText}>
-                                            Bạn vừa hoàn thành {needRating.length} sự kiện, hãy để lại đánh giá nhé!
-                                        </p>
-                                    </div>
-                                    <button style={{ ...styles.alertBtn, backgroundColor: '#10B981' }}>
-                                        Đánh giá
-                                    </button>
-                                </div>
+                    {/* Events Stats */}
+                    <div style={styles.statsCard}>
+                        <div style={styles.statItem}>
+                            <div style={styles.statIconWrapper}>
+                                <MessageSquare size={24} color="#007bff" />
+                            </div>
+                            <div>
+                                <p style={styles.statLabel}>Tổng sự kiện</p>
+                                <h3 style={styles.statValue}>{confirmedEvents.length}</h3>
+                            </div>
+                        </div>
+                        <div style={styles.statDivider}></div>
+                        <div style={styles.statItem}>
+                            <div style={styles.statIconWrapper}>
+                                <Clock size={24} color="#10B981" />
+                            </div>
+                            <div>
+                                <p style={styles.statLabel}>Sắp diễn ra</p>
+                                <h3 style={styles.statValue}>
+                                    {confirmedEvents.filter(e => new Date(e.eventDate) > new Date()).length}
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Events Grid */}
+                    {filteredEvents.length === 0 ? (
+                        <div style={styles.emptyState}>
+                            <AlertCircle size={64} color="#94A3B8" />
+                            <h3 style={styles.emptyTitle}>Không tìm thấy sự kiện</h3>
+                            <p style={styles.emptyText}>
+                                {searchQuery
+                                    ? 'Thử điều chỉnh tìm kiếm của bạn'
+                                    : 'Bạn chưa xác nhận tham gia sự kiện nào'}
+                            </p>
+                            {!searchQuery && (
+                                <button
+                                    style={styles.browseBtn}
+                                    onClick={() => navigate('/volunteer/events')}
+                                >
+                                    Duyệt sự kiện mới
+                                </button>
                             )}
+                        </div>
+                    ) : (
+                        <div style={styles.eventsGrid}>
+                            {filteredEvents.map(event => (
+                                <EventCard
+                                    key={event.id}
+                                    event={event}
+                                    onClick={() => handleEventClick(event.eventId)}
+                                    statusBadge={getStatusBadge(event.status)}
+                                />
+                            ))}
                         </div>
                     )}
-
-                    {/* Statistics Cards */}
-                    <div style={styles.statsGrid}>
-                        <StatCard
-                            icon={<Clock size={28} />}
-                            title="Tổng giờ tình nguyện"
-                            value={`${statistics.totalHours}h`}
-                            color="#007bff"
-                            bgColor="#F0F7FF"
-                        />
-                        <StatCard
-                            icon={<Award size={28} />}
-                            title="Sự kiện hoàn thành"
-                            value={statistics.completedEvents.toString()}
-                            color="#10B981"
-                            bgColor="#ECFDF5"
-                        />
-                        <StatCard
-                            icon={<Star size={28} />}
-                            title="Đánh giá trung bình"
-                            value={statistics.averageRating.toFixed(1)}
-                            color="#F59E0B"
-                            bgColor="#FFF7ED"
-                        />
-                        <StatCard
-                            icon={<TrendingUp size={28} />}
-                            title="Cấp độ hiện tại"
-                            value={statistics.rank || 'Newbie'}
-                            color="#8B5CF6"
-                            bgColor="#F5F3FF"
-                        />
-                    </div>
-
-                    {/* Main Content Grid */}
-                    <div style={styles.contentGrid}>
-                        {/* Left Column - Registrations */}
-                        <div style={styles.leftColumn}>
-                            <div style={styles.sectionCard}>
-                                <div style={styles.sectionHeader}>
-                                    <h3 style={styles.sectionTitle}>Đăng ký gần đây</h3>
-                                    <button style={styles.viewAllBtn} onClick={() => navigate('/event/registrations')}>
-                                        Xem tất cả <ArrowRight size={16} />
-                                    </button>
-                                </div>
-
-                                {pendingRegistrations.length === 0 && confirmedRegistrations.length === 0 ? (
-                                    <div style={styles.emptyState}>
-                                        <AlertCircle size={48} color="#CBD5E1" />
-                                        <p style={styles.emptyText}>Chưa có đăng ký nào</p>
-                                    </div>
-                                ) : (
-                                    <div style={styles.registrationList} >
-                                        {pendingRegistrations.map(reg => (
-                                            <RegistrationCard key={reg.id} registration={reg} type="pending" onClick={() => navigate('/event/registrations')} />
-                                        ))}
-                                        {confirmedRegistrations.map(reg => (
-                                            <RegistrationCard key={reg.id} registration={reg} type="confirmed"
-                                                onClick={() => navigate(`/event/communication/${reg.eventId}`)} />
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Right Column - Schedule */}
-                        <div style={styles.rightColumn}>
-                            <div style={styles.sectionCard}>
-                                <div style={styles.sectionHeader}>
-                                    <h3 style={styles.sectionTitle}>Lịch trình sắp tới</h3>
-                                </div>
-
-                                {upcomingEvents.length === 0 ? (
-                                    <div style={styles.emptyState}>
-                                        <Calendar size={48} color="#CBD5E1" />
-                                        <p style={styles.emptyText}>Không có lịch trình</p>
-                                    </div>
-                                ) : (
-                                    <div style={styles.scheduleList} onClick={() => navigate('/volunteer/events')} >
-                                        {upcomingEvents.map(reg => (
-                                            <ScheduleItem key={reg.id} registration={reg} />
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </main>
 
             <style>{`
-                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-                * { box-sizing: border-box; }
-                
-                .stat-card:hover {
-                    transform: translateY(-4px);
-                    box-shadow: 0 20px 30px -10px rgba(0,0,0,0.1);
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
                 }
                 
-                .registration-card:hover {
-                    background-color: #F8FAFC;
-                }
-                
-                .alert-btn:hover:not(:disabled) {
-                    transform: scale(1.05);
+                * {
+                    box-sizing: border-box;
                 }
 
-                .alert-btn:disabled {
-                    opacity: 0.7;
-                    cursor: not-allowed;
+                .event-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 12px 24px rgba(0,0,0,0.1);
                 }
 
                 @media (max-width: 1024px) {
-                    .contentGrid {
-                        grid-template-columns: 1fr !important;
+                    .eventsGrid {
+                        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .searchSection {
+                        padding: 0 !important;
+                    }
+                    
+                    .statsCard {
+                        flex-direction: column !important;
+                        gap: 16px !important;
+                    }
+                    
+                    .statDivider {
+                        display: none !important;
                     }
                 }
             `}</style>
@@ -769,7 +659,6 @@ const VolunteerDashboard: React.FC = () => {
     );
 };
 
-// Sub Components
 const SidebarLink = ({ icon, label, active = false, onClick }: any) => (
     <div style={active ? styles.navItemActive : styles.navItem} onClick={onClick}>
         <span style={styles.navIcon}>{icon}</span>
@@ -777,77 +666,63 @@ const SidebarLink = ({ icon, label, active = false, onClick }: any) => (
     </div>
 );
 
-const StatCard = ({ icon, title, value, color, bgColor }: any) => (
-    <div className="stat-card" style={{ ...styles.statCard, borderColor: color }}>
-        <div style={{ ...styles.statIcon, backgroundColor: bgColor, color }}>
-            {icon}
-        </div>
-        <div style={styles.statContent}>
-            <p style={styles.statTitle}>{title}</p>
-            <h3 style={{ ...styles.statValue, color }}>{value}</h3>
-        </div>
-    </div>
-);
-
-const RegistrationCard = ({ registration, type, onClick }: any) => {
-    if (!registration) return null;
-
-    const statusConfig = {
-        pending: { label: 'Đang chờ duyệt', color: '#F59E0B', bg: '#FFF7ED' },
-        accepted: { label: 'Cần xác nhận', color: '#3B82F6', bg: '#EFF6FF' },
-        confirmed: { label: 'Đã xác nhận', color: '#10B981', bg: '#ECFDF5' }
-    };
-
-    const config = statusConfig[type as keyof typeof statusConfig];
-    const eventTitle = registration.eventTitle || "Không rõ tiêu đề";
-    const eventDate = registration.eventDate;
-    const eventLocation = registration.eventLocation || "Không rõ địa điểm";
+// Event Card Component
+const EventCard = ({ event, onClick, statusBadge }: any) => {
+    const eventDate = new Date(event.eventDate);
+    const isUpcoming = eventDate > new Date();
 
     return (
-        <div className="registration-card" style={styles.registrationCard} onClick={onClick}>
-            <div style={styles.regCardHeader}>
-                <h4 style={styles.regCardTitle}>{eventTitle}</h4>
-                <span style={{ ...styles.statusBadge, backgroundColor: config.bg, color: config.color }}>
-                    {config.label}
+        <div className="event-card" style={styles.eventCard} onClick={onClick}>
+            <div style={styles.eventCardHeader}>
+                <div style={{
+                    ...styles.eventDateBadge,
+                    backgroundColor: isUpcoming ? '#F0F7FF' : '#F8FAFC',
+                    borderColor: isUpcoming ? '#007bff' : '#E2E8F0'
+                }}>
+                    <div style={{
+                        ...styles.eventDay,
+                        color: isUpcoming ? '#007bff' : '#64748B'
+                    }}>
+                        {eventDate.getDate()}
+                    </div>
+                    <div style={styles.eventMonth}>
+                        Th{eventDate.getMonth() + 1}
+                    </div>
+                </div>
+                <span style={{
+                    ...styles.statusBadge,
+                    backgroundColor: statusBadge.bg,
+                    color: statusBadge.color
+                }}>
+                    {statusBadge.label}
                 </span>
             </div>
-            <div style={styles.regCardMeta}>
-                <div style={styles.metaItem}>
-                    <Calendar size={14} color="#94A3B8" />
-                    {/* <span>{new Date(eventDate).toLocaleDateString('vi-VN')}</span> */}
-                    <span>{registration.eventDate ? new Date(registration.eventDate).toLocaleDateString('vi-VN') : "N/A"}</span>
-                </div>
-                <div style={styles.metaItem}>
-                    <MapPin size={14} color="#94A3B8" />
-                    {/* <span>{eventLocation}</span> */}
-                    <span>{registration.eventLocation || "Không rõ địa điểm"}</span>
-                </div>
-            </div>
-        </div>
-    );
-};
 
-const ScheduleItem = ({ registration }: any) => {
-    const eventDate = new Date(registration.eventDate);
+            <div style={styles.eventCardBody}>
+                <h3 style={styles.eventTitle}>{event.eventTitle}</h3>
 
-    return (
-        <div style={styles.scheduleItem}>
-            <div style={styles.scheduleDate}>
-                <div style={styles.scheduleDay}>
-                    {eventDate.getDate()}
+                <div style={styles.eventMeta}>
+                    <div style={styles.metaItem}>
+                        <Calendar size={16} color="#64748B" />
+                        <span>{eventDate.toLocaleDateString('vi-VN', {
+                            weekday: 'short',
+                            day: 'numeric',
+                            month: 'short'
+                        })}</span>
+                    </div>
+                    <div style={styles.metaItem}>
+                        <MapPin size={16} color="#64748B" />
+                        <span>{event.eventLocation}</span>
+                    </div>
                 </div>
-                <div style={styles.scheduleMonth}>
-                    Tháng {eventDate.getMonth() + 1}
+
+                <div style={styles.eventCardFooter}>
+                    <span style={styles.roleTag}>{event.roleName}</span>
+                    <button style={styles.joinForumBtn}>
+                        <MessageSquare size={16} />
+                        Tham gia thảo luận
+                    </button>
                 </div>
-            </div>
-            <div style={styles.scheduleContent}>
-                <h4 style={styles.scheduleTitle}>{registration.eventTitle}</h4>
-                <p style={styles.scheduleTime}>
-                    {eventDate.toLocaleTimeString('vi-VN', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })}
-                </p>
             </div>
         </div>
     );
@@ -858,18 +733,17 @@ const styles: { [key: string]: React.CSSProperties } = {
     layout: {
         display: 'flex',
         minHeight: '100vh',
-        width: '100vw',
         backgroundColor: '#F8FAFC',
-        color: '#1E293B',
-        position: 'relative',
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        position: 'relative',
+        width: '100vw'
     },
     overlay: {
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.4)',
+        backgroundColor: 'rgba(15, 23, 42, 0.5)',
         zIndex: 90,
-        backdropFilter: 'blur(4px)',
+        backdropFilter: 'blur(4px)'
     },
     sidebar: {
         width: '280px',
@@ -877,17 +751,19 @@ const styles: { [key: string]: React.CSSProperties } = {
         borderRight: '1px solid #E2E8F0',
         display: 'flex',
         flexDirection: 'column',
-        transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-        zIndex: 100,
         height: '100vh',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
         flexShrink: 0,
-        overflowY: 'auto'
+        overflowY: 'auto',
+        transition: 'transform 0.3s ease'
     },
     sidebarOpen: {
         position: 'fixed',
         left: 0,
         top: 0,
-        transform: 'translateX(0)',
+        transform: 'translateX(0)'
     },
     sidebarClosed: {
         position: 'fixed',
@@ -949,8 +825,9 @@ const styles: { [key: string]: React.CSSProperties } = {
         fontSize: '15px',
         boxShadow: '0 2px 10px rgba(0, 123, 255, 0.08)'
     },
-    navIcon: { marginRight: '12px', display: 'flex' },
-    navLabel: { flex: 1 },
+    navIcon: {
+        marginRight: '12px'
+    },
     sidebarFooter: {
         padding: '20px',
         borderTop: '1px solid #F1F5F9',
@@ -964,74 +841,75 @@ const styles: { [key: string]: React.CSSProperties } = {
         backgroundColor: '#F8FAFC',
         borderRadius: '16px',
         cursor: 'pointer',
-        transition: 'background 0.2s ease',
+        transition: 'all 0.2s'
     },
     userDropdown: {
         position: 'absolute',
         bottom: 'calc(100% + 10px)',
-        left: '0',
-        right: '0',
+        left: 0,
+        right: 0,
         backgroundColor: '#FFF',
         borderRadius: '16px',
-        boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)',
+        boxShadow: '0 12px 28px rgba(0,0,0,0.12)',
         border: '1px solid #E2E8F0',
         padding: '8px',
-        zIndex: 1000,
+        zIndex: 1000
     },
     dropdownHeader: {
         padding: '8px 12px',
         fontSize: '11px',
         fontWeight: '800',
         color: '#94A3B8',
-        textTransform: 'uppercase',
+        textTransform: 'uppercase' as const,
         letterSpacing: '0.5px'
     },
     dropdownItem: {
-        padding: '10px 12px',
+        padding: '12px 14px',
         fontSize: '14px',
         borderRadius: '10px',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
-        transition: 'background 0.2s ease',
+        transition: 'all 0.2s',
+        fontWeight: '600'
     },
     sidebarAvatar: {
         width: '42px',
         height: '42px',
         borderRadius: '50%',
-        objectFit: 'cover',
-        border: '2px solid #FFF',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.05)'
+        objectFit: 'cover' as const,
+        border: '2px solid #E2E8F0'
     },
-    userInfo: { flex: 1, minWidth: 0 },
+    userInfo: {
+        flex: 1,
+        minWidth: 0
+    },
     userName: {
         fontSize: '14px',
         fontWeight: '700',
         color: '#1E293B',
         margin: 0,
-        textOverflow: 'ellipsis',
         overflow: 'hidden',
-        whiteSpace: 'nowrap'
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap' as const
     },
     userEmail: {
         fontSize: '12px',
         color: '#94A3B8',
         margin: 0,
-        textOverflow: 'ellipsis',
         overflow: 'hidden',
-        whiteSpace: 'nowrap'
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap' as const
     },
     mainContent: {
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
-        overflowY: 'auto',
         minWidth: 0
     },
     topHeader: {
         height: '80px',
-        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(12px)',
         borderBottom: '1px solid #E2E8F0',
         display: 'flex',
@@ -1040,11 +918,26 @@ const styles: { [key: string]: React.CSSProperties } = {
         padding: '0 32px',
         position: 'sticky',
         top: 0,
-        zIndex: 80
+        zIndex: 80,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
     },
-    headerLeft: { display: 'flex', alignItems: 'center', gap: '20px' },
-    headerTitle: { fontSize: '24px', fontWeight: '800', color: '#0F172A', margin: 0 },
-    headerSub: { fontSize: '14px', color: '#64748B', margin: 0 },
+    headerLeft: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '20px'
+    },
+    headerTitle: {
+        fontSize: '24px',
+        fontWeight: '800',
+        color: '#0F172A',
+        margin: 0
+    },
+    headerSub: {
+        fontSize: '14px',
+        color: '#64748B',
+        margin: '4px 0 0 0',
+        fontWeight: '500'
+    },
     menuBtn: {
         background: '#F1F5F9',
         border: 'none',
@@ -1055,14 +948,18 @@ const styles: { [key: string]: React.CSSProperties } = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: '#475569',
-        padding: 0
+        padding: 0,
+        color: '#64748B',
+        transition: 'all 0.2s'
     },
-    headerRight: { display: 'flex', alignItems: 'center', gap: '20px' },
+    headerRight: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px'
+    },
     iconBtn: {
         background: '#FFF',
         border: '1px solid #E2E8F0',
-        color: '#64748B',
         cursor: 'pointer',
         width: '44px',
         height: '44px',
@@ -1072,6 +969,8 @@ const styles: { [key: string]: React.CSSProperties } = {
         justifyContent: 'center',
         padding: 0,
         position: 'relative',
+        transition: 'all 0.2s',
+        color: '#64748B'
     },
     notificationBadge: {
         position: 'absolute',
@@ -1081,11 +980,12 @@ const styles: { [key: string]: React.CSSProperties } = {
         color: 'white',
         fontSize: '11px',
         fontWeight: '700',
-        padding: '2px 6px',
+        padding: '3px 6px',
         borderRadius: '10px',
-        minWidth: '18px',
-        textAlign: 'center',
+        minWidth: '20px',
+        textAlign: 'center' as const,
         border: '2px solid white',
+        boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
     },
     notificationPopup: {
         position: 'absolute',
@@ -1095,10 +995,10 @@ const styles: { [key: string]: React.CSSProperties } = {
         maxWidth: '90vw',
         backgroundColor: 'white',
         borderRadius: '20px',
-        boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.15)',
+        boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.2)',
         border: '1px solid #E2E8F0',
         zIndex: 1000,
-        overflow: 'hidden',
+        overflow: 'hidden'
     },
     notificationHeader: {
         padding: '20px 24px',
@@ -1106,13 +1006,13 @@ const styles: { [key: string]: React.CSSProperties } = {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: '#F8FAFC',
+        backgroundColor: '#F8FAFC'
     },
     notificationTitle: {
         fontSize: '16px',
         fontWeight: '700',
         color: '#1E293B',
-        margin: 0,
+        margin: 0
     },
     closeNotificationBtn: {
         background: 'transparent',
@@ -1124,11 +1024,11 @@ const styles: { [key: string]: React.CSSProperties } = {
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: '8px',
-        transition: 'all 0.2s',
+        transition: 'all 0.2s'
     },
     notificationList: {
         maxHeight: '520px',
-        overflowY: 'auto',
+        overflowY: 'auto' as const
     },
     notificationLoading: {
         display: 'flex',
@@ -1138,7 +1038,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         padding: '48px 20px',
         gap: '12px',
         color: '#64748B',
-        fontSize: '14px',
+        fontSize: '14px'
     },
     emptyNotifications: {
         display: 'flex',
@@ -1146,17 +1046,17 @@ const styles: { [key: string]: React.CSSProperties } = {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '48px 20px',
-        gap: '12px',
+        gap: '12px'
     },
     emptyIcon: {
-        fontSize: '48px',
+        fontSize: '48px'
     },
     emptyNotificationText: {
         fontSize: '15px',
         color: '#94A3B8',
         fontWeight: '600',
         margin: 0,
-        textAlign: 'center',
+        textAlign: 'center' as const
     },
     notificationItem: {
         padding: '20px 24px',
@@ -1164,18 +1064,18 @@ const styles: { [key: string]: React.CSSProperties } = {
         display: 'flex',
         gap: '16px',
         cursor: 'pointer',
-        transition: 'all 0.2s',
+        transition: 'all 0.2s'
     },
     notificationIconWrapper: {
-        flexShrink: 0,
+        flexShrink: 0
     },
     notificationEmoji: {
         fontSize: '32px',
-        display: 'block',
+        display: 'block'
     },
     notificationContent: {
         flex: 1,
-        minWidth: 0,
+        minWidth: 0
     },
     notificationSubject: {
         fontSize: '15px',
@@ -1184,46 +1084,46 @@ const styles: { [key: string]: React.CSSProperties } = {
         margin: '0 0 6px 0',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
+        gap: '8px'
     },
     unreadDot: {
         width: '8px',
         height: '8px',
         borderRadius: '50%',
         backgroundColor: '#007bff',
-        flexShrink: 0,
+        flexShrink: 0
     },
     notificationText: {
         fontSize: '14px',
         color: '#64748B',
         margin: '0 0 12px 0',
-        lineHeight: '1.6',
+        lineHeight: '1.6'
     },
     notificationEventDetails: {
         backgroundColor: '#F8FAFC',
         padding: '12px',
         borderRadius: '12px',
         marginBottom: '12px',
-        borderLeft: '3px solid #007bff',
+        borderLeft: '3px solid #007bff'
     },
     notificationEventTitle: {
         fontSize: '14px',
         color: '#007bff',
         fontWeight: '700',
-        margin: '0 0 6px 0',
+        margin: '0 0 6px 0'
     },
     notificationEventMeta: {
         fontSize: '13px',
         color: '#64748B',
         margin: '4px 0',
-        fontWeight: '500',
+        fontWeight: '500'
     },
     notificationTime: {
         fontSize: '12px',
         color: '#94A3B8',
         fontWeight: '500',
         display: 'block',
-        marginBottom: '12px',
+        marginBottom: '12px'
     },
     confirmNotificationBtn: {
         backgroundColor: '#10B981',
@@ -1238,7 +1138,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         alignItems: 'center',
         gap: '8px',
         transition: 'all 0.2s',
-        marginTop: '8px',
+        marginTop: '8px'
     },
     userProfileMini: {
         display: 'flex',
@@ -1247,195 +1147,177 @@ const styles: { [key: string]: React.CSSProperties } = {
         paddingLeft: '20px',
         borderLeft: '1px solid #E2E8F0'
     },
-    miniEmail: { fontSize: '14px', color: '#475569', fontWeight: '600' },
-    miniAvatar: { width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #F1F5F9' },
-    scrollArea: {
-        padding: 'clamp(24px, 4vw, 40px)',
-        maxWidth: '1400px',
-        margin: '0 auto',
-        width: '100%'
+    miniEmail: {
+        fontSize: '14px',
+        color: '#475569',
+        fontWeight: '600'
     },
-    alertsSection: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '16px',
+    miniAvatar: {
+        width: '40px',
+        height: '40px',
+        borderRadius: '50%',
+        objectFit: 'cover' as const,
+        border: '2px solid #F1F5F9'
+    },
+    scrollArea: {
+        padding: '32px',
+        overflowY: 'auto' as const,
+        flex: 1
+    },
+    searchSection: {
         marginBottom: '32px'
     },
-    alertCard: {
+    searchBox: {
         display: 'flex',
         alignItems: 'center',
-        gap: '20px',
-        padding: '20px 24px',
+        gap: '12px',
+        padding: '14px 20px',
         backgroundColor: '#FFF',
-        borderRadius: '20px',
-        border: '2px solid #F59E0B',
-        boxShadow: '0 4px 12px rgba(245, 158, 11, 0.1)'
+        border: '2px solid #E2E8F0',
+        borderRadius: '16px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+        transition: 'all 0.2s'
     },
-    alertIcon: {
+    searchIcon: {
+        color: '#94A3B8',
         flexShrink: 0
     },
-    alertContent: {
+    searchInput: {
         flex: 1,
-        minWidth: 0
-    },
-    alertTitle: {
-        fontSize: '16px',
-        fontWeight: '700',
-        color: '#1E293B',
-        margin: '0 0 4px 0'
-    },
-    alertText: {
-        fontSize: '14px',
-        color: '#64748B',
-        margin: 0
-    },
-    alertBtn: {
-        backgroundColor: '#F59E0B',
-        color: '#FFF',
         border: 'none',
-        padding: '10px 24px',
-        borderRadius: '12px',
-        fontWeight: '700',
-        cursor: 'pointer',
-        fontSize: '14px',
-        transition: 'transform 0.2s ease',
-        flexShrink: 0,
+        outline: 'none',
+        fontSize: '15px',
+        color: '#1E293B',
+        backgroundColor: 'transparent',
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+    },
+    statsCard: {
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
-    },
-    statsGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-        gap: '24px',
-        marginBottom: '40px'
-    },
-    statCard: {
+        gap: '32px',
+        padding: '28px 32px',
         backgroundColor: '#FFF',
-        borderRadius: '24px',
-        padding: '28px',
+        borderRadius: '20px',
+        border: '1px solid #E2E8F0',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+        marginBottom: '32px'
+    },
+    statItem: {
         display: 'flex',
         alignItems: 'center',
-        gap: '20px',
-        border: '2px solid',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        cursor: 'pointer'
+        gap: '16px',
+        flex: 1
     },
-    statIcon: {
-        width: '64px',
-        height: '64px',
-        borderRadius: '18px',
+    statIconWrapper: {
+        width: '56px',
+        height: '56px',
+        borderRadius: '16px',
+        backgroundColor: '#F8FAFC',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0
     },
-    statContent: {
-        flex: 1,
-        minWidth: 0
-    },
-    statTitle: {
+    statLabel: {
         fontSize: '13px',
         color: '#64748B',
-        margin: '0 0 8px 0',
+        margin: '0 0 6px 0',
         fontWeight: '600',
-        textTransform: 'uppercase',
+        textTransform: 'uppercase' as const,
         letterSpacing: '0.5px'
     },
     statValue: {
-        fontSize: '32px',
+        fontSize: '28px',
         fontWeight: '800',
-        margin: 0,
-        letterSpacing: '-0.5px'
-    },
-    contentGrid: {
-        display: 'grid',
-        gridTemplateColumns: '1fr',
-        gap: '32px'
-    },
-    leftColumn: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px'
-    },
-    rightColumn: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px'
-    },
-    sectionCard: {
-        backgroundColor: '#FFF',
-        borderRadius: '24px',
-        padding: '32px',
-        border: '1px solid #E2E8F0',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
-    },
-    sectionHeader: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '28px'
-    },
-    sectionTitle: {
-        fontSize: '20px',
-        fontWeight: '800',
-        color: '#0F172A',
+        color: '#1E293B',
         margin: 0
     },
-    viewAllBtn: {
-        backgroundColor: 'transparent',
-        color: '#007bff',
-        border: 'none',
-        fontSize: '14px',
-        fontWeight: '700',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '6px',
-        padding: '8px 16px',
-        borderRadius: '12px',
-        transition: 'background 0.2s ease'
+    statDivider: {
+        width: '1px',
+        height: '48px',
+        backgroundColor: '#E2E8F0'
     },
     emptyState: {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '60px 20px',
-        gap: '16px'
+        padding: '80px 20px',
+        textAlign: 'center' as const,
+        backgroundColor: '#FFF',
+        borderRadius: '24px',
+        border: '1px solid #E2E8F0'
     },
-    emptyText: {
-        fontSize: '15px',
-        color: '#94A3B8',
-        fontWeight: '600',
-        margin: 0
-    },
-    registrationList: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '16px'
-    },
-    registrationCard: {
-        padding: '20px',
-        borderRadius: '16px',
-        border: '1px solid #E2E8F0',
-        transition: 'all 0.2s ease',
-        cursor: 'pointer'
-    },
-    regCardHeader: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        gap: '12px',
-        marginBottom: '12px'
-    },
-    regCardTitle: {
-        fontSize: '16px',
+    emptyTitle: {
+        fontSize: '24px',
         fontWeight: '700',
         color: '#1E293B',
-        margin: 0,
-        flex: 1
+        marginTop: '24px',
+        marginBottom: '8px'
+    },
+    emptyText: {
+        fontSize: '16px',
+        color: '#64748B',
+        marginBottom: '24px'
+    },
+    browseBtn: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        padding: '14px 28px',
+        backgroundColor: '#007bff',
+        color: '#FFF',
+        border: 'none',
+        borderRadius: '12px',
+        fontSize: '15px',
+        fontWeight: '700',
+        cursor: 'pointer',
+        boxShadow: '0 4px 12px rgba(0, 123, 255, 0.3)',
+        transition: 'all 0.2s'
+    },
+    eventsGrid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+        gap: '24px'
+    },
+    eventCard: {
+        backgroundColor: '#FFF',
+        borderRadius: '20px',
+        overflow: 'hidden',
+        border: '1px solid #E2E8F0',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease'
+    },
+    eventCardHeader: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '20px 24px',
+        borderBottom: '1px solid #F1F5F9'
+    },
+    eventDateBadge: {
+        width: '60px',
+        height: '60px',
+        borderRadius: '14px',
+        border: '2px solid',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0
+    },
+    eventDay: {
+        fontSize: '22px',
+        fontWeight: '800',
+        lineHeight: 1
+    },
+    eventMonth: {
+        fontSize: '11px',
+        fontWeight: '700',
+        color: '#64748B',
+        marginTop: '2px',
+        textTransform: 'uppercase' as const
     },
     statusBadge: {
         fontSize: '12px',
@@ -1444,76 +1326,64 @@ const styles: { [key: string]: React.CSSProperties } = {
         borderRadius: '100px',
         flexShrink: 0
     },
-    regCardMeta: {
+    eventCardBody: {
+        padding: '24px'
+    },
+    eventTitle: {
+        fontSize: '18px',
+        fontWeight: '700',
+        color: '#1E293B',
+        margin: '0 0 16px 0',
+        lineHeight: '1.4',
+        display: '-webkit-box',
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden'
+    },
+    eventMeta: {
         display: 'flex',
-        gap: '20px',
-        flexWrap: 'wrap'
+        flexDirection: 'column',
+        gap: '10px',
+        marginBottom: '20px'
     },
     metaItem: {
         display: 'flex',
         alignItems: 'center',
-        gap: '6px',
-        fontSize: '13px',
+        gap: '8px',
+        fontSize: '14px',
         color: '#64748B',
         fontWeight: '500'
     },
-    scheduleList: {
+    eventCardFooter: {
         display: 'flex',
-        flexDirection: 'column',
-        gap: '16px'
-    },
-    scheduleItem: {
-        display: 'flex',
-        gap: '16px',
-        padding: '16px',
-        borderRadius: '16px',
-        border: '1px solid #E2E8F0',
-        transition: 'all 0.2s ease',
-        cursor: 'pointer'
-    },
-    scheduleDate: {
-        width: '60px',
-        height: '60px',
-        borderRadius: '14px',
-        backgroundColor: '#F0F7FF',
-        display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-        border: '2px solid #007bff'
+        justifyContent: 'space-between',
+        gap: '12px',
+        paddingTop: '20px',
+        borderTop: '1px solid #F1F5F9'
     },
-    scheduleDay: {
-        fontSize: '22px',
-        fontWeight: '800',
-        color: '#007bff',
-        lineHeight: 1
-    },
-    scheduleMonth: {
-        fontSize: '11px',
+    roleTag: {
+        fontSize: '12px',
         fontWeight: '700',
-        color: '#64748B',
-        marginTop: '2px',
-        textTransform: 'uppercase'
+        color: '#8B5CF6',
+        backgroundColor: '#F5F3FF',
+        padding: '6px 12px',
+        borderRadius: '8px'
     },
-    scheduleContent: {
-        flex: 1,
-        minWidth: 0
-    },
-    scheduleTitle: {
-        fontSize: '15px',
-        fontWeight: '700',
-        color: '#1E293B',
-        margin: '0 0 6px 0',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap'
-    },
-    scheduleTime: {
+    joinForumBtn: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
+        padding: '8px 16px',
+        backgroundColor: '#007bff',
+        color: '#FFF',
+        border: 'none',
+        borderRadius: '10px',
         fontSize: '13px',
-        color: '#64748B',
-        fontWeight: '600',
-        margin: 0
+        fontWeight: '700',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+        flexShrink: 0
     },
     loadingFull: {
         position: 'fixed',
@@ -1523,7 +1393,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         justifyContent: 'center',
         backgroundColor: '#F8FAFC',
         zIndex: 1000
-    },
+    }
 };
 
-export default VolunteerDashboard;
+export default MyEventsCommunication;
