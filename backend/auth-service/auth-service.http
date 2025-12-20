@@ -14,8 +14,8 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-    "email": "hoanguyenn@gmail.com",
-    "password": "tlinh123"
+    "email": "zm@gmail.com",
+    "password": "1111111111"
 }
 
 ### login-admin: tạo một trang login cho admin với đường dấn /auth/admin/login
