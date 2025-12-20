@@ -107,3 +107,96 @@ Content-Type: application/json
 ### 15. Load More Posts
 GET {{baseUrl}}/events/{{eventId}}/posts?limit=5&skip=5
 Content-Type: application/json
+
+
+/////////////////////////
+### Variables
+@baseUrl = http://localhost:8000
+@eventId = 694503bb8677c610e434d10d
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTNlYmIzOWI0NDExOTgyZGNjYjJmMTMiLCJlbWFpbCI6ImR1b25naG9hbmdnMjYxQGdtYWlsLmNvbSIsIm5hbWUiOiJEdW9uZyBIb2FuZyIsInBob25lTnVtYmVyIjpudWxsLCJyb2xlSWQiOiI2OTNlYmIzOWI0NDExOTgyZGNjYjJmMDgiLCJyb2xlTmFtZSI6ImV2ZW50X21hbmFnZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpjcmVhdGUiLCJldmVudDpyZWFkIiwiZXZlbnQ6dXBkYXRlIiwiZXZlbnQ6ZGVsZXRlIiwiZXZlbnQ6YXBwcm92ZSIsImV2ZW50OnJlamVjdCIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmFwcHJvdmUiLCJyZWdpc3RyYXRpb246bWFya19jb21wbGV0ZSIsInBvc3Q6Y3JlYXRlIiwicG9zdDpyZWFkIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyIsInJlcG9ydDp2aWV3IiwicmVwb3J0OmV4cG9ydCJdLCJpYXQiOjE3NjYyNjk1ODksImV4cCI6MTc2NjI3MDQ4OX0.rXlNuWR4kd-6FMF94IkAQQCqRlFZxyxWo2mTBjb_xGo
+@postId = 69472135ba833ef9839ec21a
+@commentId = dbdc9375-682e-4feb-b4e1-de48f8aa9ee4
+
+### 1. Get Posts (Latest)
+GET {{baseUrl}}/events/{{eventId}}/posts?sortBy=latest&limit=10
+Content-Type: application/json
+
+### 2. Get Posts (Most Active)
+GET {{baseUrl}}/events/{{eventId}}/posts?sortBy=most_active&limit=10
+Content-Type: application/json
+
+### 3. Create Post (PHẢI LÀ MULTIPART)
+# @name createPost
+POST {{baseUrl}}/events/{{eventId}}/posts
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="content"
+
+Chào mọi người! Đây là bài viết test kèm ảnh. 🎉
+--WebAppBoundary
+Content-Disposition: form-data; name="images"; filename="image1.jpg"
+Content-Type: image/jpeg
+
+< ./test-image.jpg
+--WebAppBoundary--
+
+### 4. Get Post by ID
+GET {{baseUrl}}/events/{{eventId}}/posts/{{postId}}
+Content-Type: application/json
+
+### 5. Update Post
+PUT {{baseUrl}}/events/{{eventId}}/posts/{{postId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "content": "Nội dung đã được cập nhật qua API Update",
+  "images": []
+}
+
+### 6. Like Post
+POST {{baseUrl}}/events/{{eventId}}/posts/{{postId}}/like
+Authorization: Bearer {{token}}
+
+### 7. Add Comment
+# @name addComment
+POST {{baseUrl}}/events/{{eventId}}/posts/{{postId}}/comments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "content": "Bình luận này được gửi từ test script!",
+  "authorId": "656e1234567890abcdef1234", 
+  "authorName": "Người dùng Test"
+}
+
+### 8. Update Comment
+PUT {{baseUrl}}/events/{{eventId}}/posts/{{postId}}/comments/{{commentId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "content": "Comment đã được chỉnh sửa"
+}
+
+### 9. Delete Comment
+DELETE {{baseUrl}}/events/{{eventId}}/posts/{{postId}}/comments/{{commentId}}
+Authorization: Bearer {{token}}
+
+### 10. Unlike Post
+DELETE {{baseUrl}}/events/{{eventId}}/posts/{{postId}}/like
+Authorization: Bearer {{token}}
+
+### 11. Pin Post
+PATCH {{baseUrl}}/events/{{eventId}}/posts/{{postId}}/pin
+Authorization: Bearer {{token}}
+
+### 12. Unpin Post
+PATCH {{baseUrl}}/events/{{eventId}}/posts/{{postId}}/unpin
+Authorization: Bearer {{token}}
+
+### 13. Delete Post
+DELETE {{baseUrl}}/events/{{eventId}}/posts/{{postId}}
+Authorization: Bearer {{token}}

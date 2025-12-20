@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 
+import { ShareModule } from '@share/share.module';
 
-// Domain
 import { IPostRepository } from './communication/domain/repositories/post.repository.interface';
 
 // Infrastructure
@@ -13,7 +15,7 @@ import { Post, PostSchema } from './communication/infrastructure/database/schema
 import { RabbitMQService } from './communication/infrastructure/message-bus/rabbitmq.service';
 import { DatabaseService } from './communication/infrastructure/config/database.service';
 
-// Application
+// Application Use Cases
 import { CreatePostUseCase } from './communication/application/use-cases/create-post.use-case';
 import { UpdatePostUseCase } from './communication/application/use-cases/update-post.use-case';
 import { DeletePostUseCase } from './communication/application/use-cases/delete-post.use-case';
@@ -31,27 +33,54 @@ import { PostController } from './communication/presentation/controllers/post.co
 
 @Module({
     imports: [
+        ConfigModule.forRoot({ isGlobal: true }),
+
         DatabaseModule,
-        MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
-        RabbitMQModule.forRootAsync({
-            useFactory: () => ({
-                uri: 'amqp://rabbitmq:5672',
-                exchanges: [
-                    {
-                        name: 'notification_exchange',
-                        type: 'topic',
-                    },
-                ],
+
+        MongooseModule.forRoot(
+            process.env.MONGO_URI || 'mongodb://volunteer-mongo:27017/communication-service'
+        ),
+
+        MongooseModule.forFeature([
+            { name: Post.name, schema: PostSchema }
+        ]),
+
+        ShareModule,
+
+        JwtModule.registerAsync({
+            inject: [ConfigService],
+            useFactory: (config: ConfigService) => ({
+                secret: config.get<string>('JWT_ACCESS_SECRET'),
+                signOptions: { expiresIn: '15m' },
             }),
         }),
     ],
+
     controllers: [PostController],
+
     providers: [
-        // Infrastructure
         DatabaseService,
         RabbitMQService,
         PostRepository,
         { provide: IPostRepository, useClass: PostRepository },
+
+        {
+            provide: 'EVENT_SERVICE',
+            useFactory: () =>
+                ClientProxyFactory.create({
+                    transport: Transport.REDIS,
+                    options: { host: 'redis', port: 6379 },
+                }),
+        },
+
+        {
+            provide: 'USER_SERVICE',
+            useFactory: () =>
+                ClientProxyFactory.create({
+                    transport: Transport.REDIS,
+                    options: { host: 'redis', port: 6379 },
+                }),
+        },
 
         // Use Cases
         CreatePostUseCase,
@@ -66,5 +95,9 @@ import { PostController } from './communication/presentation/controllers/post.co
         UpdateCommentUseCase,
         DeleteCommentUseCase,
     ],
+    exports: [
+        'USER_SERVICE',
+        'EVENT_SERVICE'
+    ]
 })
 export class AppModule { }

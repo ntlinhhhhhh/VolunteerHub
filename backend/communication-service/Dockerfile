@@ -41,5 +41,5 @@
     EXPOSE 4005
     
     # Run with wait script
-    CMD ["./wait-for-services.sh", "node", "dist/main.js"]
+    CMD ["./wait-for-services.sh", "node", "dist/communication-service/src/main.js"]
     

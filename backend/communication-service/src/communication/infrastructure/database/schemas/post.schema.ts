@@ -77,4 +77,3 @@ export const PostSchema = SchemaFactory.createForClass(Post);
 PostSchema.index({ eventId: 1, createdAt: -1 });
 PostSchema.index({ eventId: 1, lastActivityAt: -1 });
 PostSchema.index({ eventId: 1, isPinned: -1, createdAt: -1 });
-PostSchema.index({ authorId: 1 });
