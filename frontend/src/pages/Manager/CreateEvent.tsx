@@ -2,7 +2,9 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
     FaPlus, FaTrash, FaArrowLeft, FaUsers, FaSignOutAlt, FaCalendarAlt, 
     FaMapMarkerAlt, FaClipboardList, FaInfoCircle, FaCheckCircle, FaTag, FaClipboardCheck, FaUserFriends,
-    FaPaperPlane
+    FaPaperPlane, FaTools,
+    FaChartBar,
+    FaLayerGroup
 } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 
@@ -189,11 +191,14 @@ const CreateEvent: React.FC = () => {
                     <h1 style={{ fontSize: '22px', margin: 0, display: 'flex', alignItems: 'center', gap: '12px', color: COLORS.DARK_NAVY }}><FaUsers color={COLORS.PRIMARY} /> Manager</h1>
                 </div>
                 <nav style={{ flex: 1, padding: '20px 12px' }}>
-                    <div onClick={() => navigate("/manager/dashboard")} style={{ ...styles.navItem, cursor: 'pointer' }}>
+                    <div onClick={() => navigate("/manager/statistics")} style={styles.navItem}>
+                                            <FaChartBar style={{ marginRight: '12px' }} /> Statistics
+                                        </div>
+                    <div onClick={() => navigate("/manager/pending-applications")} style={{ ...styles.navItem, cursor: 'pointer' }}>
                         <FaClipboardList style={{ marginRight: '12px' }} /> Pending Applications
                     </div>
                     <div onClick={() => navigate("/manager/my-events")} style={{ ...styles.navItem, backgroundColor: 'rgba(26, 115, 232, 0.15)', color: COLORS.PRIMARY, cursor: 'default' }}>
-                        <FaPlus style={{ marginRight: '12px' }} /> My Events
+                        <FaLayerGroup style={{ marginRight: '12px' }} /> My Events
                     </div>
                 </nav>
                 <div style={{ padding: '20px', borderTop: `1px solid ${COLORS.SIDEBAR_BORDER}` }}>
@@ -283,6 +288,14 @@ const CreateEvent: React.FC = () => {
                                 <div><label style={styles.label}>Min Age</label><input type="number" style={styles.input} value={formData.requirements.minAge} onChange={e => handleNestedChange('requirements', 'minAge', parseInt(e.target.value))} /></div>
                                 <div><label style={styles.label}>Max Age</label><input type="number" style={styles.input} value={formData.requirements.maxAge} onChange={e => handleNestedChange('requirements', 'maxAge', parseInt(e.target.value))} /></div>
                             </div>
+                            <div style={{ marginBottom: '10px' }}>
+                                <label style={styles.label}>Skills Required (comma separated)</label>
+                                <input 
+                                    style={styles.input} 
+                                    placeholder="Làm việc nhóm, Giao tiếp..." 
+                                    onChange={e => handleNestedChange('requirements', 'skills', e.target.value.split(',').map(s => s.trim()))} 
+                                />
+                            </div>
                             <label style={styles.label}>Health Requirements</label>
                             <input style={styles.input} value={formData.requirements.healthRequirements} onChange={e => handleNestedChange('requirements', 'healthRequirements', e.target.value)} placeholder="e.g. Sức khỏe tốt" />
                         </div>
@@ -322,8 +335,8 @@ const CreateEvent: React.FC = () => {
                         <button type="button" onClick={() => navigate(-1)} style={styles.cancelBtn}>Discard</button>
                         <button type="submit" disabled={loading} style={styles.submitBtn}>{loading ? "Saving..." : "Save draft"}</button>
                         <button type="button" onClick={handleSubmitForApproval} disabled={loading} style={styles.submitApprovalBtn}>
-                                                    <FaPaperPlane /> Gửi duyệt Admin
-                                                </button>
+                                                                            <FaPaperPlane /> Gửi duyệt Admin
+                                                                </button>
                     </div>
                 </form>
             </main>

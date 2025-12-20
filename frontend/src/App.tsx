@@ -28,6 +28,7 @@ import ForumEventDetail from './pages/Home/ForumEventDetail';
 import MyEventsCommunication from './pages/Home/Communication';
 import ManagerStatistics from './pages/Manager/ManagerStatistics';
 import EventDetails from './pages/Manager/EventDetails';
+import EventAttendance from './pages/Manager/EventAttendance';
 
 function App() {
     return (
@@ -54,7 +55,7 @@ function App() {
                 <Route path="/manager/edit-event/:id" element={<EditEvent />} />
                 <Route path="/manager/statistics" element={< ManagerStatistics />} />
                 <Route path="/manager/event-details/:id" element={< EventDetails />} />
-
+                <Route path="/manager/events/:eventId/attendance" element={<EventAttendance />} />
 
 
                 <Route path="/admin/event-approvals" element={<EventsApproval />} />
