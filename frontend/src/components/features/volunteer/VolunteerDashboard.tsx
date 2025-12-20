@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Heart, LayoutDashboard, Calendar, Search, MessageSquare,
-  LogOut, Bell, Clock, MapPin, ChevronRight,
+  LogOut, Clock, MapPin, ChevronRight,
   Award, Star, User, Edit, Camera, Mail, Phone, Save, X,
   CheckCircle, Hourglass, ThumbsUp
 } from 'lucide-react';
+import { NotificationDropdown } from '../notification/NotificationDropdown';
 
 
 /* --- UTILS HOOK (Dành cho Dashboard) --- */
@@ -582,10 +583,7 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
             <input type="text" placeholder="Tìm kiếm nhanh..." className="bg-transparent border-none outline-none text-sm w-full" />
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full">
-              <Bell size={20} />
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
+            <NotificationDropdown userId={localStorage.getItem('userId') || 'mock-user-id'} />
             <div
               className="flex items-center gap-3 pl-4 border-l border-gray-200 cursor-pointer"
               onClick={() => setActiveTab("profile")}

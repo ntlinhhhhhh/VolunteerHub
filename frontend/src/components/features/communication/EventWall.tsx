@@ -9,6 +9,7 @@ import {
 import {
   getPosts,
   createPost,
+  updatePost,
   deletePost,
   likePost,
   unlikePost,
@@ -20,6 +21,8 @@ import {
   type BackendPost,
   type BackendComment
 } from '../../../services/communication.service';
+import { getEventParticipants, type BackendRegistration } from '../../../services/event-registration.service';
+import { getEventById, type BackendEvent } from '../../../services/event.service';
 
 // --- Type Definitions ---
 interface Post {
@@ -261,6 +264,17 @@ const convertBackendCommentToComment = (backendComment: BackendComment): Comment
   };
 };
 
+const convertBackendRegistrationToMember = (backendRegistration: BackendRegistration): Member => {
+  return {
+    id: parseInt(backendRegistration.volunteerId) || Date.now(),
+    name: backendRegistration.volunteerName,
+    role: backendRegistration.roleName,
+    avatar: `https://i.pravatar.cc/150?img=${backendRegistration.volunteerId}`,
+    email: backendRegistration.volunteerEmail,
+    status: backendRegistration.status === 'checked_in' ? 'Online' : 'Offline'
+  };
+};
+
 // Helper function to get time ago string
 const getTimeAgo = (dateString: string): string => {
   const date = new Date(dateString);
@@ -280,10 +294,16 @@ export default function EventWallApp() {
   const { id: eventId } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState('wall');
   const [posts, setPosts] = useState<Post[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [event, setEvent] = useState<BackendEvent | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [notifications, setNotifications] = useState<{ id: number; type: string; message: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMembersLoading, setIsMembersLoading] = useState(true);
+  const [isEventLoading, setIsEventLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'latest' | 'most_active'>('latest');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -292,16 +312,25 @@ export default function EventWallApp() {
   const currentUserRole = localStorage.getItem('userRole') || 'volunteer';
   const isEventManager = currentUserRole === 'event_manager' || currentUserRole === 'admin';
 
-  // Load posts on mount and when sortBy changes
+  // Load posts, members, and event data on mount
+  useEffect(() => {
+    if (eventId) {
+      loadPosts();
+      loadMembers();
+      loadEvent();
+    }
+  }, [eventId]);
+
+  // Reload posts when sortBy changes
   useEffect(() => {
     if (eventId) {
       loadPosts();
     }
-  }, [eventId, sortBy]);
+  }, [sortBy]);
 
   const loadPosts = async () => {
     if (!eventId) return;
-    
+
     setIsLoading(true);
     setError(null);
     try {
@@ -317,6 +346,39 @@ export default function EventWallApp() {
     }
   };
 
+  const loadMembers = async () => {
+    if (!eventId) return;
+
+    setIsMembersLoading(true);
+    try {
+      const backendRegistrations = await getEventParticipants(eventId);
+      const convertedMembers = backendRegistrations.map(convertBackendRegistrationToMember);
+      setMembers(convertedMembers);
+    } catch (err) {
+      console.error('Error loading members:', err);
+      // Don't show error notification for members, just use empty list
+      setMembers([]);
+    } finally {
+      setIsMembersLoading(false);
+    }
+  };
+
+  const loadEvent = async () => {
+    if (!eventId) return;
+
+    setIsEventLoading(true);
+    try {
+      const backendEvent = await getEventById(eventId);
+      setEvent(backendEvent);
+    } catch (err) {
+      console.error('Error loading event:', err);
+      // Don't show error notification for event, just use null
+      setEvent(null);
+    } finally {
+      setIsEventLoading(false);
+    }
+  };
+
   const addNotification = (type: string, message: string) => {
     const id = Date.now();
     setNotifications(prev => [...prev, { id, type, message }]);
@@ -327,7 +389,7 @@ export default function EventWallApp() {
 
   const handleCreatePost = async (content: string, images?: string[]) => {
     if (!eventId) return;
-    
+
     setIsSubmitting(true);
     try {
       const newBackendPost = await createPost(eventId, content, images || []);
@@ -338,6 +400,25 @@ export default function EventWallApp() {
     } catch (err) {
       console.error('Error creating post:', err);
       addNotification('error', 'Không thể đăng bài viết. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditPost = async (content: string, images?: string[]) => {
+    if (!eventId || !editingPost?.backendId) return;
+
+    setIsSubmitting(true);
+    try {
+      const updatedBackendPost = await updatePost(eventId, editingPost.backendId, content, images || []);
+      const updatedPost = convertBackendPostToPost(updatedBackendPost, currentUserId);
+      setPosts(posts.map(p => p.backendId === editingPost.backendId ? updatedPost : p));
+      setIsEditModalOpen(false);
+      setEditingPost(null);
+      addNotification('success', 'Đã cập nhật bài viết thành công!');
+    } catch (err) {
+      console.error('Error updating post:', err);
+      addNotification('error', 'Không thể cập nhật bài viết. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
     }
@@ -600,22 +681,22 @@ export default function EventWallApp() {
         {/* Only show Banner on Wall tab */}
         {activeTab === 'wall' && (
           <div className="relative w-full h-48 sm:h-64 rounded-[24px] overflow-hidden shadow-lg mb-8 group cursor-pointer">
-            <img 
-              src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=1200" 
+            <img
+              src={event?.imageUrl || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=1200"}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              alt="Event Cover" 
+              alt="Event Cover"
             />
-            <div 
+            <div
               className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8"
               style={{ background: `linear-gradient(to top, ${THEME.colors.primaryDeep} 90%, transparent)` }}
             >
               <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs text-white w-fit mb-2 border border-white/30">
-                Sự kiện thường niên
+                {event?.category || 'Sự kiện'}
               </span>
-              <h2 className="text-2xl sm:text-4xl font-bold text-white mb-2 drop-shadow-md">Year End Party 2024</h2>
+              <h2 className="text-2xl sm:text-4xl font-bold text-white mb-2 drop-shadow-md">{event?.title || 'Đang tải...'}</h2>
               <div className="flex flex-wrap items-center gap-4 text-white/90 text-sm sm:text-base">
-                <div className="flex items-center gap-1.5"><Calendar size={16} /> 25/12/2024</div>
-                <div className="flex items-center gap-1.5"><MapPin size={16} /> Riverside Center, Hanoi</div>
+                <div className="flex items-center gap-1.5"><Calendar size={16} /> {event ? new Date(event.startDate).toLocaleDateString('vi-VN') : 'Đang tải...'}</div>
+                <div className="flex items-center gap-1.5"><MapPin size={16} /> {event?.location || 'Đang tải...'}</div>
               </div>
             </div>
           </div>
@@ -627,10 +708,22 @@ export default function EventWallApp() {
           <aside className="hidden lg:block w-1/4 space-y-6">
             <SidebarCard title="Thông Tin Sự Kiện">
               <div className="space-y-4">
-                <InfoRow icon={<Calendar size={18} />} label="Thời gian" value="08:00 - 17:00" />
-                <InfoRow icon={<MapPin size={18} />} label="Địa điểm" value="Hội trường A2" />
-                <InfoRow icon={<Users size={18} />} label="Tham gia" value="150/200 người" />
-                
+                <InfoRow
+                  icon={<Calendar size={18} />}
+                  label="Thời gian"
+                  value={event ? `${new Date(event.startDate).toLocaleDateString('vi-VN')} - ${new Date(event.endDate).toLocaleDateString('vi-VN')}` : 'Đang tải...'}
+                />
+                <InfoRow
+                  icon={<MapPin size={18} />}
+                  label="Địa điểm"
+                  value={event?.location || 'Đang tải...'}
+                />
+                <InfoRow
+                  icon={<Users size={18} />}
+                  label="Tham gia"
+                  value={event ? `${event.currentParticipants}/${event.maxParticipants} người` : 'Đang tải...'}
+                />
+
                 {/* Updated Button: 'Đã tham gia' implies approved */}
                 <Button variant="success" className="w-full mt-2 text-sm justify-center">
                   <Check size={16} /> Đã tham gia
@@ -641,9 +734,9 @@ export default function EventWallApp() {
             <SidebarCard title="Thống Kê Nhanh">
               <div className="grid grid-cols-2 gap-4">
                 <StatBox label="Bài viết" value={posts.length} />
-                <StatBox label="Thành viên" value="67" />
-                <StatBox label="Lượt thích" value="342" />
-                <StatBox label="Bình luận" value="128" />
+                <StatBox label="Thành viên" value={members.length} />
+                <StatBox label="Lượt thích" value={posts.reduce((sum, post) => sum + post.likes, 0)} />
+                <StatBox label="Bình luận" value={posts.reduce((sum, post) => sum + post.comments.length, 0)} />
               </div>
             </SidebarCard>
           </aside>
@@ -698,11 +791,15 @@ export default function EventWallApp() {
                 ) : (
                   <div className="space-y-6">
                     {posts.map(post => (
-                      <PostCard 
-                        key={post.backendId || post.id} 
-                        post={post} 
+                      <PostCard
+                        key={post.backendId || post.id}
+                        post={post}
                         onLike={() => toggleLike(post)}
                         onCommentClick={() => setSelectedPost(post)}
+                        onEdit={post.authorId === currentUserId ? () => {
+                          setEditingPost(post);
+                          setIsEditModalOpen(true);
+                        } : undefined}
                         onDelete={isEventManager || post.authorId === currentUserId ? () => handleDeletePost(post) : undefined}
                         onPin={isEventManager ? () => handlePinPost(post) : undefined}
                         isEventManager={isEventManager}
@@ -717,7 +814,7 @@ export default function EventWallApp() {
               </>
             ) : (
               // --- MEMBERS LIST CONTENT ---
-              <MembersList members={MOCK_MEMBERS} />
+              <MembersList members={members} isLoading={isMembersLoading} />
             )}
           </div>
 
@@ -756,15 +853,33 @@ export default function EventWallApp() {
         />
       )}
       {selectedPost && (
-        <PostDetailModal 
-          post={selectedPost} 
-          onClose={() => setSelectedPost(null)} 
+        <PostDetailModal
+          post={selectedPost}
+          onClose={() => setSelectedPost(null)}
           onLike={() => toggleLike(selectedPost)}
           onAddComment={(content) => handleAddComment(selectedPost, content)}
           onDeleteComment={(comment) => handleDeleteComment(selectedPost, comment)}
           onUpdateComment={(comment, newContent) => handleUpdateComment(selectedPost, comment, newContent)}
           currentUserId={currentUserId}
           isEventManager={isEventManager}
+        />
+      )}
+
+      {isEditModalOpen && editingPost && (
+        <EditPostModal
+          post={editingPost}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingPost(null);
+          }}
+          onSubmit={handleEditPost}
+          user={{
+            id: currentUserId,
+            name: localStorage.getItem('userName') || MOCK_USER.name,
+            avatar: localStorage.getItem('userAvatar') || MOCK_USER.avatar,
+            role: currentUserRole
+          }}
+          isSubmitting={isSubmitting}
         />
       )}
 
@@ -799,8 +914,45 @@ export default function EventWallApp() {
 
 // --- Sub-Components ---
 
-function MembersList({ members }: { members: Member[] }) {
+function MembersList({ members, isLoading = false }: { members: Member[]; isLoading?: boolean }) {
   const [searchTerm, setSearchTerm] = useState('');
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 animate-slide-in">
+        {/* Search Skeleton */}
+        <div className="bg-white rounded-[16px] p-4 shadow-sm border border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 bg-gray-200 rounded"></div>
+            <div className="flex-1 h-4 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+
+        {/* Managers Section Skeleton */}
+        <div className="bg-white rounded-[16px] overflow-hidden shadow-sm border border-gray-100">
+          <div className="p-4 bg-gradient-to-r from-blue-50 to-white border-b border-blue-100">
+            <div className="h-5 bg-gray-200 rounded w-1/3"></div>
+          </div>
+          <div className="divide-y divide-gray-50 p-4 space-y-4">
+            <MemberSkeleton />
+            <MemberSkeleton />
+          </div>
+        </div>
+
+        {/* Volunteers Section Skeleton */}
+        <div className="bg-white rounded-[16px] overflow-hidden shadow-sm border border-gray-100">
+          <div className="p-4 bg-gray-50 border-b border-gray-100">
+            <div className="h-5 bg-gray-200 rounded w-1/2"></div>
+          </div>
+          <div className="divide-y divide-gray-50 p-4 space-y-4">
+            <MemberSkeleton />
+            <MemberSkeleton />
+            <MemberSkeleton />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const managers = members.filter((m: Member) => m.role === 'Event Manager');
   const volunteers = members.filter((m: Member) => m.role !== 'Event Manager');
@@ -860,23 +1012,37 @@ function MembersList({ members }: { members: Member[] }) {
 function MemberRow({ member, isManager }: { member: Member; isManager?: boolean }) {
   return (
     <div className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-       <div className="flex items-center gap-4">
-          <div className="relative">
-             <Avatar src={member.avatar} />
-             <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${member.status === 'Online' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-          </div>
-          <div>
-             <div className="font-semibold text-gray-800 flex items-center gap-2">
-                {member.name}
-                {isManager && <BadgeCheck size={16} className="text-blue-500" fill="transparent" />}
-             </div>
-             <div className="text-xs text-gray-500 flex items-center gap-2">
-                <span className={isManager ? 'text-blue-600 font-medium' : ''}>{member.role}</span>
-                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                <span className="truncate max-w-[150px]">{member.email}</span>
-             </div>
-          </div>
-       </div>
+        <div className="flex items-center gap-4">
+           <div className="relative">
+              <Avatar src={member.avatar} />
+              <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${member.status === 'Online' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+           </div>
+           <div>
+              <div className="font-semibold text-gray-800 flex items-center gap-2">
+                 {member.name}
+                 {isManager && <BadgeCheck size={16} className="text-blue-500" fill="transparent" />}
+              </div>
+              <div className="text-xs text-gray-500 flex items-center gap-2">
+                 <span className={isManager ? 'text-blue-600 font-medium' : ''}>{member.role}</span>
+                 <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                 <span className="truncate max-w-[150px]">{member.email}</span>
+              </div>
+           </div>
+        </div>
+    </div>
+  );
+}
+
+function MemberSkeleton() {
+  return (
+    <div className="p-4 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+           <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+           <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-32"></div>
+              <div className="h-3 bg-gray-200 rounded w-48"></div>
+           </div>
+        </div>
     </div>
   );
 }
@@ -933,18 +1099,20 @@ function NavIcon({ icon, active, onClick }: { icon: React.ReactNode; active: boo
 
 // --- Post Card Component ---
 
-function PostCard({ 
-  post, 
-  onLike, 
+function PostCard({
+  post,
+  onLike,
   onCommentClick,
+  onEdit,
   onDelete,
   onPin,
   isEventManager,
   isOwner
-}: { 
-  post: Post; 
-  onLike: () => void; 
+}: {
+  post: Post;
+  onLike: () => void;
   onCommentClick: () => void;
+  onEdit?: () => void;
   onDelete?: () => void;
   onPin?: () => void;
   isEventManager?: boolean;
@@ -997,6 +1165,18 @@ function PostCard({
             </button>
             {showMenu && (
               <div className="absolute right-0 top-10 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10 min-w-[150px]">
+                {isOwner && onEdit && (
+                  <button
+                    onClick={() => {
+                      onEdit();
+                      setShowMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                  >
+                    <Edit3 size={16} />
+                    Chỉnh sửa bài viết
+                  </button>
+                )}
                 {isEventManager && (
                   <button
                     onClick={() => {
@@ -1131,14 +1311,14 @@ function PostSkeleton() {
 
 // --- Create Post Modal ---
 
-function CreatePostModal({ 
-  onClose, 
-  onSubmit, 
+function CreatePostModal({
+  onClose,
+  onSubmit,
   user,
   isSubmitting = false
-}: { 
-  onClose: () => void; 
-  onSubmit: (content: string, images?: string[]) => void; 
+}: {
+  onClose: () => void;
+  onSubmit: (content: string, images?: string[]) => void;
   user: User;
   isSubmitting?: boolean;
 }) {
@@ -1203,6 +1383,89 @@ function CreatePostModal({
             onClick={handleSubmit}
           >
             Đăng bài
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Edit Post Modal ---
+
+function EditPostModal({
+  post,
+  onClose,
+  onSubmit,
+  user,
+  isSubmitting = false
+}: {
+  post: Post;
+  onClose: () => void;
+  onSubmit: (content: string, images?: string[]) => void;
+  user: User;
+  isSubmitting?: boolean;
+}) {
+  const [content, setContent] = useState(post.content);
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleClose = () => {
+    if (isSubmitting) return;
+    setIsClosing(true);
+    setTimeout(onClose, 200);
+  };
+
+  const handleSubmit = () => {
+    if (!content.trim() || isSubmitting) return;
+    onSubmit(content, post.images);
+    setContent(''); // Clear after submit
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-opacity">
+      <div
+        className={`bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}
+      >
+        <div className="flex justify-between items-center p-4 border-b border-gray-100">
+          <h3 className="font-bold text-lg text-gray-800">Chỉnh sửa bài viết</h3>
+          <button onClick={handleClose} className="bg-gray-100 p-2 rounded-full hover:bg-gray-200"><X size={20} /></button>
+        </div>
+
+        <div className="p-4">
+           <div className="flex items-center gap-3 mb-4">
+              <Avatar src={user.avatar} />
+              <div>
+                <div className="font-semibold text-gray-900">{user.name}</div>
+                <div className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md inline-flex items-center gap-1 mt-0.5">
+                   <Users size={10} /> Public
+                </div>
+              </div>
+           </div>
+
+           <textarea
+             className="w-full min-h-[150px] resize-none text-lg text-gray-700 placeholder-gray-400 focus:outline-none scrollbar-hide"
+             placeholder="Bạn đang nghĩ gì thế?"
+             value={content}
+             onChange={(e) => setContent(e.target.value)}
+             autoFocus
+           />
+
+           {/* Added Video button back next to Image button */}
+           <div className="border border-gray-200 rounded-xl p-3 flex justify-between items-center mt-4 shadow-sm">
+              <span className="text-sm font-medium text-gray-600 pl-2">Thỉnh sửa phương tiện</span>
+              <div className="flex gap-1">
+                 <button className="p-2 hover:bg-gray-100 rounded-full text-green-500"><ImageIcon size={20} /></button>
+                 <button className="p-2 hover:bg-gray-100 rounded-full text-red-500"><Video size={20} /></button>
+              </div>
+           </div>
+        </div>
+
+        <div className="p-4 pt-0">
+          <Button
+            className="w-full py-3 text-lg"
+            disabled={!content.trim() || content === post.content}
+            onClick={handleSubmit}
+          >
+            Cập nhật
           </Button>
         </div>
       </div>
