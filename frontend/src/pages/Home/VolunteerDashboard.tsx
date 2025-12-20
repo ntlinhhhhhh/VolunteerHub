@@ -15,18 +15,23 @@ interface Statistics {
 
 interface Registration {
     id: string;
-    status: 'pending' | 'accepted' | 'rejected' | 'completed' | 'cancelled';
-    isConfirmed: boolean;
-    isRated: boolean;
-    event: {
-        id: string;
-        title: string;
-        startDate: string;
-        endDate: string;
-        location: string;
-        thumbnail?: string;
-    };
+    registrationCode: string;
+    eventId: string;
+    eventTitle: string;
+    eventDate: string;
+    eventLocation: string;
+    status: 'pending' | 'accepted' | 'rejected' | 'completed' | 'cancelled' | 'confirmed' | 'checked_in' | 'checked_out' | 'rated' | 'no_show' | 'cancelled_by_volunteer' | 'cancelled_by_organizer';
+    roleName: string;
     createdAt: string;
+    updatedAt: string;
+    approval?: {
+        reviewedBy?: string;
+        reviewedAt?: string;
+    };
+    attendance?: any;
+    completion?: {
+        certificateIssued: boolean;
+    };
 }
 
 interface InAppNotification {
@@ -58,6 +63,7 @@ const VolunteerDashboard: React.FC = () => {
 
     const logoutPopupRef = useRef<HTMLDivElement>(null);
     const notificationRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
 
     const [statistics, setStatistics] = useState<Statistics>({
         totalHours: 0,
@@ -69,9 +75,6 @@ const VolunteerDashboard: React.FC = () => {
     const [registrations, setRegistrations] = useState<Registration[]>([]);
     const [inAppNotis, setInAppNotis] = useState<InAppNotification[]>([]);
     const [userData, setUserData] = useState<any>(null);
-
-    const navigate = useNavigate();
-
 
     useEffect(() => {
         fetchDashboardData();
@@ -106,6 +109,7 @@ const VolunteerDashboard: React.FC = () => {
             setLoading(true);
             const token = localStorage.getItem('accessToken');
 
+            // Fetch user data
             const userRes = await fetch('http://localhost:8000/users/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -121,6 +125,7 @@ const VolunteerDashboard: React.FC = () => {
 
             setUserData(finalData);
 
+            // Fetch statistics
             const statsRes = await fetch('http://localhost:8000/registrations/my-statistics', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -140,11 +145,23 @@ const VolunteerDashboard: React.FC = () => {
                 rank
             });
 
-            const regRes = await fetch('http://localhost:8000/registrations/my-registrations?limit=10', {
+            // Fetch registrations
+            const regRes = await fetch('http://localhost:8000/registrations/my-registrations?limit=50', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const regJson = await regRes.json();
-            setRegistrations(regJson.data?.items || regJson.data || []);
+
+            // Handle both response formats
+            let registrationsList = [];
+            if (regJson.data?.items) {
+                registrationsList = regJson.data.items;
+            } else if (Array.isArray(regJson.data)) {
+                registrationsList = regJson.data;
+            } else if (Array.isArray(regJson)) {
+                registrationsList = regJson;
+            }
+
+            setRegistrations(registrationsList);
 
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
@@ -159,7 +176,7 @@ const VolunteerDashboard: React.FC = () => {
             const token = localStorage.getItem('accessToken');
             if (!token) return;
 
-            let userId = userData?.id || userData?.id;
+            let userId = userData?.id;
 
             if (!userId) {
                 const userRes = await fetch('http://localhost:8000/users/me', {
@@ -167,7 +184,7 @@ const VolunteerDashboard: React.FC = () => {
                 });
                 const userJson = await userRes.json();
                 const raw = userJson.data || userJson;
-                userId = raw.id || raw.id;
+                userId = raw.id;
             }
 
             const response = await fetch(`http://localhost:8000/notifications/${userId}?channel=in_app`, {
@@ -269,11 +286,7 @@ const VolunteerDashboard: React.FC = () => {
 
             if (response.ok) {
                 alert('✅ Đã xác nhận tham gia sự kiện thành công!');
-
-                // Mark notification as read
                 await markNotificationAsRead(notification.id);
-
-                // Refresh data
                 await fetchDashboardData();
                 await fetchNotifications();
             } else {
@@ -324,11 +337,13 @@ const VolunteerDashboard: React.FC = () => {
 
     const closeSidebar = () => setSidebarOpen(false);
 
-    const needConfirmation = registrations.filter(r => r.status === 'accepted' && !r.isConfirmed);
-    const needRating = registrations.filter(r => r.status === 'completed' && !r.isRated);
+    // Filter registrations by status
+    const needConfirmation = registrations.filter(r => r.status === 'accepted');
+    const needRating = registrations.filter(r => r.status === 'completed');
     const pendingRegistrations = registrations.filter(r => r.status === 'pending');
+    const confirmedRegistrations = registrations.filter(r => r.status === 'confirmed');
     const upcomingEvents = registrations.filter(r =>
-        r.status === 'accepted' && r.isConfirmed && new Date(r.event.startDate) > new Date()
+        r.status === 'confirmed' && new Date(r.eventDate) > new Date()
     ).slice(0, 3);
 
     const getNotificationIcon = (type: string) => {
@@ -396,20 +411,13 @@ const VolunteerDashboard: React.FC = () => {
                 </div>
 
                 <nav style={styles.navMenu}>
-                    <SidebarLink
-                        icon={<LayoutDashboard size={20} />}
-                        label="Overview"
-                        active />
+                    <SidebarLink icon={<LayoutDashboard size={20} />} label="Overview" active />
                     <SidebarLink
                         icon={<Search size={20} />}
                         onClick={() => navigate('/volunteer/events')}
                         label="Browse Events" />
-                    <SidebarLink
-                        icon={<Users size={20} />}
-                        label="Attendee Insights" />
-                    <SidebarLink
-                        icon={<UserCircle size={20} />}
-                        label="My Profile" />
+                    <SidebarLink icon={<Users size={20} />} label="Attendee Insights" />
+                    <SidebarLink icon={<UserCircle size={20} />} label="My Profile" />
                 </nav>
 
                 <div style={styles.sidebarFooter}>
@@ -519,7 +527,6 @@ const VolunteerDashboard: React.FC = () => {
                                                             {notification.content}
                                                         </p>
 
-                                                        {/* Event Details */}
                                                         {notification.data?.eventTitle && (
                                                             <div style={styles.notificationEventDetails}>
                                                                 <p style={styles.notificationEventTitle}>
@@ -547,7 +554,6 @@ const VolunteerDashboard: React.FC = () => {
                                                             {formatNotificationTime(notification.createdAt)}
                                                         </span>
 
-                                                        {/* Confirm Button for Approved Registrations */}
                                                         {canConfirmFromNotification(notification) && (
                                                             <button
                                                                 style={styles.confirmNotificationBtn}
@@ -676,23 +682,24 @@ const VolunteerDashboard: React.FC = () => {
                             <div style={styles.sectionCard}>
                                 <div style={styles.sectionHeader}>
                                     <h3 style={styles.sectionTitle}>Đăng ký gần đây</h3>
-                                    <button style={styles.viewAllBtn}>
+                                    <button style={styles.viewAllBtn} onClick={() => navigate('/event/registrations')}>
                                         Xem tất cả <ArrowRight size={16} />
                                     </button>
                                 </div>
 
-                                {pendingRegistrations.length === 0 && upcomingEvents.length === 0 ? (
+                                {pendingRegistrations.length === 0 && confirmedRegistrations.length === 0 ? (
                                     <div style={styles.emptyState}>
                                         <AlertCircle size={48} color="#CBD5E1" />
                                         <p style={styles.emptyText}>Chưa có đăng ký nào</p>
                                     </div>
                                 ) : (
-                                    <div style={styles.registrationList}>
+                                    <div style={styles.registrationList} >
                                         {pendingRegistrations.map(reg => (
-                                            <RegistrationCard key={reg.id} registration={reg} type="pending" />
+                                            <RegistrationCard key={reg.id} registration={reg} type="pending" onClick={() => navigate('/event/registrations')} />
                                         ))}
-                                        {upcomingEvents.map(reg => (
-                                            <RegistrationCard key={reg.id} registration={reg} type="upcoming" />
+                                        {confirmedRegistrations.map(reg => (
+                                            <RegistrationCard key={reg.id} registration={reg} type="confirmed" 
+                                            onClick={() => navigate(`/event/communication/${reg.eventId}`)}/>
                                         ))}
                                     </div>
                                 )}
@@ -712,7 +719,7 @@ const VolunteerDashboard: React.FC = () => {
                                         <p style={styles.emptyText}>Không có lịch trình</p>
                                     </div>
                                 ) : (
-                                    <div style={styles.scheduleList}>
+                                    <div style={styles.scheduleList} onClick={() => navigate('/volunteer/events')} >
                                         {upcomingEvents.map(reg => (
                                             <ScheduleItem key={reg.id} registration={reg} />
                                         ))}
@@ -761,7 +768,6 @@ const SidebarLink = ({ icon, label, active = false, onClick }: any) => (
     <div style={active ? styles.navItemActive : styles.navItem} onClick={onClick}>
         <span style={styles.navIcon}>{icon}</span>
         <span style={styles.navLabel}>{label}</span>
-
     </div>
 );
 
@@ -777,19 +783,24 @@ const StatCard = ({ icon, title, value, color, bgColor }: any) => (
     </div>
 );
 
-const RegistrationCard = ({ registration, type }: any) => {
-    if (!registration?.event) return null;
+const RegistrationCard = ({ registration, type, onClick }: any) => {
+    if (!registration) return null;
+
     const statusConfig = {
         pending: { label: 'Đang chờ duyệt', color: '#F59E0B', bg: '#FFF7ED' },
-        upcoming: { label: 'Sắp diễn ra', color: '#10B981', bg: '#ECFDF5' }
+        accepted: { label: 'Cần xác nhận', color: '#3B82F6', bg: '#EFF6FF' },
+        confirmed: { label: 'Đã xác nhận', color: '#10B981', bg: '#ECFDF5' }
     };
 
     const config = statusConfig[type as keyof typeof statusConfig];
+    const eventTitle = registration.eventTitle || "Không rõ tiêu đề";
+    const eventDate = registration.eventDate;
+    const eventLocation = registration.eventLocation || "Không rõ địa điểm";
 
     return (
-        <div className="registration-card" style={styles.registrationCard}>
+        <div className="registration-card" style={styles.registrationCard} onClick={onClick}>
             <div style={styles.regCardHeader}>
-                <h4 style={styles.regCardTitle}>{registration.event.title || "Không rõ tiêu đề"}</h4>
+                <h4 style={styles.regCardTitle}>{eventTitle}</h4>
                 <span style={{ ...styles.statusBadge, backgroundColor: config.bg, color: config.color }}>
                     {config.label}
                 </span>
@@ -797,38 +808,44 @@ const RegistrationCard = ({ registration, type }: any) => {
             <div style={styles.regCardMeta}>
                 <div style={styles.metaItem}>
                     <Calendar size={14} color="#94A3B8" />
-                    <span>{new Date(registration.event.startDate).toLocaleDateString('vi-VN')}</span>
+                    {/* <span>{new Date(eventDate).toLocaleDateString('vi-VN')}</span> */}
+                    <span>{registration.eventDate ? new Date(registration.eventDate).toLocaleDateString('vi-VN') : "N/A"}</span>
                 </div>
                 <div style={styles.metaItem}>
                     <MapPin size={14} color="#94A3B8" />
-                    <span>{registration.event.location}</span>
+                    {/* <span>{eventLocation}</span> */}
+                    <span>{registration.eventLocation || "Không rõ địa điểm"}</span>
                 </div>
             </div>
         </div>
     );
 };
 
-const ScheduleItem = ({ registration }: any) => (
-    <div style={styles.scheduleItem}>
-        <div style={styles.scheduleDate}>
-            <div style={styles.scheduleDay}>
-                {new Date(registration.event.startDate).getDate()}
+const ScheduleItem = ({ registration }: any) => {
+    const eventDate = new Date(registration.eventDate);
+
+    return (
+        <div style={styles.scheduleItem}>
+            <div style={styles.scheduleDate}>
+                <div style={styles.scheduleDay}>
+                    {eventDate.getDate()}
+                </div>
+                <div style={styles.scheduleMonth}>
+                    Tháng {eventDate.getMonth() + 1}
+                </div>
             </div>
-            <div style={styles.scheduleMonth}>
-                Tháng {new Date(registration.event.startDate).getMonth() + 1}
+            <div style={styles.scheduleContent}>
+                <h4 style={styles.scheduleTitle}>{registration.eventTitle}</h4>
+                <p style={styles.scheduleTime}>
+                    {eventDate.toLocaleTimeString('vi-VN', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}
+                </p>
             </div>
         </div>
-        <div style={styles.scheduleContent}>
-            <h4 style={styles.scheduleTitle}>{registration.event.title}</h4>
-            <p style={styles.scheduleTime}>
-                {new Date(registration.event.startDate).toLocaleTimeString('vi-VN', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                })}
-            </p>
-        </div>
-    </div>
-);
+    );
+};
 
 // Styles
 const styles: { [key: string]: React.CSSProperties } = {

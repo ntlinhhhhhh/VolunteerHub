@@ -55,23 +55,27 @@ interface Event {
     updatedAt: string;
 }
 
-const EventDetail: React.FC = () => {
+const ForumEventDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [event, setEvent] = useState<Event | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedRole, setSelectedRole] = useState<string | null>(null);
-    const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+    const [showRegisterModal, setShowRegisterModal] = useState(false);
+    const [isRegistered, setIsRegistered] = useState(false);
 
     useEffect(() => {
         fetchEventDetail();
+        checkRegistrationStatus();
     }, [id]);
 
     const fetchEventDetail = async () => {
         try {
+            const token = localStorage.getItem('accessToken');
             const response = await fetch(`http://localhost:8000/events/${id}`, {
                 headers: {
                     'Accept': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : ''
                 },
             });
             const data = await response.json();
@@ -82,6 +86,27 @@ const EventDetail: React.FC = () => {
             console.error('Error fetching event detail:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const checkRegistrationStatus = async () => {
+        try {
+            const token = localStorage.getItem('accessToken');
+            if (!token) return;
+
+            const response = await fetch('http://localhost:8000/registrations/my-registrations', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            if (data.success) {
+                const items = data.data?.items || data.data || [];
+                const registered = items.some((reg: any) => (reg.event?.id || reg.eventId) === id);
+                setIsRegistered(registered);
+            }
+        } catch (error) {
+            console.error('Error checking registration:', error);
         }
     };
 
@@ -113,16 +138,60 @@ const EventDetail: React.FC = () => {
     };
 
     const handleJoinClick = (roleId?: string) => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            alert('Vui lòng đăng nhập để đăng ký sự kiện');
+            navigate('/login');
+            return;
+        }
+
+        if (isRegistered) {
+            alert('Bạn đã đăng ký sự kiện này rồi!');
+            return;
+        }
+
         setSelectedRole(roleId || null);
-        setShowLoginPrompt(true);
+        setShowRegisterModal(true);
     };
 
-    const handleLoginRedirect = () => {
-        localStorage.setItem('pendingEventRegistration', JSON.stringify({
-            eventId: id,
-            roleId: selectedRole
-        }));
-        navigate('/login');
+    const handleRegisterSubmit = async () => {
+        try {
+            const token = localStorage.getItem('accessToken');
+            
+            const response = await fetch('http://localhost:8000/registrations/apply', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    eventId: id,
+                    roleId: selectedRole,
+                    motivation: 'Tham gia từ diễn đàn',
+                    skills: [],
+                    availability: 'Flexible',
+                    experience: 'None',
+                    emergencyContact: {
+                        name: '',
+                        phone: '',
+                        relationship: ''
+                    }
+                })
+            });
+
+            if (response.ok) {
+                alert('✅ Đăng ký thành công! Đang chờ ban tổ chức phê duyệt.');
+                setShowRegisterModal(false);
+                setIsRegistered(true);
+                await fetchEventDetail();
+            } else {
+                const error = await response.json();
+                alert(`❌ Đăng ký thất bại: ${error.message || 'Vui lòng thử lại'}`);
+            }
+        } catch (error) {
+            console.error('Error registering:', error);
+            alert('❌ Có lỗi xảy ra. Vui lòng thử lại!');
+        }
     };
 
     if (loading) {
@@ -141,8 +210,8 @@ const EventDetail: React.FC = () => {
             <>
                 <div className="loading-container">
                     <div className="error-text">Không tìm thấy sự kiện</div>
-                    <button className="back-btn" onClick={() => navigate('/')}>
-                        Quay về trang chủ
+                    <button className="back-btn" onClick={() => navigate('/event/communication/:eventId')}>
+                        Quay về diễn đàn
                     </button>
                 </div>
                 <style>{loadingStyles}</style>
@@ -160,12 +229,13 @@ const EventDetail: React.FC = () => {
                 {/* Navigation Bar */}
                 <nav className="navbar">
                     <div className="nav-content">
-                        <div className="nav-brand" onClick={() => navigate('/')}>
+                        <button className="btn-back" onClick={() => navigate('/forum')}>
+                            ← Quay lại diễn đàn
+                        </button>
+                        <div className="nav-brand">
                             Volunteer<span className="brand-highlight">Hub</span>
                         </div>
-                        <button className="btn-back" onClick={() => navigate('/')}>
-                            ← Trang chủ
-                        </button>
+                        <div className="nav-spacer"></div>
                     </div>
                 </nav>
 
@@ -189,6 +259,13 @@ const EventDetail: React.FC = () => {
                                 {event.status === 'published' ? '🟢 Đang mở đăng ký' : '⚪ Đã đóng'}
                             </span>
                         </div>
+
+                        {/* Registration Status */}
+                        {isRegistered && (
+                            <div className="registered-banner">
+                                ✅ Bạn đã đăng ký sự kiện này
+                            </div>
+                        )}
 
                         {/* Quick Info */}
                         <div className="quick-info">
@@ -236,7 +313,13 @@ const EventDetail: React.FC = () => {
                                     <div className="stat-label">Đã đăng ký</div>
                                 </div>
                             </div>
-                            <button className="btn-join" onClick={() => handleJoinClick()}>Đăng ký tham gia</button>
+                            <button 
+                                className={`btn-join ${isRegistered ? 'registered' : ''}`}
+                                onClick={() => handleJoinClick()}
+                                disabled={isRegistered}
+                            >
+                                {isRegistered ? '✅ Đã đăng ký' : 'Đăng ký tham gia'}
+                            </button>
                             <div className="deadline">⏰ Hạn: {formatDate(event.schedule.registrationDeadline)}</div>
                         </div>
 
@@ -318,11 +401,11 @@ const EventDetail: React.FC = () => {
                                         </div>
                                         <p className="role-desc">{role.description}</p>
                                         <button
-                                            className={`btn-role ${role.filled >= role.slots ? 'disabled' : ''}`}
+                                            className={`btn-role ${role.filled >= role.slots || isRegistered ? 'disabled' : ''}`}
                                             onClick={() => handleJoinClick(role.id)}
-                                            disabled={role.filled >= role.slots}
+                                            disabled={role.filled >= role.slots || isRegistered}
                                         >
-                                            {role.filled >= role.slots ? 'Đã đủ người' : 'Đăng ký'}
+                                            {isRegistered ? '✅ Đã đăng ký' : role.filled >= role.slots ? 'Đã đủ người' : 'Đăng ký'}
                                         </button>
                                     </div>
                                 ))}
@@ -372,26 +455,35 @@ const EventDetail: React.FC = () => {
                                     <div className="stat-label">Đã đăng ký</div>
                                 </div>
                             </div>
-                            <button className="btn-join" onClick={() => handleJoinClick()}>Đăng ký tham gia</button>
+                            <button 
+                                className={`btn-join ${isRegistered ? 'registered' : ''}`}
+                                onClick={() => handleJoinClick()}
+                                disabled={isRegistered}
+                            >
+                                {isRegistered ? '✅ Đã đăng ký' : 'Đăng ký tham gia'}
+                            </button>
                             <div className="deadline">⏰ Hạn: {formatDate(event.schedule.registrationDeadline)}</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Login Modal */}
-            {showLoginPrompt && (
-                <div className="modal-overlay" onClick={() => setShowLoginPrompt(false)}>
+            {/* Register Confirmation Modal */}
+            {showRegisterModal && (
+                <div className="modal-overlay" onClick={() => setShowRegisterModal(false)}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h2 className="modal-title">Đăng nhập để tham gia</h2>
+                        <h2 className="modal-title">Xác nhận đăng ký</h2>
                         <p className="modal-text">
-                            Bạn cần đăng nhập hoặc đăng ký tài khoản để có thể đăng ký tham gia sự kiện này.
+                            Bạn có chắc chắn muốn đăng ký tham gia sự kiện <strong>{event.title}</strong>?
                         </p>
                         <div className="modal-buttons">
-                            <button className="btn-modal-primary" onClick={handleLoginRedirect}>Đăng nhập</button>
-                            <button className="btn-modal-secondary" onClick={() => navigate('/register')}>Đăng ký tài khoản</button>
+                            <button className="btn-modal-primary" onClick={handleRegisterSubmit}>
+                                Xác nhận đăng ký
+                            </button>
+                            <button className="btn-modal-secondary" onClick={() => setShowRegisterModal(false)}>
+                                Hủy
+                            </button>
                         </div>
-                        <button className="btn-modal-close" onClick={() => setShowLoginPrompt(false)}>Đóng</button>
                     </div>
                 </div>
             )}
@@ -467,8 +559,10 @@ const eventDetailStyles = `
   .nav-brand {
     font-size: 24px;
     font-weight: 300;
-    cursor: pointer;
     color: #1a1a1a;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   .brand-highlight {
@@ -486,11 +580,28 @@ const eventDetailStyles = `
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
+    z-index: 10;
   }
 
   .btn-back:hover {
     background-color: #007bff;
     color: white;
+  }
+
+  .nav-spacer {
+    width: 150px;
+  }
+
+  .registered-banner {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
   }
 
   .hero-image {
@@ -913,9 +1024,14 @@ const eventDetailStyles = `
     transition: all 0.2s;
   }
 
-  .btn-join:hover {
+  .btn-join:hover:not(.registered) {
     background: #0056b3;
     transform: translateY(-2px);
+  }
+
+  .btn-join.registered {
+    background: #10b981;
+    cursor: not-allowed;
   }
 
   .deadline {
@@ -970,12 +1086,10 @@ const eventDetailStyles = `
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin-bottom: 12px;
   }
 
   .btn-modal-primary,
-  .btn-modal-secondary,
-  .btn-modal-close {
+  .btn-modal-secondary {
     width: 100%;
     padding: 14px;
     border-radius: 8px;
@@ -983,12 +1097,12 @@ const eventDetailStyles = `
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+    border: none;
   }
 
   .btn-modal-primary {
     background: #007bff;
     color: white;
-    border: none;
   }
 
   .btn-modal-primary:hover {
@@ -996,22 +1110,12 @@ const eventDetailStyles = `
   }
 
   .btn-modal-secondary {
-    background: #28a745;
-    color: white;
-    border: none;
-  }
-
-  .btn-modal-secondary:hover {
-    background: #1e7e34;
-  }
-
-  .btn-modal-close {
     background: transparent;
     color: #5a5a5a;
     border: 2px solid #dee2e6;
   }
 
-  .btn-modal-close:hover {
+  .btn-modal-secondary:hover {
     background: #f8f9fa;
   }
 
@@ -1035,6 +1139,11 @@ const eventDetailStyles = `
     .event-title {
       font-size: 28px;
     }
+
+    .nav-brand {
+      position: static;
+      transform: none;
+    }
   }
 
   @media (max-width: 768px) {
@@ -1043,7 +1152,11 @@ const eventDetailStyles = `
     }
 
     .nav-brand {
-      font-size: 20px;
+      font-size: 18px;
+    }
+
+    .nav-spacer {
+      display: none;
     }
 
     .hero-image {
@@ -1116,4 +1229,4 @@ const eventDetailStyles = `
   }
 `;
 
-export default EventDetail;
+export default ForumEventDetail;

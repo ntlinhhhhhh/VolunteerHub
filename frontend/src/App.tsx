@@ -20,6 +20,9 @@ import EventDetail from './pages/Home/Eventdetail';
 import Profile from './pages/Home/Profile';
 import VolunteerDashboard from './pages/Home/VolunteerDashboard';
 import BrowseEvents from './pages/Home/BrowseEvents';
+import Communication from './pages/Home/CommunicationEvent';
+import MyRegistrationsPage from './pages/Home/RegistrationEvents';
+import ForumEventDetail from './pages/Home/ForumEventDetail';
 
 function App() {
     return (
@@ -48,7 +51,9 @@ function App() {
                 <Route path="/me/profile" element={< Profile />} />
                 <Route path="/volunteer/dashboard" element={< VolunteerDashboard />} />
                 <Route path="/volunteer/events" element={< BrowseEvents />} />
-                
+                <Route path="/event/registrations" element={< MyRegistrationsPage />} />
+                <Route path="/event/communication/:eventId" element={<Communication /> } />
+                <Route path="/volunteer/events/:eventId" element={<ForumEventDetail /> } />
             </Routes>
         </Router>
     );

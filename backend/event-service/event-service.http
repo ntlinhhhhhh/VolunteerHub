@@ -54,7 +54,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQxN
 
 ### List all published events (PUBLIC) - lấy danh sách tất cả các sự kiện - theo các filter
 ### filter: 
-GET http://localhost:8000/events?status=published
+GET http://localhost:8000/events/694612a2c0eab2c6832e6e7f
 Accept: application/json
 
 
@@ -193,7 +193,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM4M
 #  Only DRAFT or REJECTED can be deleted
 ### Authorization: Bearer <admin access token>
 ### Authorization: Bearer <event-manager access token>
-DELETE http://localhost:8000/events/6935a83b10323954d7a4dcc8
+GET http://localhost:8000/events/6935a83b10323954d7a4dcc8
+
+
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM1Mzc1NTA2MTc1OWYwNGY0ZmRhMWUiLCJlbWFpbCI6InRsaW5oQGdtYWlsLmNvbSIsIm5hbWUiOiJUaHV5IExpbmgiLCJwaG9uZU51bWJlciI6Iis4NDkwMTIzNDU2NyIsInJvbGVJZCI6IjY5MzUzNzU1MDYxNzU5ZjA0ZjRmZGExNiIsInJvbGVOYW1lIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyIqIl0sImlhdCI6MTc2NTA5OTA0NSwiZXhwIjoxNzY1MDk5OTQ1fQ.dt05Kj9YJ718Gnvtu6SJMydvUZLClp1tFFPo8yVLA5g
 
 ###
