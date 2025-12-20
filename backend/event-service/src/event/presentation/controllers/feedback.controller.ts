@@ -10,7 +10,8 @@ import {
     HttpStatus,
 } from '@nestjs/common';
 import { CreateFeedbackUseCase } from '../../application/use-cases/create-feedback.use-case';
-import { GetFeedbackForVolunteerUseCase } from '../../application/use-cases/get-feedback-for-volunteer.use-case';
+import { GetFeedbackForVolunteerUseCase, EnrichedFeedback } from '../../application/use-cases/get-feedback-for-volunteer.use-case';
+import { GetFeedbackGivenByVolunteerUseCase } from '../../application/use-cases/get-feedback-given-by-volunteer.use-case';
 import { GetFeedbackForEventUseCase } from '../../application/use-cases/get-feedback-for-event.use-case';
 import { CreateFeedbackDto } from '../../application/dto/create-feedback.dto';
 import { GetFeedbackDto } from '../../application/dto/get-feedback.dto';
@@ -23,6 +24,7 @@ export class FeedbackController {
     constructor(
         private readonly createFeedbackUseCase: CreateFeedbackUseCase,
         private readonly getFeedbackForVolunteerUseCase: GetFeedbackForVolunteerUseCase,
+        private readonly getFeedbackGivenByVolunteerUseCase: GetFeedbackGivenByVolunteerUseCase,
         private readonly getFeedbackForEventUseCase: GetFeedbackForEventUseCase,
     ) { }
 
@@ -87,7 +89,7 @@ export class FeedbackController {
         @Query() query: GetFeedbackDto,
         @GetUser('userId') userId: string,
         @GetUser('role') role: string
-    ) {
+    ): Promise<{ success: boolean; data: EnrichedFeedback[]; pagination: any }> {
         // Allow volunteer to see their own feedback, organizers/admins to see any
         if (role !== 'admin' && userId !== volunteerId) {
             // Check if user is organizer of the event - but for simplicity, allow for now

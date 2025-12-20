@@ -6,9 +6,26 @@ import {
   Bell, Menu
 } from 'lucide-react';
 import { Reveal } from '../../hooks/Reveal';
+import { getEvents, getCategories } from '../../services/event.service';
+import type { BackendEvent, BackendCategory } from '../../services/event.service';
 
-/* --- MOCK DATA --- */
-const CATEGORIES = [
+// Frontend event format for EventCard component
+interface FrontendEvent {
+  id: number;
+  image: string;
+  category: string;
+  color: string;
+  title: string;
+  date: string;
+  location: string;
+  joined: number;
+  total: number;
+  org: string;
+  createdAt: string;
+}
+
+// Default categories (fallback)
+const DEFAULT_CATEGORIES = [
   { id: 'all', name: 'Tất cả', icon: '🌟' },
   { id: 'env', name: 'Môi trường', color: '#6BCB77', icon: '🌳' },
   { id: 'edu', name: 'Giáo dục', color: '#5FC1D1', icon: '📚' },
@@ -17,89 +34,9 @@ const CATEGORIES = [
   { id: 'community', name: 'Cộng đồng', color: '#34729C', icon: '🤝' },
 ];
 
-const EVENTS_DATA = [
-  {
-    id: 1,
-    image: "https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    category: "Môi trường",
-    color: "#6BCB77",
-    title: "Chiến dịch Xanh: Làm sạch bãi biển Đà Nẵng",
-    date: "20/12/2024",
-    location: "Bãi biển Mỹ Khê, Đà Nẵng",
-    joined: 45,
-    total: 50,
-    org: "Green Earth VN",
-    createdAt: "2024-12-01T08:00:00Z"
-  },
-  {
-    id: 2,
-    image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    category: "Giáo dục",
-    color: "#5FC1D1",
-    title: "Dạy tiếng Anh cho trẻ em vùng cao",
-    date: "15/01/2025",
-    location: "Mộc Châu, Sơn La",
-    joined: 12,
-    total: 20,
-    org: "Teach for VN",
-    createdAt: "2024-12-05T09:30:00Z"
-  },
-  {
-    id: 3,
-    image: "https://images.unsplash.com/photo-1584515933487-779824d29309?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    category: "Y tế",
-    color: "#FF6B6B",
-    title: "Hiến máu nhân đạo: Giọt hồng yêu thương",
-    date: "05/01/2025",
-    location: "Viện Huyết học, Hà Nội",
-    joined: 150,
-    total: 200,
-    org: "Hội Chữ Thập Đỏ",
-    createdAt: "2024-11-20T14:00:00Z"
-  },
-  {
-    id: 4,
-    image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    category: "Môi trường",
-    color: "#6BCB77",
-    title: "Trồng 1000 cây xanh tại Ba Vì",
-    date: "10/02/2025",
-    location: "Vườn QG Ba Vì, Hà Nội",
-    joined: 80,
-    total: 100,
-    org: "Green Life",
-    createdAt: "2024-12-10T10:15:00Z"
-  },
-  {
-    id: 5,
-    image: "https://images.unsplash.com/photo-1593113598332-cd288d649433?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    category: "Cộng đồng",
-    color: "#34729C",
-    title: "Phát cháo miễn phí cho bệnh nhân",
-    date: "Hàng tuần",
-    location: "Bệnh viện K, Hà Nội",
-    joined: 5,
-    total: 10,
-    org: "Nhóm Thiện Tâm",
-    createdAt: "2024-10-15T06:45:00Z"
-  },
-  {
-    id: 6,
-    image: "https://images.unsplash.com/photo-1516307365426-bea591f05011?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    category: "Người cao tuổi",
-    color: "#FFD93D",
-    title: "Thăm và tặng quà viện dưỡng lão",
-    date: "25/12/2024",
-    location: "Viện dưỡng lão Thiên Đức",
-    joined: 15,
-    total: 30,
-    org: "Tuổi Trẻ Thủ Đô",
-    createdAt: "2024-12-08T16:20:00Z"
-  }
-];
 
 // Nhận prop onTagClick để xử lý click vào tag và onCardClick để xử lý click vào card
-const EventCard = ({ event, onTagClick, onCardClick }: { event: typeof EVENTS_DATA[0], onTagClick: (category: string) => void, onCardClick: (eventId: number) => void }) => {
+const EventCard = ({ event, onTagClick, onCardClick }: { event: FrontendEvent, onTagClick: (category: string) => void, onCardClick: (eventId: number) => void }) => {
   const percent = (event.joined / event.total) * 100;
 
   return (
@@ -193,6 +130,14 @@ const EventsPage = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
+  // API state
+  const [events, setEvents] = useState<FrontendEvent[]>([]);
+  const [categories, setCategories] = useState<BackendCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
   const sortRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
 
@@ -201,6 +146,99 @@ const EventsPage = () => {
     name: "Nguyễn Thu Hà",
     role: "Tình nguyện viên",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+  };
+
+  // Transform backend event to frontend format
+  const transformEvent = (event: BackendEvent): FrontendEvent => {
+    // Map category to color (you might want to store colors in backend or map by category name)
+    const categoryColors: { [key: string]: string } = {
+      'Môi trường': '#6BCB77',
+      'Giáo dục': '#5FC1D1',
+      'Y tế': '#FF6B6B',
+      'Người cao tuổi': '#FFD93D',
+      'Cộng đồng': '#34729C',
+    };
+
+    const color = categoryColors[event.categoryName] || '#34729C';
+
+    // Format date
+    const formatDate = (dateString: string) => {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    };
+
+    // Format location
+    const formatLocation = (location: BackendEvent['location']) => {
+      const parts = [location.address, location.district, location.city].filter(Boolean);
+      return parts.join(', ');
+    };
+
+    return {
+      id: parseInt(event.id, 10), // Convert string ID to number for compatibility
+      image: event.media.images[0] || "https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      category: event.categoryName,
+      color,
+      title: event.title,
+      date: formatDate(event.schedule.startDate),
+      location: formatLocation(event.location),
+      joined: event.capacity.currentVolunteers,
+      total: event.capacity.maxVolunteers,
+      org: event.organizerName,
+      createdAt: event.createdAt
+    };
+  };
+
+  // Fetch events from API
+  const fetchEvents = async (page = 1, append = false) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const categoryId = activeCategory !== 'all' ?
+        categories.find(cat => cat.name === activeCategory)?.id : undefined;
+
+      const response = await getEvents({
+        search: searchQuery || undefined,
+        categoryId,
+        page,
+        limit: 20,
+        sortBy: 'createdAt',
+        sortOrder: sortOrder === 'newest' ? 'desc' : 'asc'
+      });
+
+      const transformedEvents = response.data.map(transformEvent);
+
+      if (append) {
+        setEvents(prev => [...prev, ...transformedEvents]);
+      } else {
+        setEvents(transformedEvents);
+      }
+
+      setHasMore(page < response.pagination.totalPages);
+      setCurrentPage(page);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch events');
+      console.error('Error fetching events:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch categories from API
+  const fetchCategories = async () => {
+    try {
+      const cats = await getCategories();
+      // Add "All" category at the beginning
+      setCategories([{ id: 'all', name: 'Tất cả', icon: '🌟', isActive: true, createdAt: '', updatedAt: '' }, ...cats]);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      // Fallback to default categories
+      setCategories(DEFAULT_CATEGORIES.map(cat => ({ ...cat, isActive: true, createdAt: '', updatedAt: '' })));
+    }
   };
 
   useEffect(() => {
@@ -222,9 +260,19 @@ const EventsPage = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Fetch categories on mount
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  // Fetch events when filters change
+  useEffect(() => {
+    fetchEvents(1, false);
+  }, [activeCategory, searchQuery, sortOrder, categories]);
+
   // Xử lý khi click vào tag trên card
   const handleTagClick = (categoryName: string) => {
-    const category = CATEGORIES.find(c => c.name === categoryName);
+    const category = categories.find(c => c.name === categoryName);
     if (category) {
       setActiveCategory(category.id);
       window.scrollTo({ top: 200, behavior: 'smooth' });
@@ -236,12 +284,13 @@ const EventsPage = () => {
     navigate(`/event/${eventId}`);
   };
 
-  const filteredEvents = EVENTS_DATA.filter(event => {
-    const matchesCategory = activeCategory === 'all' ||
-      CATEGORIES.find(c => c.id === activeCategory)?.name === event.category;
-    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.location.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+  // Use API data for filtering (client-side filtering for search, server-side for category)
+  const filteredEvents = events.filter(event => {
+    const matchesSearch = !searchQuery ||
+      event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      event.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      event.org.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
   });
 
   const sortedEvents = [...filteredEvents].sort((a, b) => {
@@ -250,7 +299,7 @@ const EventsPage = () => {
     return sortOrder === 'newest' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
   });
 
-  const activeCategoryName = CATEGORIES.find(c => c.id === activeCategory)?.name || "Tất cả";
+  const activeCategoryName = categories.find(c => c.id === activeCategory)?.name || "Tất cả";
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] font-sans text-[#2C3E50]">
@@ -423,7 +472,7 @@ const EventsPage = () => {
 
                   {isFilterOpen && (
                     <div className="absolute right-0 top-full mt-2 w-full md:w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 z-50 animate-fade-in-up max-h-80 overflow-y-auto">
-                      {CATEGORIES.map(cat => (
+                      {categories.map(cat => (
                         <button
                           key={cat.id}
                           onClick={() => { setActiveCategory(cat.id); setIsFilterOpen(false); }}
@@ -433,7 +482,7 @@ const EventsPage = () => {
                               : 'text-gray-600 hover:bg-gray-50'
                           }`}
                         >
-                          <span className="text-lg">{cat.icon}</span>
+                          <span className="text-lg">{cat.icon || '📅'}</span>
                           <span className="flex-1">{cat.name}</span>
                           {activeCategory === cat.id && <Check size={16} className="text-[#34729C]" />}
                         </button>
@@ -449,7 +498,27 @@ const EventsPage = () => {
 
       {/* --- EVENTS GRID --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-0">
-        {sortedEvents.length > 0 ? (
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#34729C]"></div>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-3xl border border-red-100 shadow-sm mx-auto max-w-2xl">
+            <div className="w-32 h-32 bg-red-50 rounded-full flex items-center justify-center mb-6">
+              <X size={64} className="text-red-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-red-600 mb-3">Lỗi tải dữ liệu</h3>
+            <p className="text-red-500 max-w-md mb-8 leading-relaxed">
+              {error}
+            </p>
+            <button
+              onClick={() => fetchEvents(1, false)}
+              className="px-8 py-3 bg-red-500 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95"
+            >
+              Thử lại
+            </button>
+          </div>
+        ) : sortedEvents.length > 0 ? (
           <>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
               <div className="flex items-center gap-3">

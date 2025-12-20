@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Heart, LayoutDashboard, Calendar, Search, MessageSquare,
-  LogOut, Bell, Clock, Trophy, MapPin, ChevronRight,
+  LogOut, Bell, Clock, MapPin, ChevronRight,
   Award, Star, User, Edit, Camera, Mail, Phone, Save, X,
-  CheckCircle, Hourglass, AlertCircle, ThumbsUp
+  CheckCircle, Hourglass, ThumbsUp
 } from 'lucide-react';
+
 
 /* --- UTILS HOOK (Dành cho Dashboard) --- */
 const useCounter = (end: number, duration: number = 2000) => {
@@ -47,10 +48,10 @@ const useCounter = (end: number, duration: number = 2000) => {
 };
 
 interface UserProfile {
-  name: string;
+  fullName: string;
   role: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
   address: string;
   bio: string;
   avatar: string;
@@ -67,11 +68,17 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
+  const [originalProfile, setOriginalProfile] = useState<UserProfile | null>(null);
+
+  // Dashboard API state
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile>({
-    name: "Nguyễn Thu Hà",
+    fullName: "Nguyễn Thu Hà",
     role: "Tình nguyện viên",
     email: "thuha.nguyen@volunteerhub.vn",
-    phone: "0912 345 678",
+    phoneNumber: "0912 345 678",
     address: "Cầu Giấy, Hà Nội",
     bio: "Yêu thích các hoạt động bảo vệ môi trường và giáo dục trẻ em. Tôi tin rằng những hành động nhỏ có thể tạo nên thay đổi lớn.",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
@@ -79,10 +86,23 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
     username: "thuha.nguyen"
   });
 
-  // For demo purposes, we use mock data to show the interface
+  // Fetch dashboard data on component mount
   useEffect(() => {
-    console.log("Demo mode: Using mock user data to display interface");
-    // Mock data is already set in initial state, no API call needed for demo
+    const fetchDashboardData = async () => {
+      try {
+        setDashboardLoading(true);
+        setDashboardError(null);
+        const data = await getVolunteerDashboard();
+        setDashboardData(data);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        setDashboardError(error instanceof Error ? error.message : 'Failed to load dashboard');
+      } finally {
+        setDashboardLoading(false);
+      }
+    };
+
+    fetchDashboardData();
   }, []);
 
   // Xử lý thay đổi input trong form sửa profile
@@ -105,8 +125,8 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
     try {
       const updateData = {
         username: userProfile.username,
-        fullName: userProfile.name,
-        phoneNumber: userProfile.phone,
+        fullName: userProfile.fullName,
+        phoneNumber: userProfile.phoneNumber,
         address: userProfile.address,
         bio: userProfile.bio,
         dateOfBirth: userProfile.dateOfBirth,
@@ -133,6 +153,10 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
     } catch (error) {
       console.error("Failed to update profile:", error);
       setUpdateMessage("Lỗi kết nối. Vui lòng thử lại.");
+      // Revert to original profile on error
+      if (originalProfile) {
+        setUserProfile(originalProfile);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -151,50 +175,58 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
   const MyCalendar = () => {
     // State quản lý bộ lọc: 'upcoming' | 'pending' | 'completed'
     const [filter, setFilter] = useState("upcoming");
+    const [myEvents, setMyEvents] = useState<any[]>([]);
+    const [calendarLoading, setCalendarLoading] = useState(true);
 
-    // Mock Data: Danh sách sự kiện của tôi
-    const myEvents = [
-      {
-        id: 1,
-        title: "Chiến dịch Xanh: Làm sạch bãi biển Đà Nẵng",
-        date: "20/12/2024",
-        time: "07:00 - 11:00",
-        location: "Bãi biển Mỹ Khê, Đà Nẵng",
-        status: "upcoming", // Sắp tới
-        image: "https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
-      },
-      {
-        id: 2,
-        title: "Dạy tiếng Anh cho trẻ em vùng cao",
-        date: "15/01/2025",
-        time: "08:00 - 17:00",
-        location: "Mộc Châu, Sơn La",
-        status: "pending", // Chờ duyệt
-        image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
-      },
-      {
-        id: 3,
-        title: "Hiến máu nhân đạo: Giọt hồng yêu thương",
-        date: "10/11/2024",
-        time: "08:00 - 11:30",
-        location: "Viện Huyết học, Hà Nội",
-        status: "completed", // Đã hoàn thành
-        hours: 4,
-        rating: 5,
-        image: "https://images.unsplash.com/photo-1584515933487-779824d29309?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
-      },
-      {
-        id: 4,
-        title: "Phát cháo từ thiện tại Bệnh viện K",
-        date: "05/10/2024",
-        time: "06:00 - 09:00",
-        location: "Bệnh viện K, Tân Triều",
-        status: "completed",
-        hours: 3,
-        rating: 5,
-        image: "https://images.unsplash.com/photo-1593113598332-cd288d649433?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
-      }
-    ];
+    // Fetch user's events on component mount
+    useEffect(() => {
+      const fetchMyEvents = async () => {
+        try {
+          setCalendarLoading(true);
+          // For now, we'll use mock data as the calendar API might not be fully implemented
+          // In a real implementation, this would call an API to get user's events by status
+          const mockEvents = [
+            {
+              id: 1,
+              title: "Chiến dịch Xanh: Làm sạch bãi biển Đà Nẵng",
+              date: "20/12/2024",
+              time: "07:00 - 11:00",
+              location: "Bãi biển Mỹ Khê, Đà Nẵng",
+              status: "upcoming",
+              image: "https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+              id: 2,
+              title: "Dạy tiếng Anh cho trẻ em vùng cao",
+              date: "15/01/2025",
+              time: "08:00 - 17:00",
+              location: "Mộc Châu, Sơn La",
+              status: "pending",
+              image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+              id: 3,
+              title: "Hiến máu nhân đạo: Giọt hồng yêu thương",
+              date: "10/11/2024",
+              time: "08:00 - 11:30",
+              location: "Viện Huyết học, Hà Nội",
+              status: "completed",
+              hours: 4,
+              rating: 5,
+              image: "https://images.unsplash.com/photo-1584515933487-779824d29309?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+            }
+          ];
+          setMyEvents(mockEvents);
+        } catch (error) {
+          console.error('Error fetching my events:', error);
+          setMyEvents([]);
+        } finally {
+          setCalendarLoading(false);
+        }
+      };
+
+      fetchMyEvents();
+    }, []);
 
     // Lọc sự kiện theo tab hiện tại
     const filteredEvents = myEvents.filter(evt => evt.status === filter);
@@ -268,7 +300,25 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
 
           {/* Events List Container */}
           <div className="space-y-5">
-            {filteredEvents.length > 0 ? (
+            {calendarLoading ? (
+              // Loading state for events
+              Array.from({ length: 3 }).map((_, idx) => (
+                <div key={idx} className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5">
+                  <div className="animate-pulse flex flex-col md:flex-row gap-6">
+                    <div className="w-full md:w-56 h-48 md:h-32 bg-gray-200 rounded-2xl"></div>
+                    <div className="flex-1 space-y-3">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                      <div className="flex gap-3 mt-4">
+                        <div className="h-8 bg-gray-200 rounded w-20"></div>
+                        <div className="h-8 bg-gray-200 rounded w-16"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : filteredEvents.length > 0 ? (
               filteredEvents.map((evt) => (
                 <div
                   key={evt.id}
@@ -358,47 +408,26 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
   const FeedbackSection = () => {
     // State quản lý Feedback Tab: 'received' (Đánh giá về tôi) | 'given' (Đánh giá của tôi)
     const [feedbackTab, setFeedbackTab] = useState("received");
+    const [feedbackData, setFeedbackData] = useState<FeedbackItem[]>([]);
+    const [feedbackLoading, setFeedbackLoading] = useState(false);
 
-    // --- MOCK DATA ---
-    const receivedFeedback = [
-      {
-        id: 1,
-        eventName: "Chiến dịch Xanh: Làm sạch bãi biển Đà Nẵng",
-        organizer: "Green Earth VN",
-        avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=100&h=100&q=80",
-        rating: 5,
-        comment: "Hà rất nhiệt tình và năng nổ. Luôn đến sớm và hỗ trợ các thành viên khác. Cảm ơn bạn đã đóng góp tích cực!",
-        date: "21/12/2024"
-      },
-      {
-        id: 2,
-        eventName: "Phát cháo từ thiện tại Bệnh viện K",
-        organizer: "Nhóm Thiện Tâm",
-        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=100&h=100&q=80",
-        rating: 5,
-        comment: "Bạn làm việc rất trách nhiệm và hòa đồng. Hy vọng được hợp tác với Hà trong các dự án sau.",
-        date: "06/10/2024"
-      }
-    ];
+    // Fetch feedback data when tab changes
+    useEffect(() => {
+      const fetchFeedback = async () => {
+        try {
+          setFeedbackLoading(true);
+          const data = await getFeedback(feedbackTab as 'received' | 'given');
+          setFeedbackData(data);
+        } catch (error) {
+          console.error('Error fetching feedback:', error);
+          setFeedbackData([]);
+        } finally {
+          setFeedbackLoading(false);
+        }
+      };
 
-    const givenFeedback = [
-      {
-        id: 1,
-        eventName: "Hiến máu nhân đạo: Giọt hồng yêu thương",
-        image: "https://images.unsplash.com/photo-1584515933487-779824d29309?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
-        rating: 5,
-        comment: "Tổ chức chuyên nghiệp, quy trình hiến máu nhanh gọn và an toàn. Các bạn hỗ trợ viên rất thân thiện và chu đáo.",
-        date: "10/11/2024"
-      },
-      {
-        id: 2,
-        eventName: "Phát cháo từ thiện tại Bệnh viện K",
-        image: "https://images.unsplash.com/photo-1593113598332-cd288d649433?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
-        rating: 4,
-        comment: "Sự kiện rất ý nghĩa. Tuy nhiên, mình nghĩ nên sắp xếp thêm người điều phối hàng lối để tránh ùn tắc vào giờ cao điểm.",
-        date: "05/10/2024"
-      }
-    ];
+      fetchFeedback();
+    }, [feedbackTab]);
 
     // Helper render star rating
     const renderStars = (rating: number) => {
@@ -454,14 +483,30 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
 
           {/* Feedback List Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {feedbackTab === 'received' ? (
-              // --- RECEIVED FEEDBACK (Đánh giá từ BTC) ---
-              receivedFeedback.map((fb) => (
+            {feedbackLoading ? (
+              // Loading state
+              Array.from({ length: 4 }).map((_, idx) => (
+                <div key={idx} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                  <div className="animate-pulse">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-1/3 mb-1"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                      </div>
+                    </div>
+                    <div className="h-16 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-12 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+              ))
+            ) : feedbackData.length > 0 ? (
+              feedbackData.map((fb: FeedbackItem) => (
                 <div key={fb.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-lg transition-all hover:-translate-y-1 group">
                   <div className="flex items-center gap-4 mb-4">
-                    <img src={fb.avatar} alt={fb.organizer} className="w-12 h-12 rounded-full border border-gray-100 object-cover" />
+                    <img src={fb.avatar || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=100&h=100&q=80"} alt={fb.organizer || "Organizer"} className="w-12 h-12 rounded-full border border-gray-100 object-cover" />
                     <div>
-                      <h4 className="font-bold text-[#2C3E50] text-lg">{fb.organizer}</h4>
+                      <h4 className="font-bold text-[#2C3E50] text-lg">{fb.organizer || "Ban tổ chức"}</h4>
                       <p className="text-xs text-gray-500">Ban tổ chức</p>
                     </div>
                     <div className="ml-auto text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-lg font-medium">{fb.date}</div>
@@ -481,35 +526,11 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
                 </div>
               ))
             ) : (
-              // --- GIVEN FEEDBACK (Đánh giá của tôi) ---
-              givenFeedback.map((fb) => (
-                <div key={fb.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-lg transition-all hover:-translate-y-1 flex flex-col">
-                  <div className="flex gap-4 mb-4">
-                    <img src={fb.image} alt={fb.eventName} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
-                    <div>
-                      <h4 className="font-bold text-[#2C3E50] line-clamp-2 mb-1 leading-tight">{fb.eventName}</h4>
-                      <div className="flex items-center gap-2 mt-2">
-                        {renderStars(fb.rating)}
-                        <span className="text-xs text-gray-400">• {fb.date}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-[#F0F7FF] p-4 rounded-xl relative mb-4 flex-grow">
-                    <div className="absolute top-0 left-6 -mt-2 w-4 h-4 bg-[#F0F7FF] transform rotate-45"></div>
-                    <p className="text-gray-700 text-sm leading-relaxed">
-                      <span className="font-bold text-[#34729C]">Bạn: </span>
-                      {fb.comment}
-                    </p>
-                  </div>
-
-                  <div className="flex justify-end pt-2 border-t border-dashed border-gray-100">
-                    <button className="text-xs font-bold text-gray-400 hover:text-[#34729C] transition-colors flex items-center gap-1">
-                      <MessageSquare size={12}/> Chỉnh sửa đánh giá
-                    </button>
-                  </div>
-                </div>
-              ))
+              <div className="col-span-2 text-center py-12">
+                <MessageSquare size={48} className="text-gray-300 mx-auto mb-4" />
+                <h4 className="text-lg font-bold text-gray-600 mb-2">Chưa có đánh giá nào</h4>
+                <p className="text-gray-500">Bạn chưa nhận được đánh giá nào từ ban tổ chức.</p>
+              </div>
             )}
           </div>
         </div>
@@ -565,12 +586,12 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
               <Bell size={20} />
               <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
             </button>
-            <div 
+            <div
               className="flex items-center gap-3 pl-4 border-l border-gray-200 cursor-pointer"
               onClick={() => setActiveTab("profile")}
             >
               <div className="text-right hidden md:block">
-                <p className="text-sm font-bold text-[#2C3E50]">{userProfile.name}</p>
+                <p className="text-sm font-bold text-[#2C3E50]">{userProfile.fullName}</p>
                 <p className="text-xs text-gray-500">Tình nguyện viên</p>
               </div>
               <img src={userProfile.avatar} alt="Avatar" className="w-10 h-10 rounded-full ring-2 ring-[#5FC1D1] object-cover" />
@@ -589,7 +610,7 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
                  <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div>
-                      <h1 className="text-3xl font-bold mb-2">Chào buổi sáng, {userProfile.name.split(' ').pop()}! 👋</h1>
+                      <h1 className="text-3xl font-bold mb-2">Chào buổi sáng, {userProfile.fullName.split(' ').pop()}! 👋</h1>
                       <p className="text-white/90">Bạn đã sẵn sàng cho sự kiện "Dọn rác bãi biển" vào cuối tuần này chưa?</p>
                     </div>
                     <button className="px-6 py-3 bg-white text-[#34729C] font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all">
@@ -600,21 +621,54 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
 
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                  { label: "Giờ đóng góp", value: "48h", icon: <Clock size={24} className="text-[#34729C]" />, color: "bg-[#D1ECFF]" },
-                  { label: "Sự kiện tham gia", value: "12", icon: <Calendar size={24} className="text-[#5FC1D1]" />, color: "bg-[#E0F7FA]" },
-                  { label: "Rating", value: "4.9/5", icon: <Star size={24} className="text-[#FFD93D]" />, color: "bg-[#FFF8E1]" }
-                ].map((stat, idx) => (
-                  <div key={idx} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
-                    <div className={`w-14 h-14 ${stat.color} rounded-2xl flex items-center justify-center`}>
-                      {stat.icon}
+                {dashboardLoading ? (
+                  // Loading state for stats
+                  Array.from({ length: 3 }).map((_, idx) => (
+                    <div key={idx} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+                      <div className="w-14 h-14 bg-gray-200 rounded-2xl animate-pulse"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
+                        <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-gray-500 text-sm font-medium">{stat.label}</p>
-                      <p className="text-2xl font-bold text-[#2C3E50]">{stat.value}</p>
+                  ))
+                ) : dashboardData ? (
+                  [
+                    {
+                      label: "Giờ đóng góp",
+                      value: `${dashboardData.userStats.totalHoursContributed}h`,
+                      icon: <Clock size={24} className="text-[#34729C]" />,
+                      color: "bg-[#D1ECFF]"
+                    },
+                    {
+                      label: "Sự kiện tham gia",
+                      value: dashboardData.userStats.totalEventsParticipated.toString(),
+                      icon: <Calendar size={24} className="text-[#5FC1D1]" />,
+                      color: "bg-[#E0F7FA]"
+                    },
+                    {
+                      label: "Rating",
+                      value: `${dashboardData.userStats.averageRating.toFixed(1)}/5`,
+                      icon: <Star size={24} className="text-[#FFD93D]" />,
+                      color: "bg-[#FFF8E1]"
+                    }
+                  ].map((stat, idx) => (
+                    <div key={idx} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+                      <div className={`w-14 h-14 ${stat.color} rounded-2xl flex items-center justify-center`}>
+                        {stat.icon}
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-sm font-medium">{stat.label}</p>
+                        <p className="text-2xl font-bold text-[#2C3E50]">{stat.value}</p>
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  // Error state
+                  <div className="col-span-3 bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
+                    <p className="text-red-600">Không thể tải thống kê. Vui lòng thử lại.</p>
                   </div>
-                ))}
+                )}
               </div>
 
               {/* Main Content (Events) */}
@@ -624,29 +678,57 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
                     <a href="#" className="text-[#34729C] text-sm font-semibold hover:underline">Xem lịch</a>
                  </div>
                   
-                 {/* Timeline Card */}
-                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 relative overflow-hidden group hover:shadow-md transition-all">
-                     <div className="absolute top-0 left-0 w-1.5 h-full bg-[#34729C]"></div>
-                     <div className="flex flex-col md:flex-row gap-6">
-                        <div className="md:w-1/3">
-                           <img src="https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Event" className="w-full h-32 object-cover rounded-xl" />
-                        </div>
-                        <div className="flex-1 flex flex-col justify-between">
-                           <div>
-                              <div className="flex items-center gap-2 mb-2">
-                                 <span className="px-2 py-1 bg-green-100 text-green-600 text-xs font-bold rounded uppercase">Sắp diễn ra</span>
-                                 <span className="text-sm text-gray-500">20/12/2024 • 07:00 AM</span>
-                              </div>
-                              <h4 className="text-lg font-bold text-[#2C3E50] mb-2">Chiến dịch Xanh: Làm sạch bãi biển Đà Nẵng</h4>
-                              <p className="text-gray-500 text-sm flex items-center gap-1"><MapPin size={14} /> Bãi biển Mỹ Khê, Đà Nẵng</p>
-                           </div>
-                           <div className="mt-4 flex gap-3">
-                              <button className="flex-1 px-4 py-2 bg-[#34729C] text-white text-sm font-bold rounded-lg hover:bg-[#2a5d80] transition-colors">Check-in</button>
-                              <button className="px-4 py-2 border border-gray-200 text-gray-600 text-sm font-bold rounded-lg hover:bg-gray-50 transition-colors">Chi tiết</button>
-                           </div>
-                        </div>
+                 {/* Upcoming Events */}
+                 {dashboardLoading ? (
+                   <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                     <div className="animate-pulse">
+                       <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+                       <div className="h-32 bg-gray-200 rounded-xl"></div>
                      </div>
-                 </div>
+                   </div>
+                 ) : dashboardData && dashboardData.upcomingEvents.length > 0 ? (
+                   dashboardData.upcomingEvents.slice(0, 1).map((event: any) => (
+                     <div key={event.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 relative overflow-hidden group hover:shadow-md transition-all">
+                         <div className="absolute top-0 left-0 w-1.5 h-full bg-[#34729C]"></div>
+                         <div className="flex flex-col md:flex-row gap-6">
+                            <div className="md:w-1/3">
+                               <img src={event.image} alt={event.title} className="w-full h-32 object-cover rounded-xl" />
+                            </div>
+                            <div className="flex-1 flex flex-col justify-between">
+                               <div>
+                                  <div className="flex items-center gap-2 mb-2">
+                                     <span className="px-2 py-1 bg-green-100 text-green-600 text-xs font-bold rounded uppercase">Sắp diễn ra</span>
+                                     <span className="text-sm text-gray-500">{event.date} • {event.time}</span>
+                                  </div>
+                                  <h4 className="text-lg font-bold text-[#2C3E50] mb-2">{event.title}</h4>
+                                  <p className="text-gray-500 text-sm flex items-center gap-1"><MapPin size={14} /> {event.location}</p>
+                               </div>
+                               <div className="mt-4 flex gap-3">
+                                  <button className="flex-1 px-4 py-2 bg-[#34729C] text-white text-sm font-bold rounded-lg hover:bg-[#2a5d80] transition-colors">Check-in</button>
+                                  <button
+                                    onClick={() => navigate(`/event/${event.id}`)}
+                                    className="px-4 py-2 border border-gray-200 text-gray-600 text-sm font-bold rounded-lg hover:bg-gray-50 transition-colors"
+                                  >
+                                    Chi tiết
+                                  </button>
+                               </div>
+                            </div>
+                         </div>
+                     </div>
+                   ))
+                 ) : (
+                   <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center">
+                     <Calendar size={48} className="text-gray-300 mx-auto mb-4" />
+                     <h4 className="text-lg font-bold text-gray-600 mb-2">Chưa có sự kiện sắp tới</h4>
+                     <p className="text-gray-500 text-sm">Hãy khám phá và đăng ký tham gia các sự kiện ý nghĩa!</p>
+                     <button
+                       onClick={() => navigate('/events')}
+                       className="mt-4 px-6 py-2 bg-[#34729C] text-white text-sm font-bold rounded-lg hover:bg-[#2a5d80] transition-colors"
+                     >
+                       Tìm sự kiện
+                     </button>
+                   </div>
+                 )}
 
                  {/* Recommended Section */}
                  <div className="pt-4">
@@ -698,22 +780,30 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
                     </div>
                     
                     <div className="flex-1 mb-2 md:mb-0">
-                      <h2 className="text-2xl font-bold text-[#2C3E50]">{userProfile.name}</h2>
+                      <h2 className="text-2xl font-bold text-[#2C3E50]">{userProfile.fullName}</h2>
                       <p className="text-gray-500">{userProfile.role}</p>
                     </div>
 
                     <div className="flex gap-3 mb-2 md:mb-0">
                       {!isEditing ? (
-                        <button 
-                          onClick={() => setIsEditing(true)}
+                        <button
+                          onClick={() => {
+                            setOriginalProfile({ ...userProfile });
+                            setIsEditing(true);
+                          }}
                           className="flex items-center gap-2 px-5 py-2.5 bg-[#34729C] text-white rounded-xl font-bold shadow-md hover:bg-[#2a5d80] transition-colors"
                         >
                           <Edit size={16} /> Chỉnh sửa
                         </button>
                       ) : (
                         <>
-                          <button 
-                            onClick={() => setIsEditing(false)}
+                          <button
+                            onClick={() => {
+                              if (originalProfile) {
+                                setUserProfile(originalProfile);
+                              }
+                              setIsEditing(false);
+                            }}
                             className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors"
                           >
                             <X size={16} /> Hủy
@@ -749,9 +839,9 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
                         <div className="group">
                           <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Họ và tên</label>
                           {isEditing ? (
-                            <input type="text" name="name" value={userProfile.name} onChange={handleProfileChange} className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#34729C] focus:ring-2 focus:ring-[#34729C]/10 outline-none transition-all bg-gray-50 focus:bg-white" />
+                            <input type="text" name="fullName" value={userProfile.fullName} onChange={handleProfileChange} className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#34729C] focus:ring-2 focus:ring-[#34729C]/10 outline-none transition-all bg-gray-50 focus:bg-white" />
                           ) : (
-                            <p className="text-[#2C3E50] font-medium text-lg">{userProfile.name}</p>
+                            <p className="text-[#2C3E50] font-medium text-lg">{userProfile.fullName}</p>
                           )}
                         </div>
 
@@ -769,10 +859,10 @@ const VolunteerDashboard = ({ onLogout }: { onLogout: () => void }) => {
                         <div className="group">
                           <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Số điện thoại</label>
                           {isEditing ? (
-                            <input type="tel" name="phone" value={userProfile.phone} onChange={handleProfileChange} className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#34729C] focus:ring-2 focus:ring-[#34729C]/10 outline-none transition-all bg-gray-50 focus:bg-white" />
+                            <input type="tel" name="phoneNumber" value={userProfile.phoneNumber} onChange={handleProfileChange} className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#34729C] focus:ring-2 focus:ring-[#34729C]/10 outline-none transition-all bg-gray-50 focus:bg-white" />
                           ) : (
                             <div className="flex items-center gap-2 text-[#2C3E50] font-medium">
-                              <Phone size={18} className="text-[#5FC1D1]" /> {userProfile.phone}
+                              <Phone size={18} className="text-[#5FC1D1]" /> {userProfile.phoneNumber}
                             </div>
                           )}
                         </div>

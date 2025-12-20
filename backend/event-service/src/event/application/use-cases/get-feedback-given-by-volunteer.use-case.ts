@@ -3,29 +3,16 @@ import { IFeedbackRepository, PaginatedResult } from '../../domain/repositories/
 import { Feedback, FeedbackType } from '../../domain/entities/feedback.entity';
 import { GetFeedbackDto } from '../dto/get-feedback.dto';
 import { IEventRepository } from '../../domain/repositories/event.repository.interface';
+import { EnrichedFeedback } from './get-feedback-for-volunteer.use-case';
 
-export interface EnrichedFeedback {
-    id: string;
-    eventId: string;
-    eventTitle: string;
-    organizerName: string;
-    volunteerId: string;
-    managerId?: string;
-    feedbackType: FeedbackType;
-    rating: number;
-    comment?: string;
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-interface GetFeedbackForVolunteerParams {
+interface GetFeedbackGivenByVolunteerParams {
     volunteerId: string;
     query?: GetFeedbackDto;
 }
 
 @Injectable()
-export class GetFeedbackForVolunteerUseCase {
-    private readonly logger = new Logger(GetFeedbackForVolunteerUseCase.name);
+export class GetFeedbackGivenByVolunteerUseCase {
+    private readonly logger = new Logger(GetFeedbackGivenByVolunteerUseCase.name);
 
     constructor(
         @Inject(IFeedbackRepository)
@@ -34,12 +21,12 @@ export class GetFeedbackForVolunteerUseCase {
         private readonly eventRepository: IEventRepository
     ) { }
 
-    async execute(params: GetFeedbackForVolunteerParams): Promise<PaginatedResult<EnrichedFeedback>> {
+    async execute(params: GetFeedbackGivenByVolunteerParams): Promise<PaginatedResult<EnrichedFeedback>> {
         const { volunteerId, query } = params;
 
         const options = {
             volunteerId,
-            feedbackType: FeedbackType.MANAGER_TO_VOLUNTEER, // Only received feedback
+            feedbackType: FeedbackType.VOLUNTEER_TO_EVENT,
             page: query?.page || 1,
             limit: query?.limit || 20,
             sortBy: query?.sortBy || 'createdAt',
@@ -87,7 +74,7 @@ export class GetFeedbackForVolunteerUseCase {
             })
         );
 
-        this.logger.log(`Retrieved ${enrichedData.length} enriched feedback items for volunteer ${volunteerId}`);
+        this.logger.log(`Retrieved ${enrichedData.length} enriched feedback items given by volunteer ${volunteerId}`);
 
         return {
             ...result,

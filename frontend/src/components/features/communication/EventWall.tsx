@@ -1,10 +1,25 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   Heart, MessageCircle, MoreVertical, MapPin,
   Users, Calendar, Image as ImageIcon, X,
   ChevronDown, Check, Bell, User, Pin,
-  Edit3, Search, Shield, BadgeCheck, Video
+  Edit3, Search, Shield, BadgeCheck, Video, Trash2
 } from 'lucide-react';
+import {
+  getPosts,
+  createPost,
+  deletePost,
+  likePost,
+  unlikePost,
+  pinPost,
+  unpinPost,
+  addComment,
+  updateComment,
+  deleteComment,
+  type BackendPost,
+  type BackendComment
+} from '../../../services/communication.service';
 
 // --- Type Definitions ---
 interface Post {
@@ -22,6 +37,9 @@ interface Post {
   comments: Comment[];
   images: string[];
   isLiked: boolean;
+  backendId?: string; // Backend post ID for API calls
+  eventId?: string;
+  authorId?: string;
 }
 
 interface Comment {
@@ -31,6 +49,8 @@ interface Comment {
   content: string;
   time: string;
   likes: number;
+  backendId?: string; // Backend comment ID for API calls
+  authorId?: string;
 }
 
 interface Member {
@@ -86,7 +106,8 @@ const MOCK_MEMBERS: Member[] = [
   { id: 7, name: 'Vũ Văn E', role: 'Volunteer', avatar: 'https://i.pravatar.cc/150?img=60', email: 'vue@gmail.com', status: 'Online' },
 ];
 
-const MOCK_POSTS: Post[] = [
+// MOCK_POSTS removed - using real API data now
+const MOCK_POSTS_LEGACY: Post[] = [
   {
     id: 1,
     type: 'pinned',
@@ -201,19 +222,100 @@ const Button = ({ children, variant = 'primary', className = '', onClick, disabl
   );
 };
 
+// Helper function to convert backend post to frontend post
+const convertBackendPostToPost = (backendPost: BackendPost, currentUserId: string): Post => {
+  const isLiked = backendPost.likedBy.includes(currentUserId);
+  const timeAgo = getTimeAgo(backendPost.createdAt);
+  
+  return {
+    id: parseInt(backendPost.id) || Date.now(),
+    type: backendPost.isPinned ? 'pinned' : 'regular',
+    author: {
+      name: backendPost.authorName,
+      avatar: backendPost.authorAvatar || `https://i.pravatar.cc/150?img=${backendPost.authorId}`,
+      role: 'Volunteer', // TODO: Get from user service
+      roleColor: THEME.colors.accent
+    },
+    content: backendPost.content,
+    time: timeAgo,
+    likes: backendPost.likesCount,
+    comments: backendPost.comments.map(convertBackendCommentToComment),
+    images: backendPost.images,
+    isLiked,
+    backendId: backendPost.id, // Store backend ID for API calls
+    eventId: backendPost.eventId,
+    authorId: backendPost.authorId
+  };
+};
+
+const convertBackendCommentToComment = (backendComment: BackendComment): Comment => {
+  return {
+    id: parseInt(backendComment.id) || Date.now(),
+    author: backendComment.authorName,
+    avatar: backendComment.authorAvatar || undefined,
+    content: backendComment.content,
+    time: getTimeAgo(backendComment.createdAt),
+    likes: 0, // Backend doesn't have comment likes yet
+    backendId: backendComment.id,
+    authorId: backendComment.authorId
+  };
+};
+
+// Helper function to get time ago string
+const getTimeAgo = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  
+  if (diffInSeconds < 60) return 'Vừa xong';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} ngày trước`;
+  return date.toLocaleDateString('vi-VN');
+};
+
 // --- Main Application Component ---
 
 export default function EventWallApp() {
+  const { id: eventId } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState('wall');
-  const [posts, setPosts] = useState<Post[]>(MOCK_POSTS);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [notifications, setNotifications] = useState<{ id: number; type: string; message: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'latest' | 'most_active'>('latest');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const currentUserId = localStorage.getItem('userId') || 'mock-user-id';
+  const currentUserRole = localStorage.getItem('userRole') || 'volunteer';
+  const isEventManager = currentUserRole === 'event_manager' || currentUserRole === 'admin';
 
+  // Load posts on mount and when sortBy changes
   useEffect(() => {
-    setTimeout(() => setIsLoading(false), 800);
-  }, []);
+    if (eventId) {
+      loadPosts();
+    }
+  }, [eventId, sortBy]);
+
+  const loadPosts = async () => {
+    if (!eventId) return;
+    
+    setIsLoading(true);
+    setError(null);
+    try {
+      const backendPosts = await getPosts(eventId, 20, 0, sortBy);
+      const convertedPosts = backendPosts.map(post => convertBackendPostToPost(post, currentUserId));
+      setPosts(convertedPosts);
+    } catch (err) {
+      console.error('Error loading posts:', err);
+      setError('Không thể tải bài viết. Vui lòng thử lại sau.');
+      addNotification('error', 'Lỗi khi tải bài viết');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const addNotification = (type: string, message: string) => {
     const id = Date.now();
@@ -223,36 +325,166 @@ export default function EventWallApp() {
     }, 5000);
   };
 
-  const handleCreatePost = (content: string, images?: string[]) => {
-    const newPost: Post = {
-      id: Date.now(),
-      type: 'regular',
-      author: { ...MOCK_USER, roleColor: THEME.colors.primary },
-      content: content,
-      time: 'Vừa xong',
-      likes: 0,
-      comments: [],
-      images: images || [],
-      isLiked: false
-    };
-    setPosts([newPost, ...posts]);
-    setIsCreateModalOpen(false);
-    addNotification('success', 'Đã đăng bài viết thành công!');
+  const handleCreatePost = async (content: string, images?: string[]) => {
+    if (!eventId) return;
+    
+    setIsSubmitting(true);
+    try {
+      const newBackendPost = await createPost(eventId, content, images || []);
+      const newPost = convertBackendPostToPost(newBackendPost, currentUserId);
+      setPosts([newPost, ...posts]);
+      setIsCreateModalOpen(false);
+      addNotification('success', 'Đã đăng bài viết thành công!');
+    } catch (err) {
+      console.error('Error creating post:', err);
+      addNotification('error', 'Không thể đăng bài viết. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const toggleLike = (postId: number) => {
-    setPosts(posts.map(post => {
-      if (post.id === postId) {
-        const isLiked = !post.isLiked;
-        if (isLiked) addNotification('like', `Bạn đã thích bài viết của ${post.author.name}`);
-        return {
-          ...post,
-          isLiked,
-          likes: isLiked ? post.likes + 1 : post.likes - 1
-        };
+  const toggleLike = async (post: Post) => {
+    if (!eventId || !post.backendId) return;
+    
+    try {
+      if (post.isLiked) {
+        await unlikePost(eventId, post.backendId);
+        setPosts(posts.map(p => 
+          p.backendId === post.backendId 
+            ? { ...p, isLiked: false, likes: Math.max(0, p.likes - 1) }
+            : p
+        ));
+      } else {
+        await likePost(eventId, post.backendId);
+        setPosts(posts.map(p => 
+          p.backendId === post.backendId 
+            ? { ...p, isLiked: true, likes: p.likes + 1 }
+            : p
+        ));
+        addNotification('like', `Bạn đã thích bài viết của ${post.author.name}`);
       }
-      return post;
-    }));
+    } catch (err) {
+      console.error('Error toggling like:', err);
+      addNotification('error', 'Không thể thực hiện thao tác. Vui lòng thử lại.');
+    }
+  };
+
+  const handleDeletePost = async (post: Post) => {
+    if (!eventId || !post.backendId) return;
+    if (!window.confirm('Bạn có chắc chắn muốn xóa bài viết này?')) return;
+    
+    try {
+      await deletePost(eventId, post.backendId);
+      setPosts(posts.filter(p => p.backendId !== post.backendId));
+      if (selectedPost?.backendId === post.backendId) {
+        setSelectedPost(null);
+      }
+      addNotification('success', 'Đã xóa bài viết thành công!');
+    } catch (err) {
+      console.error('Error deleting post:', err);
+      addNotification('error', 'Không thể xóa bài viết. Vui lòng thử lại.');
+    }
+  };
+
+  const handlePinPost = async (post: Post) => {
+    if (!eventId || !post.backendId) return;
+    
+    try {
+      if (post.type === 'pinned') {
+        await unpinPost(eventId, post.backendId);
+        setPosts(posts.map(p => 
+          p.backendId === post.backendId ? { ...p, type: 'regular' } : p
+        ));
+        addNotification('success', 'Đã bỏ ghim bài viết');
+      } else {
+        await pinPost(eventId, post.backendId);
+        setPosts(posts.map(p => 
+          p.backendId === post.backendId ? { ...p, type: 'pinned' } : p
+        ));
+        addNotification('success', 'Đã ghim bài viết');
+      }
+    } catch (err) {
+      console.error('Error pinning post:', err);
+      addNotification('error', 'Không thể thực hiện thao tác. Vui lòng thử lại.');
+    }
+  };
+
+  const handleAddComment = async (post: Post, content: string) => {
+    if (!eventId || !post.backendId) return;
+    
+    try {
+      const newComment = await addComment(eventId, post.backendId, content);
+      const convertedComment = convertBackendCommentToComment(newComment);
+      setPosts(posts.map(p => 
+        p.backendId === post.backendId 
+          ? { ...p, comments: [...p.comments, convertedComment], likes: p.likes } 
+          : p
+      ));
+      if (selectedPost?.backendId === post.backendId) {
+        setSelectedPost({ ...selectedPost, comments: [...selectedPost.comments, convertedComment] });
+      }
+    } catch (err) {
+      console.error('Error adding comment:', err);
+      addNotification('error', 'Không thể thêm bình luận. Vui lòng thử lại.');
+    }
+  };
+
+  const handleDeleteComment = async (post: Post, comment: Comment) => {
+    if (!eventId || !post.backendId || !comment.backendId) return;
+    if (!window.confirm('Bạn có chắc chắn muốn xóa bình luận này?')) return;
+    
+    try {
+      await deleteComment(eventId, post.backendId, comment.backendId);
+      setPosts(posts.map(p => 
+        p.backendId === post.backendId 
+          ? { ...p, comments: p.comments.filter(c => c.backendId !== comment.backendId) }
+          : p
+      ));
+      if (selectedPost?.backendId === post.backendId) {
+        setSelectedPost({
+          ...selectedPost,
+          comments: selectedPost.comments.filter(c => c.backendId !== comment.backendId)
+        });
+      }
+      addNotification('success', 'Đã xóa bình luận');
+    } catch (err) {
+      console.error('Error deleting comment:', err);
+      addNotification('error', 'Không thể xóa bình luận. Vui lòng thử lại.');
+    }
+  };
+
+  const handleUpdateComment = async (post: Post, comment: Comment, newContent: string) => {
+    if (!eventId || !post.backendId || !comment.backendId) return;
+    
+    try {
+      await updateComment(eventId, post.backendId, comment.backendId, newContent);
+      setPosts(posts.map(p => 
+        p.backendId === post.backendId 
+          ? {
+              ...p,
+              comments: p.comments.map(c => 
+                c.backendId === comment.backendId 
+                  ? { ...c, content: newContent }
+                  : c
+              )
+            }
+          : p
+      ));
+      if (selectedPost?.backendId === post.backendId) {
+        setSelectedPost({
+          ...selectedPost,
+          comments: selectedPost.comments.map(c => 
+            c.backendId === comment.backendId 
+              ? { ...c, content: newContent }
+              : c
+          )
+        });
+      }
+      addNotification('success', 'Đã cập nhật bình luận');
+    } catch (err) {
+      console.error('Error updating comment:', err);
+      addNotification('error', 'Không thể cập nhật bình luận. Vui lòng thử lại.');
+    }
   };
 
   return (
@@ -313,6 +545,30 @@ export default function EventWallApp() {
                 )}
               </button>
             ))}
+            {activeTab === 'wall' && (
+              <div className="ml-4 flex gap-2">
+                <button
+                  onClick={() => setSortBy('latest')}
+                  className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                    sortBy === 'latest' 
+                      ? 'bg-blue-100 text-blue-700 font-medium' 
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Mới nhất
+                </button>
+                <button
+                  onClick={() => setSortBy('most_active')}
+                  className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                    sortBy === 'most_active' 
+                      ? 'bg-blue-100 text-blue-700 font-medium' 
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Nổi bật
+                </button>
+              </div>
+            )}
           </nav>
 
           {/* Right: Dashboard Style User Info */}
@@ -327,10 +583,10 @@ export default function EventWallApp() {
 
             {/* User Profile Dropdown Trigger */}
             <div className="flex items-center gap-3 cursor-pointer p-1 pr-3 rounded-full hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all">
-              <Avatar src={MOCK_USER.avatar} size="sm" />
+              <Avatar src={localStorage.getItem('userAvatar') || MOCK_USER.avatar} size="sm" />
               <div className="hidden sm:block text-left">
-                <div className="text-xs font-bold text-gray-800 leading-none">{MOCK_USER.name}</div>
-                <div className="text-[10px] font-medium text-blue-600 leading-tight mt-1">{MOCK_USER.role}</div>
+                <div className="text-xs font-bold text-gray-800 leading-none">{localStorage.getItem('userName') || MOCK_USER.name}</div>
+                <div className="text-[10px] font-medium text-blue-600 leading-tight mt-1">{currentUserRole === 'event_manager' ? 'Event Manager' : currentUserRole === 'admin' ? 'Admin' : 'Volunteer'}</div>
               </div>
               <ChevronDown size={14} className="text-gray-400 hidden sm:block" />
             </div>
@@ -418,19 +674,39 @@ export default function EventWallApp() {
                 </div>
 
                 {/* Posts List */}
-                {isLoading ? (
+                {error ? (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                    <p className="text-red-600">{error}</p>
+                    <button 
+                      onClick={loadPosts}
+                      className="mt-2 text-sm text-red-700 hover:underline"
+                    >
+                      Thử lại
+                    </button>
+                  </div>
+                ) : isLoading ? (
                   <div className="space-y-4">
                     <PostSkeleton />
                     <PostSkeleton />
+                  </div>
+                ) : posts.length === 0 ? (
+                  <div className="bg-white rounded-[16px] p-12 text-center border border-gray-100">
+                    <MessageCircle size={48} className="mx-auto mb-4 text-gray-300" />
+                    <p className="text-gray-500 text-lg font-medium">Chưa có bài viết nào</p>
+                    <p className="text-gray-400 text-sm mt-2">Hãy là người đầu tiên chia sẻ!</p>
                   </div>
                 ) : (
                   <div className="space-y-6">
                     {posts.map(post => (
                       <PostCard 
-                        key={post.id} 
+                        key={post.backendId || post.id} 
                         post={post} 
-                        onLike={() => toggleLike(post.id)}
+                        onLike={() => toggleLike(post)}
                         onCommentClick={() => setSelectedPost(post)}
+                        onDelete={isEventManager || post.authorId === currentUserId ? () => handleDeletePost(post) : undefined}
+                        onPin={isEventManager ? () => handlePinPost(post) : undefined}
+                        isEventManager={isEventManager}
+                        isOwner={post.authorId === currentUserId}
                       />
                     ))}
                     <div className="py-8 flex justify-center text-sm text-gray-400 font-medium">
@@ -466,8 +742,31 @@ export default function EventWallApp() {
       </div>
 
       {/* --- Modals --- */}
-      {isCreateModalOpen && <CreatePostModal onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreatePost} user={MOCK_USER} />}
-      {selectedPost && <PostDetailModal post={selectedPost} onClose={() => setSelectedPost(null)} onLike={() => toggleLike(selectedPost.id)} />}
+      {isCreateModalOpen && (
+        <CreatePostModal 
+          onClose={() => setIsCreateModalOpen(false)} 
+          onSubmit={handleCreatePost} 
+          user={{
+            id: currentUserId,
+            name: localStorage.getItem('userName') || MOCK_USER.name,
+            avatar: localStorage.getItem('userAvatar') || MOCK_USER.avatar,
+            role: currentUserRole
+          }}
+          isSubmitting={isSubmitting}
+        />
+      )}
+      {selectedPost && (
+        <PostDetailModal 
+          post={selectedPost} 
+          onClose={() => setSelectedPost(null)} 
+          onLike={() => toggleLike(selectedPost)}
+          onAddComment={(content) => handleAddComment(selectedPost, content)}
+          onDeleteComment={(comment) => handleDeleteComment(selectedPost, comment)}
+          onUpdateComment={(comment, newContent) => handleUpdateComment(selectedPost, comment, newContent)}
+          currentUserId={currentUserId}
+          isEventManager={isEventManager}
+        />
+      )}
 
       {/* --- Global Styles --- */}
       <style>{`
@@ -634,8 +933,34 @@ function NavIcon({ icon, active, onClick }: { icon: React.ReactNode; active: boo
 
 // --- Post Card Component ---
 
-function PostCard({ post, onLike, onCommentClick }: { post: Post; onLike: () => void; onCommentClick: () => void }) {
+function PostCard({ 
+  post, 
+  onLike, 
+  onCommentClick,
+  onDelete,
+  onPin,
+  isEventManager,
+  isOwner
+}: { 
+  post: Post; 
+  onLike: () => void; 
+  onCommentClick: () => void;
+  onDelete?: () => void;
+  onPin?: () => void;
+  isEventManager?: boolean;
+  isOwner?: boolean;
+}) {
   const isPinned = post.type === 'pinned';
+  const [showMenu, setShowMenu] = useState(false);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (showMenu) {
+      const handleClickOutside = () => setShowMenu(false);
+      setTimeout(() => document.addEventListener('click', handleClickOutside), 0);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [showMenu]);
 
   return (
     <div
@@ -663,7 +988,42 @@ function PostCard({ post, onLike, onCommentClick }: { post: Post; onLike: () => 
               </div>
             </div>
           </div>
-          <button className="text-gray-400 hover:bg-gray-100 p-1 rounded-full"><MoreVertical size={20} /></button>
+          <div className="relative">
+            <button 
+              onClick={() => setShowMenu(!showMenu)}
+              className="text-gray-400 hover:bg-gray-100 p-1 rounded-full"
+            >
+              <MoreVertical size={20} />
+            </button>
+            {showMenu && (
+              <div className="absolute right-0 top-10 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10 min-w-[150px]">
+                {isEventManager && (
+                  <button
+                    onClick={() => {
+                      onPin?.();
+                      setShowMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                  >
+                    <Pin size={16} />
+                    {isPinned ? 'Bỏ ghim' : 'Ghim bài viết'}
+                  </button>
+                )}
+                {(isOwner || isEventManager) && onDelete && (
+                  <button
+                    onClick={() => {
+                      onDelete();
+                      setShowMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  >
+                    <Trash2 size={16} />
+                    Xóa bài viết
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Post Content */}
@@ -771,18 +1131,30 @@ function PostSkeleton() {
 
 // --- Create Post Modal ---
 
-function CreatePostModal({ onClose, onSubmit, user }: { onClose: () => void; onSubmit: (content: string, images?: string[]) => void; user: User }) {
+function CreatePostModal({ 
+  onClose, 
+  onSubmit, 
+  user,
+  isSubmitting = false
+}: { 
+  onClose: () => void; 
+  onSubmit: (content: string, images?: string[]) => void; 
+  user: User;
+  isSubmitting?: boolean;
+}) {
   const [content, setContent] = useState('');
   const [isClosing, setIsClosing] = useState(false);
 
   const handleClose = () => {
+    if (isSubmitting) return;
     setIsClosing(true);
     setTimeout(onClose, 200);
   };
 
   const handleSubmit = () => {
-    if (!content.trim()) return;
+    if (!content.trim() || isSubmitting) return;
     onSubmit(content);
+    setContent(''); // Clear after submit
   };
 
   return (
@@ -840,7 +1212,52 @@ function CreatePostModal({ onClose, onSubmit, user }: { onClose: () => void; onS
 
 // --- Post Detail Modal (Full View) ---
 
-function PostDetailModal({ post, onClose, onLike }: { post: Post; onClose: () => void; onLike: () => void }) {
+function PostDetailModal({ 
+  post, 
+  onClose, 
+  onLike,
+  onAddComment,
+  onDeleteComment,
+  onUpdateComment,
+  currentUserId,
+  isEventManager = false
+}: { 
+  post: Post; 
+  onClose: () => void; 
+  onLike: () => void;
+  onAddComment?: (content: string) => void;
+  onDeleteComment?: (comment: Comment) => void;
+  onUpdateComment?: (comment: Comment, newContent: string) => void;
+  currentUserId: string;
+  isEventManager?: boolean;
+}) {
+  const [commentContent, setCommentContent] = useState('');
+  const [editingComment, setEditingComment] = useState<Comment | null>(null);
+  const [editContent, setEditContent] = useState('');
+
+  const handleSubmitComment = () => {
+    if (!commentContent.trim() || !onAddComment) return;
+    onAddComment(commentContent);
+    setCommentContent('');
+  };
+
+  const handleStartEdit = (comment: Comment) => {
+    setEditingComment(comment);
+    setEditContent(comment.content);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingComment || !editContent.trim() || !onUpdateComment) return;
+    onUpdateComment(editingComment, editContent);
+    setEditingComment(null);
+    setEditContent('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingComment(null);
+    setEditContent('');
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-8 animate-fade-in">
        <div className="bg-white w-full max-w-5xl h-full md:h-[90vh] md:rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row relative">
@@ -890,20 +1307,64 @@ function PostDetailModal({ post, onClose, onLike }: { post: Post; onClose: () =>
                 </div>
               ) : (
                 post.comments.map((comment: Comment) => (
-                  <div key={comment.id} className="flex gap-3 group">
+                  <div key={comment.backendId || comment.id} className="flex gap-3 group">
                      <Avatar src={comment.avatar || `https://i.pravatar.cc/150?img=${comment.id}`} size="sm" />
                      <div className="flex-1">
-                        <div className="flex items-baseline gap-2">
-                           <div className="bg-gray-100 px-3 py-2 rounded-2xl rounded-tl-none">
-                              <span className="font-semibold text-sm block">{comment.author}</span>
-                              <span className="text-sm text-gray-800">{comment.content}</span>
-                           </div>
-                        </div>
-                        <div className="flex gap-4 mt-1 ml-2 text-xs text-gray-500 font-medium">
-                           <button className="hover:text-gray-800">Thích</button>
-                           <button className="hover:text-gray-800">Phản hồi</button>
-                           <span>{comment.time}</span>
-                        </div>
+                        {editingComment?.backendId === comment.backendId ? (
+                          <div className="space-y-2">
+                            <textarea
+                              value={editContent}
+                              onChange={(e) => setEditContent(e.target.value)}
+                              className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              rows={2}
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                onClick={handleSaveEdit}
+                                className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                              >
+                                Lưu
+                              </button>
+                              <button
+                                onClick={handleCancelEdit}
+                                className="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300"
+                              >
+                                Hủy
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex items-baseline gap-2">
+                               <div className="bg-gray-100 px-3 py-2 rounded-2xl rounded-tl-none">
+                                  <span className="font-semibold text-sm block">{comment.author}</span>
+                                  <span className="text-sm text-gray-800">{comment.content}</span>
+                               </div>
+                            </div>
+                            <div className="flex gap-4 mt-1 ml-2 text-xs text-gray-500 font-medium">
+                               <button className="hover:text-gray-800">Thích</button>
+                               {(comment.authorId === currentUserId || isEventManager) && (
+                                 <>
+                                   <button 
+                                     onClick={() => handleStartEdit(comment)}
+                                     className="hover:text-gray-800"
+                                   >
+                                     Sửa
+                                   </button>
+                                   {onDeleteComment && (
+                                     <button 
+                                       onClick={() => onDeleteComment(comment)}
+                                       className="hover:text-red-600 text-red-500"
+                                     >
+                                       Xóa
+                                     </button>
+                                   )}
+                                 </>
+                               )}
+                               <span>{comment.time}</span>
+                            </div>
+                          </>
+                        )}
                      </div>
                   </div>
                 ))
@@ -927,8 +1388,22 @@ function PostDetailModal({ post, onClose, onLike }: { post: Post; onClose: () =>
                    type="text"
                    placeholder="Thêm bình luận..."
                    className="flex-1 bg-transparent text-sm py-2 px-1 focus:outline-none"
+                   value={commentContent}
+                   onChange={(e) => setCommentContent(e.target.value)}
+                   onKeyPress={(e) => {
+                     if (e.key === 'Enter' && !e.shiftKey) {
+                       e.preventDefault();
+                       handleSubmitComment();
+                     }
+                   }}
                  />
-                 <button className="text-blue-500 font-semibold text-sm disabled:opacity-50" disabled>Đăng</button>
+                 <button 
+                   className="text-blue-500 font-semibold text-sm disabled:opacity-50 hover:text-blue-600" 
+                   disabled={!commentContent.trim()}
+                   onClick={handleSubmitComment}
+                 >
+                   Đăng
+                 </button>
                </div>
             </div>
          </div>

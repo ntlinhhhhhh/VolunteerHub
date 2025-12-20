@@ -31,6 +31,7 @@ import { CreateCategoryUseCase } from './event/application/use-cases/create-cate
 import { EventController } from './event/presentation/controllers/event.controller';
 import { CategoryController } from './event/presentation/controllers/category.controller';
 import { FeedbackController } from './event/presentation/controllers/feedback.controller';
+import { VolunteerFeedbackController } from './event/presentation/controllers/volunteer-feedback.controller';
 import { EventCategory } from './event/domain/entities/event-category.entity';
 import { EventCategorySchema } from './event/infrastructure/database/schemas/event-category.schema';
 import { Feedback } from './event/infrastructure/database/schemas/feedback.schema';
@@ -45,6 +46,7 @@ import { GetEventStatisticsUseCase } from './event/application/use-cases/get-eve
 import { ListCategoriesUseCase } from './event/application/use-cases/list-categories.use-case';
 import { CreateFeedbackUseCase } from './event/application/use-cases/create-feedback.use-case';
 import { GetFeedbackForVolunteerUseCase } from './event/application/use-cases/get-feedback-for-volunteer.use-case';
+import { GetFeedbackGivenByVolunteerUseCase } from './event/application/use-cases/get-feedback-given-by-volunteer.use-case';
 import { GetFeedbackForEventUseCase } from './event/application/use-cases/get-feedback-for-event.use-case';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from '@share/auth/jwt.strategy';
@@ -82,7 +84,7 @@ import { MessagePublisherService } from './event/infrastructure/messaging/messag
         }),
         ShareModule,
     ],
-    controllers: [EventController, CategoryController, FeedbackController],
+    controllers: [EventController, CategoryController, FeedbackController, VolunteerFeedbackController],
     providers: [
         {
             provide: 'USER_SERVICE',
@@ -124,6 +126,7 @@ import { MessagePublisherService } from './event/infrastructure/messaging/messag
         ListCategoriesUseCase,
         CreateFeedbackUseCase,
         GetFeedbackForVolunteerUseCase,
+        GetFeedbackGivenByVolunteerUseCase,
         GetFeedbackForEventUseCase,
         EventCategorySeeder,
         IncrementRoleFilledUseCase,

@@ -68,9 +68,11 @@ export class FeedbackRepository implements IFeedbackRepository {
         const sortOrder = options.sortOrder === 'asc' ? 1 : -1;
         const sort: any = { [sortField]: sortOrder };
 
-        // Execute queries
+        // Execute queries with population
         const [docs, total] = await Promise.all([
-            this.feedbackModel.find(query).sort(sort).skip(skip).limit(limit).exec(),
+            this.feedbackModel.find(query).sort(sort).skip(skip).limit(limit)
+                .populate('eventId', 'title organizerName organizerId') // Populate event data
+                .exec(),
             this.feedbackModel.countDocuments(query).exec(),
         ]);
 
@@ -153,5 +155,69 @@ export class FeedbackRepository implements IFeedbackRepository {
 
     async getFeedbackCountForVolunteer(volunteerId: string): Promise<number> {
         return await this.feedbackModel.countDocuments({ volunteerId }).exec();
+    }
+
+    // Custom method for enriched feedback data
+    async findAllWithEventData(options: FeedbackFilterOptions): Promise<PaginatedResult<any>> {
+        const query: FilterQuery<FeedbackDocument> = {};
+
+        if (options.eventId) {
+            query.eventId = options.eventId;
+        }
+
+        if (options.volunteerId) {
+            query.volunteerId = options.volunteerId;
+        }
+
+        if (options.managerId) {
+            query.managerId = options.managerId;
+        }
+
+        if (options.feedbackType) {
+            query.feedbackType = options.feedbackType;
+        }
+
+        if (options.rating) {
+            query.rating = options.rating;
+        }
+
+        // Pagination
+        const page = options.page || 1;
+        const limit = options.limit || 20;
+        const skip = (page - 1) * limit;
+
+        // Sorting
+        const sortField = options.sortBy || 'createdAt';
+        const sortOrder = options.sortOrder === 'asc' ? 1 : -1;
+        const sort: any = { [sortField]: sortOrder };
+
+        // Execute queries with population
+        const [docs, total] = await Promise.all([
+            this.feedbackModel.find(query).sort(sort).skip(skip).limit(limit)
+                .populate('eventId', 'title organizerName organizerId')
+                .exec(),
+            this.feedbackModel.countDocuments(query).exec(),
+        ]);
+
+        // Convert to plain objects with populated data
+        const data = docs.map(doc => ({
+            id: doc._id.toString(),
+            eventId: doc.eventId,
+            volunteerId: doc.volunteerId,
+            managerId: doc.managerId,
+            feedbackType: doc.feedbackType,
+            rating: doc.rating,
+            comment: doc.comment,
+            createdAt: doc.createdAt,
+            updatedAt: doc.updatedAt,
+        }));
+
+        return {
+            data,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
     }
 }
