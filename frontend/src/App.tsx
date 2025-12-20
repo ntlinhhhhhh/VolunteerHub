@@ -22,13 +22,15 @@ import BrowseEvents from './pages/Home/BrowseEvents';
 import MyEvents from './pages/Manager/MyEvents';
 import EditEvent from './pages/Manager/EditEvent';
 import CreateEvent from './pages/Manager/CreateEvent';
-import Communication from './pages/Home/CommunicationEvent';
 import MyRegistrationsPage from './pages/Home/RegistrationEvents';
-import ForumEventDetail from './pages/Home/ForumEventDetail';
 import MyEventsCommunication from './pages/Home/Communication';
 import ManagerStatistics from './pages/Manager/ManagerStatistics';
 import EventDetails from './pages/Manager/EventDetails';
 import EventAttendance from './pages/Manager/EventAttendance';
+import VoluntterCommunication from './pages/Home/Communication';
+import EventCommunicationDetail from './pages/Home/EventCommunicationDetail';
+import ForumEventDetail from './pages/Home/ForumEventDetail';
+
 
 function App() {
     return (
@@ -65,12 +67,14 @@ function App() {
                 <Route path="/volunteer/dashboard" element={< VolunteerDashboard />} />
                 <Route path="/volunteer/events" element={< BrowseEvents />} />
                 <Route path="/event/registrations" element={< MyRegistrationsPage />} />
-                <Route path="/event/communication/:eventId" element={<Communication /> } />
+                <Route path="/event/communication/:eventId" element={< EventCommunicationDetail /> } />
                 <Route path="/volunteer/events/:eventId" element={<ForumEventDetail /> } />
                 <Route path="/volunteer/communication" element={<MyEventsCommunication /> } />
             </Routes>
         </Router>
     );
+
+    
 }
 
 export default App;
