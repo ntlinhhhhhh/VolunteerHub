@@ -103,7 +103,7 @@ const Communication: React.FC = () => {
 
     const [sortBy, setSortBy] = useState<'latest' | 'most_active'>('latest');
     const [postContent, setPostContent] = useState('');
-    const [postImages, setPostImages] = useState<string[]>([]);
+    const [postImages, setPostImages] = useState<File[]>([]);
     const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
     const [commentInputs, setCommentInputs] = useState<{ [key: string]: string }>({});
     const [editingPost, setEditingPost] = useState<string | null>(null);
@@ -236,13 +236,59 @@ const Communication: React.FC = () => {
         }
     };
 
+    // const fetchPosts = async () => {
+    //     try {
+    //         if (!eventId) return;
+    //         setLoading(true);
+
+    //         const token = localStorage.getItem('accessToken');
+    //         // Lưu ý: Dùng đúng cổng API cho posts (4010 hoặc 8000 tùy Gateway)
+    //         const response = await fetch(`${USER_API_URL}/events/${eventId}/posts?sortBy=${sortBy}&limit=500`, {
+    //             headers: {
+    //                 'Authorization': `Bearer ${token}`,
+    //                 'Content-Type': 'application/json'
+    //             }
+    //         });
+
+    //         if (response.ok) {
+    //             const result = await response.json();
+
+    //             // Lấy dữ liệu từ result.data (là object chứa posts và pinnedPosts)
+    //             const rawData = result.data || result;
+
+    //             // TRÍCH XUẤT MẢNG TỪ OBJECT
+    //             const postsArray = Array.isArray(rawData.posts) ? rawData.posts : [];
+    //             const pinnedArray = Array.isArray(rawData.pinnedPosts) ? rawData.pinnedPosts : [];
+
+    //             // Gộp lại và format để đảm bảo luôn có ID
+    //             const allPosts = [...pinnedArray, ...postsArray].map((p: any) => ({
+    //                 ...p,
+    //                 id: p.id || p._id || Math.random().toString(),
+    //                 likedBy: p.likedBy || [],
+    //                 comments: p.comments || []
+    //             }));
+
+    //             // Sắp xếp lại nếu cần
+    //             if (sortBy === 'latest') {
+    //                 allPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    //             }
+
+    //             setPosts(allPosts);
+    //         }
+    //     } catch (error) {
+    //         console.error('Error fetching posts:', error);
+    //         setPosts([]);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
     const fetchPosts = async () => {
         try {
             if (!eventId) return;
             setLoading(true);
 
             const token = localStorage.getItem('accessToken');
-            // Lưu ý: Dùng đúng cổng API cho posts (4010 hoặc 8000 tùy Gateway)
             const response = await fetch(`${USER_API_URL}/events/${eventId}/posts?sortBy=${sortBy}&limit=500`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -252,37 +298,50 @@ const Communication: React.FC = () => {
 
             if (response.ok) {
                 const result = await response.json();
-
-                // Lấy dữ liệu từ result.data (là object chứa posts và pinnedPosts)
                 const rawData = result.data || result;
 
-                // TRÍCH XUẤT MẢNG TỪ OBJECT
                 const postsArray = Array.isArray(rawData.posts) ? rawData.posts : [];
                 const pinnedArray = Array.isArray(rawData.pinnedPosts) ? rawData.pinnedPosts : [];
 
-                // Gộp lại và format để đảm bảo luôn có ID
+                // CHUẨN HÓA DỮ LIỆU - Backend đã trả về đúng format rồi
                 const allPosts = [...pinnedArray, ...postsArray].map((p: any) => ({
                     ...p,
-                    id: p.id || p._id || Math.random().toString(),
+                    id: p.id || p._id,
+                    // Avatar đã được chuẩn hóa từ backend với format: /uploads/avatars/...
+                    authorAvatar: p.authorAvatar
+                        ? (p.authorAvatar.startsWith('http')
+                            ? p.authorAvatar
+                            : `${USER_API_URL}${p.authorAvatar}`)
+                        : `https://ui-avatars.com/api/?name=${encodeURIComponent(p.authorName || 'User')}`,
+                    // Images đã được chuẩn hóa từ backend với format: /uploads/posts/...
+                    images: (p.images || []).map((img: string) =>
+                        img.startsWith('http') ? img : `${USER_API_URL}${img}`
+                    ),
                     likedBy: p.likedBy || [],
-                    comments: p.comments || []
+                    comments: (p.comments || []).map((c: any) => ({
+                        ...c,
+                        id: c.id || c._id,
+                        authorAvatar: c.authorAvatar
+                            ? (c.authorAvatar.startsWith('http')
+                                ? c.authorAvatar
+                                : `${USER_API_URL}${c.authorAvatar}`)
+                            : `https://ui-avatars.com/api/?name=${encodeURIComponent(c.authorName || 'User')}`
+                    }))
                 }));
 
-                // Sắp xếp lại nếu cần
                 if (sortBy === 'latest') {
                     allPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
                 }
 
+                console.log('✅ Posts loaded:', allPosts);
                 setPosts(allPosts);
             }
         } catch (error) {
-            console.error('Error fetching posts:', error);
-            setPosts([]);
+            console.error('❌ Error fetching posts:', error);
         } finally {
             setLoading(false);
         }
     };
-
     const fetchNotifications = async () => {
         try {
             setLoadingNotifications(true);
@@ -330,46 +389,153 @@ const Communication: React.FC = () => {
         }
     };
 
-    // ==================== POST HANDLERS ====================
+    // // ==================== POST HANDLERS ====================
+    // const handleCreatePost = async () => {
+    //     if (!postContent.trim()) {
+    //         alert('⚠️ Vui lòng nhập nội dung bài viết!');
+    //         return;
+    //     }
+
+    //     if (!eventId) {
+    //         alert('❌ Không tìm thấy ID sự kiện!');
+    //         return;
+    //     }
+
+
+    //     try {
+    //         const formData = new FormData();
+    //         formData.append('content', postContent);
+    //         formData.append('eventId', eventId);
+    //         setSubmittingPost(true);
+    //         const token = localStorage.getItem('accessToken');
+    //         const userId = userData?.id || userData?.id || '';
+    //         const userName = userData?.fullName || 'User';
+
+    //         postImages.forEach((image) => {
+    //             // Nếu postImages chứa Base64, bạn cần convert sang Blob trước
+    //             formData.append('images', image);
+    //         });
+
+    //         const response = await fetch(`${USER_API_URL}/events/${eventId}/posts`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Authorization': `Bearer ${token}`,
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({
+    //                 eventId: eventId,
+    //                 authorId: userId,
+    //                 authorName: userName,
+    //                 content: postContent,
+    //                 images: postImages.length > 0 ? postImages : []
+    //             })
+    //         });
+
+    //         if (response.ok) {
+    //             setPostContent('');
+    //             setPostImages([]);
+    //             setShowCreatePost(false);
+    //             await fetchPosts();
+    //             alert('✅ Đã tạo bài viết thành công!');
+    //         } else {
+    //             const errorData = await response.json().catch(() => ({}));
+    //             alert(`❌ Không thể tạo bài viết: ${errorData.message || 'Lỗi không xác định'}`);
+    //         }
+    //     } catch (error) {
+    //         console.error('Error creating post:', error);
+    //         alert('❌ Có lỗi xảy ra khi tạo bài viết!');
+    //     } finally {
+    //         setSubmittingPost(false);
+    //     }
+    // };
+
+    // const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const files = e.target.files;
+    //     if (!files || files.length === 0) return;
+
+    //     if (postImages.length >= 4) {
+    //         alert('⚠️ Chỉ được thêm tối đa 4 ảnh!');
+    //         return;
+    //     }
+
+    //     const remainingSlots = 4 - postImages.length;
+    //     const filesToProcess = Array.from(files).slice(0, remainingSlots);
+
+    //     filesToProcess.forEach(file => {
+    //         if (!file.type.startsWith('image/')) {
+    //             alert('⚠️ Chỉ được upload file ảnh!');
+    //             return;
+    //         }
+
+    //         if (file.size > 5 * 1024 * 1024) {
+    //             alert('⚠️ Kích thước ảnh không được vượt quá 5MB!');
+    //             return;
+    //         }
+
+    //         const reader = new FileReader();
+    //         reader.onloadend = () => {
+    //             const base64 = reader.result as string;
+    //             setPostImages(prev => [...prev, base64]);
+    //         };
+    //         reader.readAsDataURL(file);
+    //     });
+
+    //     e.target.value = '';
+    // };
+
+    const removeImage = (index: number) => {
+        setPostImages(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        if (postImages.length + files.length > 4) {
+            alert('⚠️ Chỉ được thêm tối đa 4 ảnh!');
+            return;
+        }
+
+        const newFiles = Array.from(files).filter(file => {
+            if (!file.type.startsWith('image/')) {
+                alert(`⚠️ ${file.name} không phải là ảnh!`);
+                return false;
+            }
+            return true;
+        });
+
+        setPostImages(prev => [...prev, ...newFiles]);
+        e.target.value = '';
+    };
+
+    // Hàm tạo Post (Gửi FormData)
     const handleCreatePost = async () => {
         if (!postContent.trim()) {
             alert('⚠️ Vui lòng nhập nội dung bài viết!');
             return;
         }
 
-        if (!eventId) {
-            alert('❌ Không tìm thấy ID sự kiện!');
-            return;
-        }
-
-
         try {
-            const formData = new FormData();
-            formData.append('content', postContent);
-            formData.append('eventId', eventId);
             setSubmittingPost(true);
             const token = localStorage.getItem('accessToken');
-            const userId = userData?.id || userData?.id || '';
-            const userName = userData?.fullName || 'User';
 
-            postImages.forEach((image) => {
-                // Nếu postImages chứa Base64, bạn cần convert sang Blob trước
-                formData.append('images', image);
+            const formData = new FormData();
+            formData.append('content', postContent);
+            // eventId lấy từ useParams() đã có ở trên
+            if (eventId) formData.append('eventId', eventId);
+
+            // Đưa các tệp tin thực tế vào FormData
+            postImages.forEach((file) => {
+                formData.append('images', file);
             });
 
             const response = await fetch(`${USER_API_URL}/events/${eventId}/posts`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
+                    // KHÔNG ĐƯỢC để Content-Type: application/json
                 },
-                body: JSON.stringify({
-                    eventId: eventId,
-                    authorId: userId,
-                    authorName: userName,
-                    content: postContent,
-                    images: postImages.length > 0 ? postImages : []
-                })
+                body: formData
             });
 
             if (response.ok) {
@@ -380,7 +546,7 @@ const Communication: React.FC = () => {
                 alert('✅ Đã tạo bài viết thành công!');
             } else {
                 const errorData = await response.json().catch(() => ({}));
-                alert(`❌ Không thể tạo bài viết: ${errorData.message || 'Lỗi không xác định'}`);
+                alert(`❌ Lỗi: ${errorData.message || 'Không thể tạo bài viết'}`);
             }
         } catch (error) {
             console.error('Error creating post:', error);
@@ -388,44 +554,6 @@ const Communication: React.FC = () => {
         } finally {
             setSubmittingPost(false);
         }
-    };
-
-    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        if (!files || files.length === 0) return;
-
-        if (postImages.length >= 4) {
-            alert('⚠️ Chỉ được thêm tối đa 4 ảnh!');
-            return;
-        }
-
-        const remainingSlots = 4 - postImages.length;
-        const filesToProcess = Array.from(files).slice(0, remainingSlots);
-
-        filesToProcess.forEach(file => {
-            if (!file.type.startsWith('image/')) {
-                alert('⚠️ Chỉ được upload file ảnh!');
-                return;
-            }
-
-            if (file.size > 5 * 1024 * 1024) {
-                alert('⚠️ Kích thước ảnh không được vượt quá 5MB!');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64 = reader.result as string;
-                setPostImages(prev => [...prev, base64]);
-            };
-            reader.readAsDataURL(file);
-        });
-
-        e.target.value = '';
-    };
-
-    const removeImage = (index: number) => {
-        setPostImages(prev => prev.filter((_, i) => i !== index));
     };
 
     const handleLikePost = async (postId: string) => {
@@ -625,6 +753,15 @@ const Communication: React.FC = () => {
             case 'new_comment': return '💬';
             default: return '📢';
         }
+    };
+
+    const getFullUrl = (path: string | undefined) => {
+        if (!path) return "";
+        if (path.startsWith('http')) return path;
+
+        const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+
+        return `${USER_API_URL}/${cleanPath}`;
     };
 
     const closeSidebar = () => setSidebarOpen(false);
@@ -893,14 +1030,19 @@ const Communication: React.FC = () => {
                                         autoFocus
                                     />
 
+                                    {/* HIỂN THỊ ẢNH PREVIEW KHI ĐANG CHỌN */}
                                     {postImages.length > 0 && (
                                         <div style={styles.imagePreviewContainer}>
-                                            {postImages.map((img, idx) => (
+                                            {postImages.map((file, idx) => (
                                                 <div key={idx} style={styles.imagePreviewItem}>
-                                                    <img src={img} style={styles.imagePreview} alt={`Preview ${idx + 1}`} />
+                                                    <img
+                                                        src={URL.createObjectURL(file)} // Tạo URL từ File object
+                                                        style={styles.imagePreview}
+                                                        alt={`Preview ${idx + 1}`}
+                                                    />
                                                     <button
                                                         style={styles.removeImageBtn}
-                                                        onClick={() => removeImage(idx)}
+                                                        onClick={() => removeImage(idx)} // Gọi hàm xóa ảnh
                                                         title="Xóa ảnh"
                                                     >
                                                         <X size={16} />
@@ -1005,7 +1147,7 @@ const Communication: React.FC = () => {
                                     <div style={styles.postHeader}>
                                         <div style={styles.postAuthor}>
                                             <img
-                                                src={`http:localhost:8000/${post.authorAvatar}` || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.authorName)}`}
+                                                src={post.authorAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.authorName)}`}
                                                 style={styles.postAvatar}
                                                 alt={post.authorName}
                                             />
@@ -1114,12 +1256,17 @@ const Communication: React.FC = () => {
                                             <p style={styles.postText}>{post.content}</p>
                                             {post.images && post.images.length > 0 && (
                                                 <div style={styles.postImagesGrid}>
-                                                    {post.images.map((img, idx) => (
+                                                    {post.images.map((imgUrl, idx) => (
                                                         <img
                                                             key={idx}
-                                                            src={img}
+                                                            src={imgUrl} // Đã được chuẩn hóa thành http://localhost:8000/uploads/posts/...
                                                             style={styles.postImage}
-                                                            alt={`Post image ${idx + 1}`}
+                                                            alt={`Post content ${idx + 1}`}
+                                                            onClick={() => window.open(imgUrl, '_blank')}
+                                                            onError={(e) => {
+                                                                console.error('❌ Image load error:', imgUrl);
+                                                                (e.target as HTMLImageElement).style.display = 'none';
+                                                            }}
                                                         />
                                                     ))}
                                                 </div>

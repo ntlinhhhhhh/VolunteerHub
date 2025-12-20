@@ -6,16 +6,16 @@ import { getConnectionToken } from '@nestjs/mongoose';
 import { HttpExceptionFilter } from './communication/presentation/filters/http-exception.filter';
 import * as express from 'express';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { join } from 'path';
 
 async function bootstrap() {
     const logger = new Logger('Bootstrap');
 
     try {
-
         const app = await NestFactory.create(AppModule);
-        app.use('/uploads', express.static('/app/uploads'));
-
         const configService = app.get(ConfigService);
+
+        app.use('/uploads', express.static('/app/uploads'));
 
         app.useGlobalPipes(
             new ValidationPipe({
@@ -24,23 +24,18 @@ async function bootstrap() {
                 transform: true,
             }),
         );
-
-
-        // Global exception filter
         app.useGlobalFilters(new HttpExceptionFilter());
 
-        // Enable CORS
+        const corsOrigin = configService.get<string>('CORS_ORIGIN') || 'http://localhost:5173';
         app.enableCors({
-            origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+            origin: corsOrigin,
             credentials: true,
         });
 
+        const redisHost = configService.get<string>('REDIS_HOST') || 'redis';
+        const redisPort = configService.get<number>('REDIS_PORT') || 6379;
 
-
-        const redisHost = process.env.REDIS_HOST || 'redis';
-        const redisPort = parseInt(process.env.REDIS_PORT || '6379', 10);
-
-        const microserviceOptions: MicroserviceOptions = {
+        app.connectMicroservice<MicroserviceOptions>({
             transport: Transport.REDIS,
             options: {
                 host: redisHost,
@@ -48,31 +43,28 @@ async function bootstrap() {
                 retryAttempts: 5,
                 retryDelay: 3000,
             },
-        };
+        });
 
-        app.connectMicroservice(microserviceOptions);
         await app.startAllMicroservices();
+        logger.log('📡 Communication Microservice connected to Redis');
 
-        // Port
-        const port = configService.get<number>('PORT') || 4010;
-
-        // Check MongoDB connection
         try {
             const mongooseConnection = app.get(getConnectionToken());
             if (mongooseConnection.readyState === 1) {
-                logger.log('Connected to MongoDB successfully');
-            } else {
-                logger.warn('MongoDB connection not ready');
+                logger.log('✅ Connected to MongoDB successfully');
             }
-        } catch (error) {
-            logger.error('Failed to connect to MongoDB', error);
+        } catch (dbError) {
+            logger.warn('⚠️ MongoDB check skipped or failed');
         }
 
+        const port = configService.get<number>('PORT') || 4010;
         await app.listen(port);
-        logger.log(`Communication Service running on port ${port}`);
+        
+        logger.log(`🚀 Communication Service is running on: http://localhost:${port}`);
+        logger.log(`🔗 CORS enabled for origin: ${corsOrigin}`);
 
     } catch (error) {
-        logger.error('❌ Failed to start Auth Service:', error.message);
+        logger.error('❌ Failed to start Communication Service:', error.stack);
         process.exit(1);
     }
 }
