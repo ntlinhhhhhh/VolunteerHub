@@ -22,6 +22,10 @@ import BrowseEvents from './pages/Home/BrowseEvents';
 import MyEvents from './pages/Manager/MyEvents';
 import EditEvent from './pages/Manager/EditEvent';
 import CreateEvent from './pages/Manager/CreateEvent';
+import Communication from './pages/Home/CommunicationEvent';
+import MyRegistrationsPage from './pages/Home/RegistrationEvents';
+import ForumEventDetail from './pages/Home/ForumEventDetail';
+import MyEventsCommunication from './pages/Home/Communication';
 
 function App() {
     return (
@@ -44,16 +48,18 @@ function App() {
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/manager/dashboard" element={<ManagerDashboard />} />
                 <Route path="/manager/create-event" element={<CreateEvent />} />
-                <Route path="/manager/my-events" element={<MyEvents />} />
-                <Route path="/manager/edit-event/:id" element={<EditEvent />} />
 
                 <Route path="/admin/event-approvals" element={<EventsApproval />} />
                 <Route path="/admin/user-management" element={<UserManagement />} />
                 <Route path="/google/callback" element={<GoogleCallback />} />
-                <Route path="/me/profile" element={< Profile />} />
+                <Route path="/volunteer/profile" element={< Profile />} />
                 <Route path="/volunteer/dashboard" element={< VolunteerDashboard />} />
                 <Route path="/volunteer/events" element={< BrowseEvents />} />
-                
+                <Route path="/event/registrations" element={< MyRegistrationsPage />} />
+                <Route path="/event/communication/:eventId" element={<Communication /> } />
+                <Route path="/volunteer/events/:eventId" element={<ForumEventDetail /> } />
+                <Route path="/volunteer/communication" element={<MyEventsCommunication /> } />
+                MyEventsCommunication
             </Routes>
         </Router>
     );

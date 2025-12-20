@@ -1,6 +1,6 @@
 ### Variables
-@baseUrl = http://localhost:4010
-@eventId = 6935a50f1a51c72418085e99
+@baseUrl = http://localhost:8000
+@eventId = 694612a2c0eab2c6832e6e7f
 @postId = 67650d53c1234567890abcdf
 @commentId = comment123
 @userId = user123

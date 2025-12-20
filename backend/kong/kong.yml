@@ -51,7 +51,7 @@ services:
     routes:
       - name: communication-route
         paths:
-          - /posts
+          - /events/*
         strip_path: false
 
   - name: dashboard-service
