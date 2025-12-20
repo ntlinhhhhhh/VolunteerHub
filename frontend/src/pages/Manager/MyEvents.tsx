@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
     FaPlus, FaUsers, FaSignOutAlt, FaClipboardList, FaCalendarAlt,
     FaMapMarkerAlt, FaEdit, FaEye, FaFilter, FaLayerGroup, FaCheckCircle, FaTimesCircle,
-    FaChartBar
+    FaChartBar,
+    FaUserCheck
 } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 
@@ -177,6 +178,7 @@ const MyEvents: React.FC = () => {
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ backgroundColor: '#F8F9FA' }}>
+                                    <th style={styles.th}></th>
                                     <th style={styles.th}>Event Details</th>
                                     <th style={styles.th}>Location</th>
                                     <th style={styles.th}>Start Date</th>
@@ -192,6 +194,14 @@ const MyEvents: React.FC = () => {
                                     const statusStyle = getStatusStyle(event.status);
                                     return (
                                         <tr key={event.id} style={{ borderBottom: `1px solid ${COLORS.BORDER}` }}>
+                                            <td style={styles.td}>
+                                                <button 
+                                                        onClick={() => navigate(`/manager/events/${event.id}/attendance`)} 
+                                                        style={styles.actionBtn}
+                                                    >
+                                                        <FaUsers  /> 
+                                                    </button>
+                                            </td>
                                             <td style={styles.td}>
                                                 <div style={{ fontWeight: 'bold', color: COLORS.DARK_NAVY }}>{event.title}</div>
                                                 <div style={{ fontSize: '12px', color: COLORS.PRIMARY }}>{event.categoryName}</div>
@@ -228,7 +238,7 @@ const MyEvents: React.FC = () => {
                                                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                                                     {/* <button title="View Details" style={styles.actionBtn}><FaEye /></button>
                                                      */}
-
+                                                    
                                                     <button 
                                                         title="View Details" 
                                                         onClick={() => navigate(`/manager/event-details/${event.id}`)} // Điều hướng đến trang chi tiết
@@ -257,6 +267,7 @@ const MyEvents: React.FC = () => {
                                                             <FaTimesCircle />
                                                         </button>
                                                     )}
+                                                    
 
                                                     {event.status === 'draft' && (
                                                         <button 
