@@ -20,6 +20,8 @@ import EventDetail from './pages/Home/Eventdetail';
 import Profile from './pages/Home/Profile';
 import VolunteerDashboard from './pages/Home/VolunteerDashboard';
 import BrowseEvents from './pages/Home/BrowseEvents';
+import MyEvents from './pages/Manager/MyEvents';
+import EditEvent from './pages/Manager/EditEvent';
 
 function App() {
     return (
