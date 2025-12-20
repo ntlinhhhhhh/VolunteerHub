@@ -53,3 +53,4 @@ import { UpdateAvatarUseCase } from './user/application/use-cases/update-avatar.
     ]
 })
 export class AppModule { }
+

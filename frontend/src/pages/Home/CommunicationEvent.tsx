@@ -77,15 +77,12 @@ interface UserData {
     role: string;
 }
 
-// ==================== MAIN COMPONENT ====================
 const Communication: React.FC = () => {
     const { eventId } = useParams<{ eventId: string }>();
     const navigate = useNavigate();
 
-    const API_BASE_URL = 'http://localhost:4010';
     const USER_API_URL = 'http://localhost:8000';
 
-    // ==================== STATE MANAGEMENT ====================
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
     const [showLogoutPopup, setShowLogoutPopup] = useState(false);
@@ -202,7 +199,6 @@ const Communication: React.FC = () => {
 
                 console.log('Event data received:', event);
 
-                // Process cover image from media.images array
                 let coverImageUrl = '';
                 if (event.media?.images && Array.isArray(event.media.images) && event.media.images.length > 0) {
                     const firstImage = event.media.images[0];
@@ -243,25 +239,41 @@ const Communication: React.FC = () => {
     const fetchPosts = async () => {
         try {
             if (!eventId) return;
-
             setLoading(true);
-            const response = await fetch(`${API_BASE_URL}/events/${eventId}/posts?sortBy=${sortBy}&limit=50`);
+
+            const token = localStorage.getItem('accessToken');
+            // Lưu ý: Dùng đúng cổng API cho posts (4010 hoặc 8000 tùy Gateway)
+            const response = await fetch(`${USER_API_URL}/events/${eventId}/posts?sortBy=${sortBy}&limit=500`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
             if (response.ok) {
                 const result = await response.json();
-                const data = result.data?.items || result.data || [];
 
-                const sortedPosts = Array.isArray(data) ? data.sort((a: Post, b: Post) => {
-                    if (a.isPinned === b.isPinned) {
-                        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-                    }
-                    return a.isPinned ? -1 : 1;
-                }) : [];
+                // Lấy dữ liệu từ result.data (là object chứa posts và pinnedPosts)
+                const rawData = result.data || result;
 
-                setPosts(sortedPosts);
-            } else {
-                console.warn('Failed to fetch posts:', response.status);
-                setPosts([]);
+                // TRÍCH XUẤT MẢNG TỪ OBJECT
+                const postsArray = Array.isArray(rawData.posts) ? rawData.posts : [];
+                const pinnedArray = Array.isArray(rawData.pinnedPosts) ? rawData.pinnedPosts : [];
+
+                // Gộp lại và format để đảm bảo luôn có ID
+                const allPosts = [...pinnedArray, ...postsArray].map((p: any) => ({
+                    ...p,
+                    id: p.id || p._id || Math.random().toString(),
+                    likedBy: p.likedBy || [],
+                    comments: p.comments || []
+                }));
+
+                // Sắp xếp lại nếu cần
+                if (sortBy === 'latest') {
+                    allPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                }
+
+                setPosts(allPosts);
             }
         } catch (error) {
             console.error('Error fetching posts:', error);
@@ -286,7 +298,7 @@ const Communication: React.FC = () => {
                 if (userRes.ok) {
                     const userJson = await userRes.json();
                     const raw = userJson.data || userJson;
-                    userId = raw._id || raw.id;
+                    userId = raw.id || raw.id;
                 }
             }
 
@@ -330,19 +342,26 @@ const Communication: React.FC = () => {
             return;
         }
 
+
         try {
+            const formData = new FormData();
+            formData.append('content', postContent);
+            formData.append('eventId', eventId);
             setSubmittingPost(true);
             const token = localStorage.getItem('accessToken');
-            const userId = userData?.id || userData?._id || '';
+            const userId = userData?.id || userData?.id || '';
             const userName = userData?.fullName || 'User';
 
-            const response = await fetch(`${API_BASE_URL}/events/${eventId}/posts`, {
+            postImages.forEach((image) => {
+                // Nếu postImages chứa Base64, bạn cần convert sang Blob trước
+                formData.append('images', image);
+            });
+
+            const response = await fetch(`${USER_API_URL}/events/${eventId}/posts`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
-                    'x-user-id': userId,
-                    'x-user-name': encodeURIComponent(userName)
                 },
                 body: JSON.stringify({
                     eventId: eventId,
@@ -412,11 +431,11 @@ const Communication: React.FC = () => {
     const handleLikePost = async (postId: string) => {
         try {
             const token = localStorage.getItem('accessToken');
-            const userId = userData?.id || userData?._id || '';
+            const userId = userData?.id || userData?.id || '';
             const post = posts.find(p => p.id === postId);
             const isLiked = post?.likedBy.includes(userId);
 
-            const url = `${API_BASE_URL}/events/${eventId}/posts/${postId}/like`;
+            const url = `${USER_API_URL}/events/${eventId}/posts/${postId}/like`;
             const method = isLiked ? 'DELETE' : 'POST';
 
             const response = await fetch(url, {
@@ -445,9 +464,9 @@ const Communication: React.FC = () => {
 
         try {
             const token = localStorage.getItem('accessToken');
-            const userId = userData?.id || userData?._id || '';
+            const userId = userData?.id || userData?.id || '';
 
-            const response = await fetch(`${API_BASE_URL}/events/${eventId}/posts/${postId}`, {
+            const response = await fetch(`${USER_API_URL}/events/${eventId}/posts/${postId}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -479,9 +498,9 @@ const Communication: React.FC = () => {
 
         try {
             const token = localStorage.getItem('accessToken');
-            const userId = userData?.id || userData?._id || '';
+            const userId = userData?.id || userData?.id || '';
 
-            const response = await fetch(`${API_BASE_URL}/events/${eventId}/posts/${postId}`, {
+            const response = await fetch(`${USER_API_URL}/events/${eventId}/posts/${postId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -507,7 +526,7 @@ const Communication: React.FC = () => {
             const token = localStorage.getItem('accessToken');
             const action = isPinned ? 'unpin' : 'pin';
 
-            const response = await fetch(`${API_BASE_URL}/events/${eventId}/posts/${postId}/${action}`, {
+            const response = await fetch(`${USER_API_URL}/events/${eventId}/posts/${postId}/${action}`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -537,7 +556,7 @@ const Communication: React.FC = () => {
             const userId = userData?.id || userData?._id || '';
             const userName = userData?.fullName || 'User';
 
-            const response = await fetch(`${API_BASE_URL}/events/${eventId}/posts/${postId}/comments`, {
+            const response = await fetch(`${USER_API_URL}/events/${eventId}/posts/${postId}/comments`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -986,13 +1005,13 @@ const Communication: React.FC = () => {
                                     <div style={styles.postHeader}>
                                         <div style={styles.postAuthor}>
                                             <img
-                                                src={post.authorAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.authorName)}`}
+                                                src={`http:localhost:8000/${post.authorAvatar}` || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.authorName)}`}
                                                 style={styles.postAvatar}
                                                 alt={post.authorName}
                                             />
                                             <div>
                                                 <div style={styles.postAuthorName}>
-                                                    {post.authorName}
+                                                    {decodeURIComponent(post.authorName)}
                                                     {post.isPinned && (
                                                         <span style={styles.pinnedBadge}>
                                                             <Pin size={14} /> Ghim

@@ -161,13 +161,29 @@ export class UserController {
 
 
 
+    // @MessagePattern('user.findByAuthId')
+    // async findByAuthId(@Payload() data: { authId: string }) {
+    //     console.log('call user.findByAuthId');
+    //     const user = await this.getUserProfileUseCase.executeByAuthId(
+    //         data.authId
+    //     );
+    //     return user?.toSafeObject() || null;
+    // }
+
     @MessagePattern('user.findByAuthId')
     async findByAuthId(@Payload() data: { authId: string }) {
-        console.log('call user.findByAuthId');
-        const user = await this.getUserProfileUseCase.executeByAuthId(
-            data.authId
-        );
-        return user?.toSafeObject() || null;
+        console.log('🔍 User Service received AuthId:', data.authId);
+
+        const user = await this.getUserProfileUseCase.executeByAuthId(data.authId);
+
+        // THÊM LOG NÀY ĐỂ KIỂM TRA
+        if (!user) {
+            console.error('❌ KHÔNG tìm thấy user trong Database của User Service!');
+            return null;
+        }
+
+        console.log('✅ Tìm thấy user:', user.fullName);
+        return user.toSafeObject();
     }
 
     @MessagePattern('user.findByEmail')
