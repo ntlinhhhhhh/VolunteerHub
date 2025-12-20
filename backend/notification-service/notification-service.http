@@ -1,6 +1,6 @@
 
 ### lấy danh sách thông báo của 1 user nào đấy
-GET http://localhost:8000/notifications/693af0dbd5c374ab132ee13d?channel=in_app
+GET http://localhost:8000/notifications/6942bbd02bbad82ff915e3a4?channel=in_app
 
 ### lấy danh sách thông báo của 1 user nào đấy
 PATCH http://localhost:8000/notifications/693af11ce92b283cc5ab995e/read

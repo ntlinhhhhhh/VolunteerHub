@@ -18,7 +18,8 @@ import UserManagement from './pages/Dashboard/Admin-Crud/UserManagement';
 import CreateEvent from './pages/CreateEvent';
 import EventDetail from './pages/Home/Eventdetail';
 import Profile from './pages/Home/Profile';
-import VolunteerDashboard from './pages/Dashboard/VolunteerDashboard';
+import VolunteerDashboard from './pages/Home/VolunteerDashboard';
+import BrowseEvents from './pages/Home/BrowseEvents';
 
 function App() {
     return (
@@ -46,6 +47,7 @@ function App() {
                 <Route path="/google/callback" element={<GoogleCallback />} />
                 <Route path="/me/profile" element={< Profile />} />
                 <Route path="/volunteer/dashboard" element={< VolunteerDashboard />} />
+                <Route path="/volunteer/events" element={< BrowseEvents />} />
                 
             </Routes>
         </Router>
