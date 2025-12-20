@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
     FaPlus, FaTrash, FaArrowLeft, FaUsers, FaSignOutAlt, FaCalendarAlt, 
     FaMapMarkerAlt, FaClipboardList, FaInfoCircle, FaCheckCircle, FaTag, FaClipboardCheck, FaUserFriends,
-    FaPaperPlane
+    FaPaperPlane, FaTools
 } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 
@@ -283,6 +283,14 @@ const CreateEvent: React.FC = () => {
                                 <div><label style={styles.label}>Min Age</label><input type="number" style={styles.input} value={formData.requirements.minAge} onChange={e => handleNestedChange('requirements', 'minAge', parseInt(e.target.value))} /></div>
                                 <div><label style={styles.label}>Max Age</label><input type="number" style={styles.input} value={formData.requirements.maxAge} onChange={e => handleNestedChange('requirements', 'maxAge', parseInt(e.target.value))} /></div>
                             </div>
+                            <div style={{ marginBottom: '10px' }}>
+                                <label style={styles.label}>Skills Required (comma separated)</label>
+                                <input 
+                                    style={styles.input} 
+                                    placeholder="Làm việc nhóm, Giao tiếp..." 
+                                    onChange={e => handleNestedChange('requirements', 'skills', e.target.value.split(',').map(s => s.trim()))} 
+                                />
+                            </div>
                             <label style={styles.label}>Health Requirements</label>
                             <input style={styles.input} value={formData.requirements.healthRequirements} onChange={e => handleNestedChange('requirements', 'healthRequirements', e.target.value)} placeholder="e.g. Sức khỏe tốt" />
                         </div>
@@ -322,8 +330,8 @@ const CreateEvent: React.FC = () => {
                         <button type="button" onClick={() => navigate(-1)} style={styles.cancelBtn}>Discard</button>
                         <button type="submit" disabled={loading} style={styles.submitBtn}>{loading ? "Saving..." : "Save draft"}</button>
                         <button type="button" onClick={handleSubmitForApproval} disabled={loading} style={styles.submitApprovalBtn}>
-                                                    <FaPaperPlane /> Gửi duyệt Admin
-                                                </button>
+                                                                            <FaPaperPlane /> Gửi duyệt Admin
+                                                                </button>
                     </div>
                 </form>
             </main>
