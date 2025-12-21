@@ -59,6 +59,51 @@ interface InAppNotification {
     };
 }
 
+interface InAppNotification {
+    id: string;
+    type: string;
+    subject: string;
+    content: string;
+    readAt: string | null;
+    createdAt: string;
+    data: {
+        eventTitle?: string;
+        eventId?: string;
+        fullName?: string;
+        registrationId?: string;
+        eventDate?: string;
+        eventLocation?: string;
+    };
+}
+interface Registration {
+    id: string;
+    registrationCode: string;
+    eventId: string;
+    eventTitle: string;
+    eventDate: string;
+    eventLocation: string;
+    status: 'pending' | 'accepted' | 'rejected' | 'completed' | 'cancelled' | 'confirmed' | 'checked_in' | 'checked_out' | 'rated' | 'no_show' | 'cancelled_by_volunteer' | 'cancelled_by_organizer';
+    roleName: string;
+    createdAt: string;
+    updatedAt: string;
+    approval?: {
+        reviewedBy?: string;
+        reviewedAt?: string;
+    };
+    attendance?: any;
+    completion?: {
+        certificateIssued: boolean;
+    };
+}
+
+interface Statistics {
+    totalHours: number;
+    completedEvents: number;
+    averageRating: number;
+    rank?: string;
+}
+
+
 const BrowseEvents: React.FC = () => {
     const [events, setEvents] = useState<Event[]>([]);
     const [loading, setLoading] = useState(true);
@@ -79,6 +124,8 @@ const BrowseEvents: React.FC = () => {
     const [loadingNotifications, setLoadingNotifications] = useState(false);
     const [confirmingRegistrationId, setConfirmingRegistrationId] = useState<string | null>(null);
 
+    const [registrations, setRegistrations] = useState<Registration[]>([]);
+    
     const notificationRef = useRef<HTMLDivElement>(null);
     const filterRef = useRef<HTMLDivElement>(null);
 
@@ -93,10 +140,18 @@ const BrowseEvents: React.FC = () => {
     const [emergencyRelation, setEmergencyRelation] = useState('');
     const [registering, setRegistering] = useState(false);
 
+    const needConfirmation = registrations.filter(r => r.status === 'accepted');
+
     const [userData, setUserData] = useState<any>(null);
     const logoutPopupRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
+    const [statistics, setStatistics] = useState<Statistics>({
+            totalHours: 0,
+            completedEvents: 0,
+            averageRating: 0,
+            rank: 'Newbie'
+        });
     useEffect(() => {
         fetchUserProfile();
         fetchEvents();
@@ -484,6 +539,104 @@ const BrowseEvents: React.FC = () => {
         }
     };
 
+    const fetchDashboardData = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('accessToken');
+
+            // Fetch user data
+            const userRes = await fetch('http://localhost:8000/users/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const userJson = await userRes.json();
+            const rawData = userJson.data || userJson;
+
+            const finalData = {
+                ...rawData,
+                avatar: rawData.avatar
+                    ? (rawData.avatar.startsWith('http') ? rawData.avatar : `http://localhost:8000${rawData.avatar}`)
+                    : "https://ui-avatars.com/api/?name=User"
+            };
+
+            setUserData(finalData);
+
+            // Fetch statistics
+            const statsRes = await fetch('http://localhost:8000/registrations/my-statistics', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const statsJson = await statsRes.json();
+            const s = statsJson.data || {};
+
+            let rank = 'Newbie';
+            const hours = s.totalHours || 0;
+            if (hours >= 100) rank = 'Legend';
+            else if (hours >= 50) rank = 'Expert';
+            else if (hours >= 20) rank = 'Intermediate';
+
+            setStatistics({
+                totalHours: s.totalHours || 0,
+                completedEvents: s.completedEvents || 0,
+                averageRating: s.averageRating || 0,
+                rank
+            });
+
+            // Fetch registrations
+            const regRes = await fetch('http://localhost:8000/registrations/my-registrations?limit=50', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const regJson = await regRes.json();
+
+            // Handle both response formats
+            let registrationsList = [];
+            if (regJson.data?.items) {
+                registrationsList = regJson.data.items;
+            } else if (Array.isArray(regJson.data)) {
+                registrationsList = regJson.data;
+            } else if (Array.isArray(regJson)) {
+                registrationsList = regJson;
+            }
+
+            setRegistrations(registrationsList);
+
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleConfirmRegistration = async (registrationId: string) => {
+        try {
+            setConfirmingRegistrationId(registrationId);
+            const token = localStorage.getItem('accessToken');
+
+            const response = await fetch(`http://localhost:8000/registrations/${registrationId}/confirm`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                alert('✅ Đã xác nhận tham gia sự kiện!');
+                await fetchDashboardData();
+                await fetchNotifications();
+            } else {
+                const error = await response.json();
+                alert(`❌ Lỗi: ${error.message || 'Không thể xác nhận tham gia'}`);
+            }
+        } catch (error) {
+            console.error('Error confirming registration:', error);
+            alert('❌ Có lỗi xảy ra khi xác nhận!');
+        } finally {
+            setConfirmingRegistrationId(null);
+        }
+    };
+
+
+    
+
     const handleLogout = () => {
         localStorage.removeItem('accessToken');
         window.location.href = '/login';
@@ -584,139 +737,120 @@ const BrowseEvents: React.FC = () => {
                             <p style={styles.headerSub}>Discover volunteering opportunities you love</p>
                         </div>
                     </div>
-                    <div style={styles.headerRight}>
-                        {/* Notification Button */}
-                        <div style={{ position: 'relative' }} ref={notificationRef}>
-                            <button
-                                style={styles.iconBtn}
-                                onClick={() => setShowNotifications(!showNotifications)}
-                            >
-                                <Bell size={20} />
-                                {unreadCount > 0 && (
-                                    <span style={styles.notificationBadge}>{unreadCount}</span>
-                                )}
-                            </button>
+<div style={styles.headerRight}>
+    {/* 1. Khu vực Nút và Popup Thông báo */}
+    <div style={{ position: 'relative' }} ref={notificationRef}>
+        <button
+            style={styles.iconBtn}
+            onClick={() => setShowNotifications(!showNotifications)}
+        >
+            <Bell size={20} fill={unreadCount > 0 ? "#F59E0B" : "none"} />
+            {unreadCount > 0 && (
+                <span style={styles.notificationBadge}>{unreadCount}</span>
+            )}
+        </button>
 
-                            {/* Notification Popup */}
-                            {showNotifications && (
-                                <div style={styles.notificationPopup}>
-                                    <div style={styles.notificationHeader}>
-                                        <div>
-                                            <h3 style={styles.notificationTitle}>
-                                                🔔 Thông báo {unreadCount > 0 && `(${unreadCount})`}
-                                            </h3>
-                                        </div>
+        {/* Popup Thông báo */}
+        {showNotifications && (
+            <div style={styles.notificationPopup}>
+                {/* Header của Popup */}
+                <div style={styles.notificationHeader}>
+                    <h3 style={styles.notificationTitle}>
+                        🔔 Thông báo {unreadCount > 0 && `(${unreadCount})`}
+                    </h3>
+                    <button
+                        style={styles.closeNotificationBtn}
+                        onClick={() => setShowNotifications(false)}
+                    >
+                        <X size={18} />
+                    </button>
+                </div>
+
+                {/* Body của Popup: Danh sách thông báo */}
+                <div style={styles.notificationList}>
+                    {loadingNotifications ? (
+                        <div style={styles.notificationLoading}>
+                            <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} color="#007bff" />
+                            <span>Đang tải...</span>
+                        </div>
+                    ) : (inAppNotis.length === 0 && needConfirmation.length === 0) ? (
+                        <div style={styles.emptyNotifications}>
+                            <div style={styles.emptyIcon}>📂</div>
+                            <p style={styles.emptyNotificationText}>Không có thông báo mới</p>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Danh sách các mục cần XÁC NHẬN (từ needConfirmation) */}
+                            {needConfirmation.map((reg) => (
+                                <div key={`confirm-${reg.id}`} style={{...styles.notificationItem, backgroundColor: '#FFFBEB', borderLeft: '4px solid #F59E0B'}}>
+                                    <div style={styles.notificationIconWrapper}>
+                                        {/* <span style={styles.notificationEmoji}>🔔</span> */}
+                                    </div>
+                                    <div style={styles.notificationContent}>
+                                        <h4 style={styles.notificationSubject}>Yêu cầu xác nhận tham gia</h4>
+                                        <p style={styles.notificationText}>Sự kiện: <strong>{reg.eventTitle}</strong></p>
                                         <button
-                                            style={styles.closeNotificationBtn}
-                                            onClick={() => setShowNotifications(false)}
+                                            style={styles.confirmNotificationBtn}
+                                            onClick={() => handleConfirmRegistration(reg.id)}
+                                            disabled={confirmingRegistrationId === reg.id}
                                         >
-                                            <X size={18} />
+                                            {confirmingRegistrationId === reg.id ? <Loader2 size={14} style={{animation: 'spin 1s linear infinite', backgroundColor: '#F59E0B'}} /> : 'Xác nhận'}
                                         </button>
                                     </div>
+                                </div>
+                            ))}
 
-                                    <div style={styles.notificationList}>
-                                        {loadingNotifications ? (
-                                            <div style={styles.notificationLoading}>
-                                                <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} color="#007bff" />
-                                                <span>Đang tải...</span>
-                                            </div>
-                                        ) : inAppNotis.length === 0 ? (
-                                            <div style={styles.emptyNotifications}>
-                                                <div style={styles.emptyIcon}>📂</div>
-                                                <p style={styles.emptyNotificationText}>Không có thông báo mới</p>
-                                            </div>
-                                        ) : (
-                                            inAppNotis.map((notification) => (
-                                                <div
-                                                    key={notification._id}
-                                                    style={{
-                                                        ...styles.notificationItem,
-                                                        backgroundColor: notification.readAt ? '#FFFFFF' : '#F0F7FF'
-                                                    }}
-                                                    onClick={() => handleNotificationClick(notification)}
-                                                >
-                                                    <div style={styles.notificationIconWrapper}>
-                                                        <span style={styles.notificationEmoji}>
-                                                            {getNotificationIcon(notification.type)}
-                                                        </span>
-                                                    </div>
-                                                    <div style={styles.notificationContent}>
-                                                        <h4 style={styles.notificationSubject}>
-                                                            {notification.subject}
-                                                            {!notification.readAt && (
-                                                                <span style={styles.unreadDot}></span>
-                                                            )}
-                                                        </h4>
-                                                        <p style={styles.notificationText}>
-                                                            {notification.content}
-                                                        </p>
-                                                        
-                                                        {notification.data?.eventTitle && (
-                                                            <div style={styles.notificationEventDetails}>
-                                                                <p style={styles.notificationEventTitle}>
-                                                                    📌 {notification.data.eventTitle}
-                                                                </p>
-                                                                {notification.data?.eventDate && (
-                                                                    <p style={styles.notificationEventMeta}>
-                                                                        📅 {new Date(notification.data.eventDate).toLocaleDateString('vi-VN', {
-                                                                            weekday: 'long',
-                                                                            year: 'numeric',
-                                                                            month: 'long',
-                                                                            day: 'numeric'
-                                                                        })}
-                                                                    </p>
-                                                                )}
-                                                                {notification.data?.eventLocation && (
-                                                                    <p style={styles.notificationEventMeta}>
-                                                                        📍 {notification.data.eventLocation}
-                                                                    </p>
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                        
-                                                        <span style={styles.notificationTime}>
-                                                            {formatNotificationTime(notification.createdAt)}
-                                                        </span>
-
-                                                        {canConfirmFromNotification(notification) && (
-                                                            <button
-                                                                style={styles.confirmNotificationBtn}
-                                                                onClick={(e) => handleConfirmAttendanceFromNotification(e, notification)}
-                                                                disabled={confirmingRegistrationId === notification.data.registrationId}
-                                                            >
-                                                                {confirmingRegistrationId === notification.data.registrationId ? (
-                                                                    <>
-                                                                        <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
-                                                                        Đang xác nhận...
-                                                                    </>
-                                                                ) : (
-                                                                    <>
-                                                                        <Check size={16} />
-                                                                        Xác nhận tham gia
-                                                                    </>
-                                                                )}
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
+                            {/* Danh sách THÔNG BÁO HỆ THỐNG (từ inAppNotis) */}
+                            {inAppNotis.map((notification) => (
+                                <div
+                                    key={notification.id}
+                                    style={{
+                                        ...styles.notificationItem,
+                                        backgroundColor: notification.readAt ? '#FFFFFF' : '#F0F7FF'
+                                    }}
+                                    onClick={() => handleNotificationClick(notification)}
+                                >
+                                    <div style={styles.notificationIconWrapper}>
+                                        <span style={styles.notificationEmoji}>
+                                            {getNotificationIcon(notification.type)}
+                                        </span>
+                                    </div>
+                                    <div style={styles.notificationContent}>
+                                        <h4 style={styles.notificationSubject}>
+                                            {notification.subject}
+                                            {!notification.readAt && <span style={styles.unreadDot}></span>}
+                                        </h4>
+                                        <p style={styles.notificationText}>{notification.content}</p>
+                                        <span style={styles.notificationTime}>
+                                            {formatNotificationTime(notification.createdAt)}
+                                        </span>
                                     </div>
                                 </div>
-                            )}
-                        </div>
+                            ))}
+                        </>
+                    )}
+                </div>
 
-                        {!isMobile && userData && (
-                            <div style={styles.userProfileMini}>
-                                <span style={styles.miniEmail}>{userData.email}</span>
-                                <img
-                                    src={userData.avatar || "https://ui-avatars.com/api/?name=User"}
-                                    style={styles.miniAvatar}
-                                    alt="avatar"
-                                />
-                            </div>
-                        )}
-                    </div>
+                {/* Footer của Popup */}
+                <div style={styles.notificationFooter} onClick={() => navigate('/volunteer/notifications')}>
+                    {/* Xem tất cả */}
+                </div>
+            </div>
+        )}
+    </div>
+
+    {/* 2. Khu vực Profile người dùng (Ngoài chuông thông báo) */}
+    {!isMobile && (
+        <div style={styles.userProfileMini}>
+            <span style={styles.miniEmail}>{userData?.email}</span>
+            <img
+                src={userData?.avatar || "https://ui-avatars.com/api/?name=User"}
+                style={styles.miniAvatar}
+                alt="avatar"
+            />
+        </div>
+    )}
+</div>
                 </header>
 
                 <div style={styles.scrollArea}>
@@ -1841,7 +1975,26 @@ const styles: { [key: string]: React.CSSProperties } = {
         fontWeight: '700',
         cursor: 'pointer',
         boxShadow: '0 8px 20px rgba(16, 185, 129, 0.3)'
-    }
+    },
+    // Thêm vào trong đối tượng styles của bạn
+    noti: {
+        position: 'absolute',
+        top: -2,
+        right: -2,
+        backgroundColor: '#EF4444',
+        color: 'white',
+        fontSize: '10px',
+        fontWeight: 'bold',
+        borderRadius: '50%',
+        width: '18px',
+        height: '18px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        border: '2px solid white',
+        // Thêm dòng này để tạo hiệu ứng gây chú ý
+        animation: 'pulse 2s infinite', 
+    },
 };
 
 export default BrowseEvents;
