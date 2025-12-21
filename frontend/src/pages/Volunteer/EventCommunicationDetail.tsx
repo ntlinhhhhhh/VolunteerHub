@@ -2,12 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
     LayoutDashboard, Search, Users, UserCircle, Bell, Menu, ChevronLeft,
     MessageSquare, Heart, Send, Trash2, Edit2, Pin, MoreVertical,
-    Image as ImageIcon, X, Loader2, LogOut, ArrowRight,
-    PinOff, Check, AlertCircle, Calendar, MapPin
+    Image as ImageIcon, X, Loader2, MapPin
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-// ==================== INTERFACES ====================
 interface Post {
     id: string;
     eventId: string;

@@ -9,10 +9,9 @@ const GoogleCallback = () => {
     const code = searchParams.get('code');
     if (!code) return;
 
-    // Gọi backend để thực hiện toàn bộ flow: tạo Auth/User, trả JWT
     fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/google/callback?code=${code}`, {
       method: 'GET', 
-      credentials: 'include', // nếu backend trả cookie
+      credentials: 'include',
     })
       .then(async (res) => {
         if (!res.ok) throw new Error(`Backend error: ${res.status}`);
@@ -21,10 +20,8 @@ const GoogleCallback = () => {
       .then(data => {
         console.log('JWT from backend:', data);
 
-        // Lưu token
         localStorage.setItem('token', data.accessToken);
 
-        // Redirect đến dashboard hoặc trang chính
         navigate('/dashboard');
       })
       .catch(err => {

@@ -1,31 +1,3 @@
-// import React, { useEffect, useState } from 'react';
-// import { useSearchParams } from 'react-router-dom';
-
-// const LoginSuccess: React.FC = () => {
-//   const [searchParams] = useSearchParams();
-//   const [token, setToken] = useState<string | null>(null);
-
-//   useEffect(() => {
-//     const t = searchParams.get('token');
-//     if (t) setToken(t);
-//   }, [searchParams]);
-
-//   return (
-//     <div style={{ textAlign: 'center', marginTop: '50px' }}>
-//       <h1>Login Success</h1>
-//       {token ? (
-//         <div>
-//           <p>Your access token:</p>
-//           <textarea readOnly value={token} style={{ width: '400px', height: '100px' }} />
-//         </div>
-//       ) : (
-//         <p>No token found</p>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default LoginSuccess;
 import React, { useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
@@ -42,10 +14,8 @@ const LoginSuccess: React.FC = () => {
       return;
     }
 
-    // Save token
     localStorage.setItem("accessToken", token);
 
-    // Decode token payload
     let payload: any = null;
     try {
       payload = JSON.parse(atob(token.split(".")[1]));
@@ -53,7 +23,7 @@ const LoginSuccess: React.FC = () => {
       console.error("Failed to decode token", e);
     }
 
-    const role = payload?.roleName || "volunteer"; // fallback
+    const role = payload?.roleName || "volunteer";
 
     console.log("ROLE DETECTED:", role);
 

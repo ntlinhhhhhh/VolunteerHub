@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa'; // Import React Icon
 
-// Khai báo interface cho user Google (Giữ nguyên)
 interface GoogleUser {
     name: string;
     email: string;
@@ -10,7 +9,6 @@ interface GoogleUser {
     sub: string;
 }
 
-// Khai báo window.google (Giữ nguyên)
 declare global {
     interface Window {
         google: any;
@@ -106,7 +104,6 @@ const Login: React.FC = () => {
                 <h1 style={styles.title}>Sign In to VolunteerHub</h1>
                 <p style={styles.subtitle}>Welcome back! Enter your credentials to continue.</p>
 
-                {/* 🔵 GOOGLE LOGIN BUTTON */}
                 <button 
                     onClick={handleGoogleLogin}
                     style={styles.googleButton}
@@ -161,7 +158,6 @@ const Login: React.FC = () => {
                     </Link>
                 </div>
 
-                {/* Register */}
                 <div style={styles.linkText}>
                     <p style={{ color: '#343a40' }}>
                         Don't have an account? 
@@ -173,7 +169,6 @@ const Login: React.FC = () => {
     );
 };
 
-// --- Themed Styling ---
 const styles: { [key: string]: React.CSSProperties } = {
     fullPageContainer: {
         display: "flex",
@@ -196,7 +191,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         borderRadius: '16px',
         boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
         textAlign: 'center',
-        position: 'relative', // Cần thiết cho nút quay lại
+        position: 'relative',
     },
     title: {
         fontSize: '28px',

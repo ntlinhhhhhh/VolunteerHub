@@ -4,7 +4,6 @@ import {
     FaCalendarAlt,
     FaMapMarkerAlt,
     FaUsers,
-    FaMoneyBillWave,
     FaUserTie,
     FaHourglassEnd,
     FaClipboardList,

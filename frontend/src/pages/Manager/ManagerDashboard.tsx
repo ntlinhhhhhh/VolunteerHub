@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
-    FaClipboardList, FaUsers, FaUser, FaSignOutAlt, FaEye, FaCheckCircle, FaExclamationTriangle,
-    FaTimesCircle, FaCommentDots, FaChevronUp, FaPhoneAlt, FaMapMarkerAlt,
+    FaClipboardList, FaUsers, FaSignOutAlt, FaEye, FaCheckCircle, FaExclamationTriangle,
+    FaTimesCircle, FaChevronUp,
     FaClipboard,
-    FaPlus,
     FaLayerGroup,
     FaChartBar
 } from 'react-icons/fa';
@@ -28,7 +27,6 @@ const COLORS = {
     SIDEBAR_BORDER: '#DADCE0', 
 };
 
-// --- INTERFACES ---
 interface Registration {
     id: string;
     registrationCode: string;

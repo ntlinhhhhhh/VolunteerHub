@@ -30,11 +30,10 @@ const EventDetails: React.FC = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [user, setUser] = useState<any>(null);
-    const [eventInfo, setEventInfo] = useState<any>(null); // Thông tin chi tiết sự kiện
+    const [eventInfo, setEventInfo] = useState<any>(null); 
     const [registrations, setRegistrations] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // --- FETCH USER PROFILE ---
     const fetchUserProfile = useCallback(async () => {
         const token = localStorage.getItem("accessToken");
         if (!token) { navigate("/manager/login"); return; }
@@ -57,7 +56,6 @@ const EventDetails: React.FC = () => {
         } catch (err) { console.error("Fetch event error:", err); }
     }, [id]);
 
-    // --- FETCH REGISTRATIONS ---
     const fetchRegistrations = useCallback(async () => {
         setLoading(true);
         const token = localStorage.getItem("accessToken");

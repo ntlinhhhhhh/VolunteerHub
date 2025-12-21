@@ -3,9 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { 
     FaUsers, FaSignOutAlt, FaClipboardList, FaLayerGroup, FaChartBar,
     FaArrowLeft, FaSearch, FaSignInAlt, FaSignOutAlt as FaLogOut, FaCheckCircle, 
-    FaClock, FaPhoneAlt, FaFilter, FaStar, FaFileExcel 
+    FaClock, FaPhoneAlt, FaFilter, FaStar,
 } from 'react-icons/fa';
-import * as XLSX from 'xlsx';
 
 const API_BASE_URL = "http://localhost:8000";
 
@@ -38,7 +37,6 @@ const EventAttendance: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [eventTitle, setEventTitle] = useState("");
 
-    // --- STATE CHO RATING ---
     const [ratingModal, setRatingModal] = useState<{show: boolean, regId: string | null, name: string}>({ 
         show: false, regId: null, name: "" 
     });
@@ -46,7 +44,6 @@ const EventAttendance: React.FC = () => {
         performance: 5, punctuality: 5, teamwork: 5, comment: "" 
     });
 
-    // Helper component để vẽ sao
     const StarRating = ({ value, label, field }: { value: number, label: string, field: string }) => (
         <div style={{ marginBottom: '18px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>

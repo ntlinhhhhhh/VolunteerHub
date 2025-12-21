@@ -11,7 +11,6 @@ import {
 
 const API_BASE_URL = "http://localhost:8000";
 
-// --- ĐỒNG BỘ BỘ MÀU CHUẨN ---
 const COLORS = {
     PRIMARY: '#1A73E8', 
     DARK_NAVY: '#202124', 
@@ -41,7 +40,6 @@ const ManagerStatistics: React.FC = () => {
         if (!token) { navigate("/manager/login"); return; }
 
         try {
-            // Fetch User Profile
             const userRes = await fetch(`${API_BASE_URL}/users/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });

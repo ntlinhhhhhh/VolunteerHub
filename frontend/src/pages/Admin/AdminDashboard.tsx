@@ -3,7 +3,6 @@ import { FaUsers, FaCalendarAlt, FaTicketAlt, FaShieldAlt, FaFilter, FaLock, FaU
 import { useNavigate } from "react-router-dom";
 import AdminViewInfo from './Admin-Crud/AdminViewInfo';
 import PendingEventsNotification from './Admin-Crud/PendingEventsNotification';
-import EventsApproval from './Admin-Crud/EventsApproval';
 import DashboardStats from '../../components/Charts/AdminDashboardChart';
 
 const COLORS = {
