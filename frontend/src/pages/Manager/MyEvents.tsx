@@ -3,9 +3,10 @@ import {
     FaPlus, FaUsers, FaSignOutAlt, FaClipboardList, FaCalendarAlt,
     FaMapMarkerAlt, FaEdit, FaEye, FaFilter, FaLayerGroup, FaCheckCircle, FaTimesCircle,
     FaChartBar,
-    FaUserCheck
+    FaFileExcel // Thêm icon Excel
 } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
+import * as XLSX from 'xlsx'; // Import thư viện Excel
 
 const API_BASE_URL = "http://localhost:8000";
 
@@ -82,6 +83,34 @@ const MyEvents: React.FC = () => {
         navigate("/manager/login");
     };
 
+    // --- XỬ LÝ XUẤT EXCEL ---
+    const handleExportExcel = () => {
+        if (events.length === 0) {
+            alert("Không có dữ liệu để xuất!");
+            return;
+        }
+
+        // Định dạng lại dữ liệu cho đẹp trong Excel
+        const dataToExport = events.map((event, index) => ({
+            "STT": index + 1,
+            "Tên sự kiện": event.title,
+            "Danh mục": event.categoryName,
+            "Địa điểm": `${event.location.district}, ${event.location.city}`,
+            "Ngày bắt đầu": new Date(event.schedule.startDate).toLocaleDateString('vi-VN'),
+            "Số lượng TNV": `${event.capacity.currentVolunteers}/${event.capacity.maxVolunteers}`,
+            "Trạng thái": event.status.toUpperCase()
+        }));
+
+        // Tạo worksheet
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        // Tạo workbook
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "My Events");
+
+        // Xuất file
+        XLSX.writeFile(workbook, `MyEvents_Export_${new Date().toLocaleDateString()}.xlsx`);
+    };
+
     // Hàm xử lý Publish hoặc Cancel
     const handleEventAction = async (eventId: string, action: 'publish' | 'cancel') => {
         const token = localStorage.getItem("accessToken");
@@ -102,7 +131,7 @@ const MyEvents: React.FC = () => {
             const result = await res.json();
             if (result.success) {
                 alert(result.message || `Event ${action}ed successfully`);
-                fetchMyEvents(); // Refresh danh sách
+                fetchMyEvents(); 
             } else {
                 alert(result.message || "Action failed");
             }
@@ -112,7 +141,6 @@ const MyEvents: React.FC = () => {
         }
     };
 
-    // Helper: Màu sắc cho Badge trạng thái
     const getStatusStyle = (status: string) => {
         const s = status.toLowerCase();
         if (s === 'published' || s === 'approved') return { bg: '#E6F4EA', color: COLORS.SUCCESS_ACCENT };
@@ -125,7 +153,6 @@ const MyEvents: React.FC = () => {
     return (
         <div style={{ display: 'flex', minHeight: '100vh', width: '100vw', backgroundColor: COLORS.BACKGROUND }}>
             
-            {/* SIDEBAR (Đồng nhất với Dashboard) */}
             <aside style={styles.sidebar}>
                 <div style={{ padding: '30px 24px', borderBottom: `1px solid ${COLORS.SIDEBAR_BORDER}` }}>
                     <h1 style={{ fontSize: '22px', margin: 0, display: 'flex', alignItems: 'center', gap: '12px', color: COLORS.DARK_NAVY }}>
@@ -142,7 +169,6 @@ const MyEvents: React.FC = () => {
                     <div onClick={() => navigate("/manager/my-events")} style={{ ...styles.navItem, backgroundColor: 'rgba(26, 115, 232, 0.15)', color: COLORS.PRIMARY }}>
                         <FaLayerGroup style={{ marginRight: '12px' }} /> My Events
                     </div>
-                
                 </nav>
                 <div style={{ padding: '20px', borderTop: `1px solid ${COLORS.SIDEBAR_BORDER}` }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
@@ -156,16 +182,21 @@ const MyEvents: React.FC = () => {
                 </div>
             </aside>
 
-            {/* MAIN CONTENT */}
             <main style={{ marginLeft: '280px', flex: 1, padding: '40px', boxSizing: 'border-box' }}>
                 <header style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                         <h1 style={{ margin: 0, fontSize: '28px', color: COLORS.DARK_NAVY }}>My Events</h1>
                         <p style={{ margin: '8px 0 0', color: COLORS.TEXT_SECONDARY }}>Manage and track all events you have created.</p>
                     </div>
-                    <button onClick={() => navigate("/manager/create-event")} style={styles.createBtn}>
-                        <FaPlus /> Create Event
-                    </button>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                        {/* NÚT XUẤT EXCEL MỚI */}
+                        <button onClick={handleExportExcel} style={styles.exportBtn}>
+                            <FaFileExcel /> Export Excel
+                        </button>
+                        <button onClick={() => navigate("/manager/create-event")} style={styles.createBtn}>
+                            <FaPlus /> Create Event
+                        </button>
+                    </div>
                 </header>
 
                 <div style={styles.card}>
@@ -189,18 +220,18 @@ const MyEvents: React.FC = () => {
                             </thead>
                             <tbody>
                                 {loading ? (
-                                    <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px' }}>Loading events...</td></tr>
+                                    <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px' }}>Loading events...</td></tr>
                                 ) : events.map(event => {
                                     const statusStyle = getStatusStyle(event.status);
                                     return (
                                         <tr key={event.id} style={{ borderBottom: `1px solid ${COLORS.BORDER}` }}>
                                             <td style={styles.td}>
                                                 <button 
-                                                        onClick={() => navigate(`/manager/events/${event.id}/attendance`)} 
-                                                        style={styles.actionBtn}
-                                                    >
-                                                        <FaUsers  /> 
-                                                    </button>
+                                                    onClick={() => navigate(`/manager/events/${event.id}/attendance`)} 
+                                                    style={styles.actionBtn}
+                                                >
+                                                    <FaUsers /> 
+                                                </button>
                                             </td>
                                             <td style={styles.td}>
                                                 <div style={{ fontWeight: 'bold', color: COLORS.DARK_NAVY }}>{event.title}</div>
@@ -236,17 +267,13 @@ const MyEvents: React.FC = () => {
                                             </td>
                                             <td style={{ ...styles.td, textAlign: 'right' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                                                    {/* <button title="View Details" style={styles.actionBtn}><FaEye /></button>
-                                                     */}
-                                                    
                                                     <button 
                                                         title="View Details" 
-                                                        onClick={() => navigate(`/manager/event-details/${event.id}`)} // Điều hướng đến trang chi tiết
+                                                        onClick={() => navigate(`/manager/event-details/${event.id}`)} 
                                                         style={styles.actionBtn}
                                                     >
                                                         <FaEye />
                                                     </button> 
-                                                    {/* Nút Publish: Chỉ hiện khi trạng thái là approved */}
                                                     {event.status === 'approved' && (
                                                         <button 
                                                             onClick={() => handleEventAction(event.id, 'publish')}
@@ -256,8 +283,6 @@ const MyEvents: React.FC = () => {
                                                             <FaCheckCircle />
                                                         </button>
                                                     )}
-
-                                                    {/* Nút Cancel: Chỉ hiện khi trạng thái là published */}
                                                     {event.status === 'published' && (
                                                         <button 
                                                             onClick={() => handleEventAction(event.id, 'cancel')}
@@ -267,8 +292,6 @@ const MyEvents: React.FC = () => {
                                                             <FaTimesCircle />
                                                         </button>
                                                     )}
-                                                    
-
                                                     {event.status === 'draft' && (
                                                         <button 
                                                             onClick={() => navigate(`/manager/edit-event/${event.id}`)} 
@@ -301,6 +324,7 @@ const styles = {
     th: { padding: '16px 24px', textAlign: 'left', fontSize: '12px', color: COLORS.TEXT_SECONDARY, fontWeight: 'bold', textTransform: 'uppercase' } as React.CSSProperties,
     td: { padding: '20px 24px', fontSize: '14px', color: COLORS.TEXT_MAIN, verticalAlign: 'middle' } as React.CSSProperties,
     createBtn: { padding: '10px 20px', backgroundColor: COLORS.PRIMARY, color: COLORS.WHITE, border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' } as React.CSSProperties,
+    exportBtn: { padding: '10px 20px', backgroundColor: COLORS.SUCCESS_ACCENT, color: COLORS.WHITE, border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' } as React.CSSProperties, // Style cho nút Excel
     actionBtn: { width: '32px', height: '32px', borderRadius: '6px', border: 'none', backgroundColor: '#F1F3F4', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: COLORS.TEXT_SECONDARY, padding: 0} as React.CSSProperties,
 };
 

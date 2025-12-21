@@ -3,8 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { 
     FaUsers, FaSignOutAlt, FaClipboardList, FaLayerGroup, FaChartBar,
     FaArrowLeft, FaSearch, FaSignInAlt, FaSignOutAlt as FaLogOut, FaCheckCircle, 
-    FaClock, FaPhoneAlt, FaFilter, FaStar 
+    FaClock, FaPhoneAlt, FaFilter, FaStar, FaFileExcel 
 } from 'react-icons/fa';
+import * as XLSX from 'xlsx';
 
 const API_BASE_URL = "http://localhost:8000";
 
@@ -114,6 +115,35 @@ const EventAttendance: React.FC = () => {
     const handleLogout = () => {
         localStorage.clear();
         navigate("/manager/login");
+    };
+
+    // --- LOGIC XUẤT EXCEL ---
+    const handleExportExcel = () => {
+        if (volunteers.length === 0) {
+            alert("No data to export");
+            return;
+        }
+
+        // Chuẩn bị dữ liệu để xuất (chỉ lấy những người đã xác nhận tham gia)
+        const exportData = volunteers
+            .filter(v => ['confirmed', 'checked_in', 'checked_out', 'completed'].includes(v.status))
+            .map((v, index) => ({
+                "STT": index + 1,
+                "Mã Đăng Ký": v.registrationCode,
+                "Họ Tên": v.volunteerName,
+                "Số Điện Thoại": v.volunteerPhone,
+                "Vai Trò": v.roleName,
+                "Trạng Thái": v.status.toUpperCase(),
+                "Giờ Check-in": v.attendance?.checkInTime ? new Date(v.attendance.checkInTime).toLocaleString() : "-",
+                "Giờ Check-out": v.attendance?.checkOutTime ? new Date(v.attendance.checkOutTime).toLocaleString() : "-",
+            }));
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
+
+        // Xuất file
+        XLSX.writeFile(workbook, `Attendance_${eventTitle.replace(/\s+/g, '_')}_${new Date().toLocaleDateString()}.xlsx`);
     };
 
     const handleAttendanceAction = async (registrationId: string, action: 'check-in' | 'check-out') => {
@@ -229,14 +259,19 @@ const EventAttendance: React.FC = () => {
                             <p style={{ margin: '8px 0 0', color: COLORS.TEXT_SECONDARY }}>{eventTitle || "Loading event info..."}</p>
                         </div>
                     </div>
-                    <div style={styles.searchBox}>
-                        <FaSearch color={COLORS.TEXT_SECONDARY} />
-                        <input 
-                            placeholder="Search volunteer name..." 
-                            style={styles.searchInput}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                        <button onClick={handleExportExcel} style={styles.exportBtn}>
+                            <FaFileExcel /> Export Excel
+                        </button>
+                        <div style={styles.searchBox}>
+                            <FaSearch color={COLORS.TEXT_SECONDARY} />
+                            <input 
+                                placeholder="Search volunteer name..." 
+                                style={styles.searchInput}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
                     </div>
                 </header>
 
@@ -373,13 +408,12 @@ const styles = {
     searchBox: { display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: COLORS.WHITE, padding: '10px 20px', borderRadius: '24px', width: '300px', border: `1px solid ${COLORS.BORDER}` } as React.CSSProperties,
     searchInput: { border: 'none', outline: 'none', width: '100%', fontSize: '14px' } as React.CSSProperties,
     attendanceBtn: { border: 'none', color: COLORS.WHITE, padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 'bold' } as React.CSSProperties,
+    exportBtn: { backgroundColor: '#188038', color: COLORS.WHITE, border: 'none', padding: '10px 20px', borderRadius: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 'bold', transition: '0.2s' } as React.CSSProperties,
     roleTag: { backgroundColor: COLORS.LIGHT_PRIMARY, color: COLORS.PRIMARY, padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: '500' } as React.CSSProperties,
     badge: { padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase' } as React.CSSProperties,
     timeLabel: { fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' } as React.CSSProperties,
-    
-    // MODAL STYLES
     modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' } as React.CSSProperties,
-    modalContent: { backgroundColor: COLORS.WHITE, padding: '30px', borderRadius: '20px', width: '450px', boxShadow: '0 20px 40px rgba(0,0,0,0.3)', transform: 'translateY(0)', animation: 'modalFadeIn 0.3s ease-out' } as React.CSSProperties,
+    modalContent: { backgroundColor: COLORS.WHITE, padding: '30px', borderRadius: '20px', width: '450px', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' } as React.CSSProperties,
     modalTextarea: { width: '100%', padding: '12px', borderRadius: '12px', border: `1px solid ${COLORS.BORDER}`, minHeight: '100px', outline: 'none', fontSize: '14px', boxSizing: 'border-box', fontFamily: 'inherit', resize: 'none' } as React.CSSProperties,
 };
 
