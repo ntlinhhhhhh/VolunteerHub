@@ -37,6 +37,7 @@ function App() {
                 <Route path="/events/:id" element={<EventDetail />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/login-success" element={<LoginSuccess />} />
+                <Route path="/google/callback" element={<GoogleCallback />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
@@ -54,11 +55,8 @@ function App() {
                 <Route path="/manager/communication/:eventId" element={< ManagerCommunication /> } />
                 <Route path="/manager/communication" element={< DienDan /> } />
 
-
-
                 <Route path="/admin/event-approvals" element={<EventsApproval />} />
                 <Route path="/admin/user-management" element={<UserManagement />} />
-                <Route path="/google/callback" element={<GoogleCallback />} />
                 <Route path="/me/profile" element={< Profile />} />
                 <Route path="/volunteer/dashboard" element={< VolunteerDashboard />} />
                 <Route path="/volunteer/events" element={< BrowseEvents />} />

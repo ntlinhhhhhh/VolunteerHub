@@ -47,26 +47,19 @@ export class NotificationConsumerService implements OnModuleInit {
                 await this.updateNotificationStatusUseCase.markSent(notificationInApp.id);
             } catch (err) {
                 this.logger.error(`In-App notification failed: ${err.message}`);
-                await this.updateNotificationStatusUseCase.markFailed(
-                    notificationInApp.id, // notification chưa tạo?
-                    err.message
-                );
+
+                if (notificationInApp?.id) {
+                    await this.updateNotificationStatusUseCase.markFailed(
+                        notificationInApp.id,
+                        err.message
+                    );
+                }
             }
         }
 
         // 2. EMAIL NOTIFICATION
         if (channels?.email) {
             await this.sendEmailUseCase.execute(userId, channels.email, mappedType, data);
-        }
-
-        // 3. PUSH NOTIFICATION
-        if (channels?.push) {
-            try {
-                // await this.sendPushUseCase.execute(...)
-            } catch (err) {
-                this.logger.error(`Push notification failed: ${err.message}`);
-                // markFailed tương tự
-            }
         }
     }
 }

@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-// ==================== INTERFACES ====================
 interface Post {
     id: string;
     eventId: string;
@@ -412,10 +411,10 @@ const EventCommunicationDetail: React.FC = () => {
                     {isMobile && <button onClick={() => setSidebarOpen(false)} style={styles.closeBtn}><ChevronLeft /></button>}
                 </div>
                 <nav style={styles.navMenu}>
-                    <SidebarLink icon={<LayoutDashboard size={20} />} onClick={() => navigate('/volunteer/dashboard')} label="Overview" />
-                    <SidebarLink icon={<Search size={20} />} onClick={() => navigate('/volunteer/events')} label="Browse Events" />
+                    <SidebarLink icon={<LayoutDashboard size={20} />} onClick={() => navigate('/manager/statistics')} label="Statistics" />
+                    <SidebarLink icon={<Search size={20} />} onClick={() => navigate('/manager/pending-applications')} label="Pending Applications" />
+                    <SidebarLink icon={<UserCircle size={20} />} onClick={() => navigate('/manager/my-events')} label="My Events" />
                     <SidebarLink icon={<Users size={20} />} label="Communication" active />
-                    <SidebarLink icon={<UserCircle size={20} />} onClick={() => navigate('/me/profile')} label="My Profile" />
                 </nav>
                 <div style={styles.sidebarFooter}>
                     <div style={styles.userCard} onClick={() => setShowLogoutPopup(!showLogoutPopup)}>

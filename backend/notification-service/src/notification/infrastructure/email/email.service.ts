@@ -30,15 +30,12 @@ export class EmailService {
         this.transporter = nodemailer.createTransport({
             host,
             port,
-            secure: true, // Gmail PORT 465 = SSL
+            secure: port === 465,
             auth: {
                 user,
                 pass,
             },
-            tls: {
-                rejectUnauthorized: false,
-            },
-            connectionTimeout: 20000, 
+            connectionTimeout: 20000,
             socketTimeout: 20000,
         });
 

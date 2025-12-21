@@ -22,7 +22,7 @@ const GoogleCallback = () => {
 
         localStorage.setItem('token', data.accessToken);
 
-        navigate('/dashboard');
+        navigate('/volunteer/dashboard');
       })
       .catch(err => {
         console.error('Google login failed:', err);

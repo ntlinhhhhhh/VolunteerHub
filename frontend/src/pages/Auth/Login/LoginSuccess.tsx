@@ -6,38 +6,23 @@ const LoginSuccess: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Lấy giá trị token từ URL (?token=...)
     const token = searchParams.get('token');
 
-    if (!token) {
-      console.error("No token found in URL");
+    if (token) {
+      // Lưu vào localStorage
+      localStorage.setItem("accessToken", token);
+      console.log("Token saved successfully");
+
+      // Chuyển hướng về dashboard
+      navigate("/volunteer/dashboard");
+    } else {
+      console.error("No token found, redirecting to login");
       navigate("/login");
-      return;
     }
-
-    localStorage.setItem("accessToken", token);
-
-    let payload: any = null;
-    try {
-      payload = JSON.parse(atob(token.split(".")[1]));
-    } catch (e) {
-      console.error("Failed to decode token", e);
-    }
-
-    const role = payload?.roleName || "volunteer";
-
-    console.log("ROLE DETECTED:", role);
-
-    
-      navigate("/dashboard");
-    
-
   }, [searchParams, navigate]);
 
-  return (
-    <div style={{ textAlign: 'center', marginTop: '60px' }}>
-      Redirecting to your dashboard...
-    </div>
-  );
+  return <div style={{ textAlign: 'center', marginTop: '50px' }}>Đang xác thực tài khoản...</div>;
 };
 
 export default LoginSuccess;
