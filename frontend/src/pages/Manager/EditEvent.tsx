@@ -3,7 +3,8 @@ import {
     FaArrowLeft, FaSave, FaMapMarkerAlt, FaCalendarAlt, 
     FaInfoCircle, FaUsers, FaTag, FaClipboardCheck, FaUserFriends, FaSignOutAlt, FaClipboardList, FaLayerGroup, 
     FaPaperPlane, FaTrash,
-    FaChartBar
+    FaChartBar,
+    FaComments
 } from 'react-icons/fa';
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -169,6 +170,9 @@ const EditEvent: React.FC = () => {
                                         </div>
                     <div onClick={() => navigate("/manager/pending-applications")} style={styles.navItem}><FaClipboardList style={{ marginRight: '12px' }} /> Pending Applications</div>
                     <div onClick={() => navigate("/manager/my-events")} style={{ ...styles.navItem, backgroundColor: 'rgba(26, 115, 232, 0.15)', color: COLORS.PRIMARY }}><FaLayerGroup style={{ marginRight: '12px' }} /> My Events</div>
+                    <div onClick={() => navigate("/manager/communication/")} style={{ ...styles.navItem }}>
+                        <FaComments style={{ marginRight: '12px' }} /> Communications
+                    </div>
                 </nav>
             </aside>
 

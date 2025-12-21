@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { 
     FaUsers, FaSignOutAlt, FaClipboardList, FaLayerGroup, FaChartBar,
     FaArrowLeft, FaSearch, FaSignInAlt, FaSignOutAlt as FaLogOut, FaCheckCircle, 
-    FaClock, FaPhoneAlt, FaFilter, FaStar, FaFileExcel 
+    FaClock, FaPhoneAlt, FaFilter, FaStar, FaFileExcel, 
+    FaComments
 } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 
@@ -256,6 +257,9 @@ const EventAttendance: React.FC = () => {
                     </div>
                     <div onClick={() => navigate("/manager/my-events")} style={{ ...styles.navItem, backgroundColor: 'rgba(26, 115, 232, 0.15)', color: COLORS.PRIMARY }}>
                         <FaLayerGroup style={{ marginRight: '12px' }} /> My Events
+                    </div>
+                    <div onClick={() => navigate("/manager/communication/")} style={{ ...styles.navItem }}>
+                        <FaComments style={{ marginRight: '12px' }} /> Communications
                     </div>
                 </nav>
                 <div style={{ padding: '20px', borderTop: `1px solid ${COLORS.SIDEBAR_BORDER}` }}>

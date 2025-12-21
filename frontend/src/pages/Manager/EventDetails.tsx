@@ -2,9 +2,11 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
     FaUsers, FaSignOutAlt, FaClipboardList, FaCalendarAlt,
     FaMapMarkerAlt, FaLayerGroup, FaChartBar, FaArrowLeft, FaEnvelope, 
-    FaPhone, FaCheck, FaTimes, FaClock, FaInfoCircle, FaTag
+    FaPhone, FaCheck, FaTimes, FaClock, FaInfoCircle, FaTag,
+    FaComments
 } from 'react-icons/fa';
 import { useNavigate, useParams } from "react-router-dom";
+// import { styles } from "./MyEvents";
 
 const API_BASE_URL = "http://localhost:8000";
 
@@ -166,6 +168,9 @@ const EventDetails: React.FC = () => {
                     </div>
                     <div onClick={() => navigate("/manager/my-events")} style={{ ...styles.navItem, backgroundColor: 'rgba(26, 115, 232, 0.15)', color: COLORS.PRIMARY }}>
                         <FaLayerGroup style={{ marginRight: '12px' }} /> My Events
+                    </div>
+                    <div onClick={() => navigate("/manager/communication/")} style={{ ...styles.navItem }}>
+                        <FaComments style={{ marginRight: '12px' }} /> Communications
                     </div>
                 </nav>
                 <div style={{ padding: '20px', borderTop: `1px solid ${COLORS.SIDEBAR_BORDER}` }}>
