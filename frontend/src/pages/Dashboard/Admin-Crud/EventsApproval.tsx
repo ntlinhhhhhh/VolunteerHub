@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { FaUsers, FaCalendarAlt, FaFilter, FaSearch, FaChevronRight, FaSync, FaArrowAltCircleLeft, FaInfoCircle, FaCheckCircle, FaTimesCircle, FaClock, FaClipboardList, FaMapMarkerAlt, FaShieldAlt, FaHouseUser } from 'react-icons/fa';
+import { FaUsers, FaCalendarAlt, FaFilter, FaSearch, FaChevronRight, FaSync, FaArrowAltCircleLeft, FaInfoCircle, FaCheckCircle, FaTimesCircle, FaClock, FaClipboardList, FaMapMarkerAlt, FaShieldAlt, FaHouseUser, FaDownload } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 import EventDetailSidePanel from './EventDetailSidePanel';
 
@@ -28,13 +28,14 @@ interface PendingEvent {
     title: string;
     organizerName: string;
     createdAt: string;
-    status: 'pending_approval' | 'approved' | 'rejected'; 
+    status: 'pending_approval' | 'approved' | 'rejected' | 'published'; 
     eventDate: string; 
     location: string;
 }
 
 const EventsApproval: React.FC = () => {
     const [pendingEvents, setPendingEvents] = useState<PendingEvent[]>([]);
+    const [allEvents, setAllEvents] = useState<PendingEvent[]>([]); // Thêm state cho tất cả sự kiện
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [refreshKey, setRefreshKey] = useState(0); 
@@ -42,6 +43,8 @@ const EventsApproval: React.FC = () => {
     const [actionMessage, setActionMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
+    const [filterStatus, setFilterStatus] = useState<string>('all');
+    const [filterOrganizer, setFilterOrganizer] = useState<string>('all');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentAction, setCurrentAction] = useState<'approve' | 'reject' | null>(null);
     const [currentEventId, setCurrentEventId] = useState<string | null>(null);
@@ -57,6 +60,195 @@ const EventsApproval: React.FC = () => {
 
     const handleCloseSidePanel = () => {
         setViewingEventId(null);
+    };
+
+    const filteredEvents = useMemo(() => {
+        if (!searchTerm) return pendingEvents;
+        const lowerCaseSearchTerm = searchTerm.toLowerCase();
+        return pendingEvents.filter(event => 
+            event.title.toLowerCase().includes(lowerCaseSearchTerm) ||
+            event.organizerName.toLowerCase().includes(lowerCaseSearchTerm) ||
+            event.location.toLowerCase().includes(lowerCaseSearchTerm)
+        );
+    }, [pendingEvents, searchTerm]);
+
+    // const filteredAllEvents = useMemo(() => {
+    //     if (!searchTerm) return allEvents;
+    //     const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    //     return allEvents.filter(event => 
+    //         event.title.toLowerCase().includes(lowerCaseSearchTerm) ||
+    //         event.organizerName.toLowerCase().includes(lowerCaseSearchTerm) ||
+    //         event.location.toLowerCase().includes(lowerCaseSearchTerm)
+    //     );
+    // }, [allEvents, searchTerm]);
+    const filteredAllEvents = useMemo(() => {
+        return allEvents.filter(event => {
+            const matchesSearch = !searchTerm || 
+                event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                event.organizerName.toLowerCase().includes(searchTerm.toLowerCase());
+                
+            // Lọc theo Status
+            const matchesStatus = filterStatus === 'all' || event.status === filterStatus ;
+            
+            // Lọc theo Organizer
+            const matchesOrganizer = filterOrganizer === 'all' || event.organizerName === filterOrganizer;
+
+            return matchesSearch && matchesStatus && matchesOrganizer;
+        });
+    }, [allEvents, searchTerm, filterStatus, filterOrganizer]);
+
+    // Lấy danh sách tên các Organizer duy nhất để đưa vào dropdown lọc
+    const uniqueOrganizers = useMemo(() => {
+        const names = allEvents.map(e => e.organizerName);
+        return Array.from(new Set(names)).sort();
+    }, [allEvents]);
+
+    
+    const handleExport = (format: 'csv' | 'json') => {
+        const dataToExport = allEvents;
+        if (dataToExport.length === 0) return;
+
+        if (format === 'json') {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "all_events.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        } else {
+            // Xuất CSV
+            const headers = ["ID", "Title", "Organizer", "Date", "Location", "Status", "Submitted At"];
+            const csvRows = dataToExport.map(event => [
+                event.id,
+                `"${event.title}"`,
+                `"${event.organizerName}"`,
+                event.eventDate,
+                `"${event.location}"`,
+                event.status,
+                event.createdAt
+            ].join(','));
+            
+            const csvContent = [headers.join(','), ...csvRows].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "all_events.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
+
+    const fetchAllEvents = useCallback(async (token: string) => {
+        try {
+            const res = await fetch("http://localhost:8000/events/", {
+                method: "GET",
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+            });
+            const result = await res.json();
+            if (result.success) {
+                const raw = Array.isArray(result.data) ? result.data : (result.data?.events || []);
+                const events: PendingEvent[] = raw.map((event: any) => ({
+                    id: event.id,
+                    title: event.title,
+                    organizerName: event.organizerName || event.organizer?.name || 'Unknown',
+                    createdAt: new Date(event.createdAt).toLocaleDateString('vi-VN'),
+                    eventDate: event.schedule?.startDate ? new Date(event.schedule.startDate).toLocaleDateString('vi-VN') : 'N/A',
+                    location: event.location?.address || event.location || 'Online',
+                    status: event.status,
+                }));
+                setAllEvents(events);
+            }
+        } catch (err) {
+            console.error("Error fetching all events", err);
+        }
+    }, []);
+
+    const renderAllEventsTable = () => {
+        if (loading && allEvents.length === 0) return null; // Đã có loading ở bảng trên
+        
+        if (filteredAllEvents.length === 0) {
+            return (
+                <div style={styles.emptyState}>
+                    <p>No events found in history.</p>
+                </div>
+            );
+        }
+
+        return (
+            <div style={styles.tableWrapper}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '15px' }}>
+                            
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center', 
+                        marginBottom: '20px',
+                        gap: '15px',
+                        flexWrap: 'wrap'
+                    }}>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <FaDownload></FaDownload>
+                        </div>
+                        {/* Nút Export */}
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button onClick={() => handleExport('csv')} style={styles.exportButton}>CSV</button>
+                            <button onClick={() => handleExport('json')} style={styles.exportButton}>JSON</button>
+                        </div>
+                    </div>
+                </div>
+                <table style={styles.table}>
+                    <thead>
+                        <tr>
+                            <th style={{...styles.th, width: '15%', textAlign: 'center'}}>Actions</th>
+                            <th style={{...styles.th, width: '35%'}}>Event Title</th>
+                            <th style={{...styles.th, width: '15%'}}>Organizer</th>
+                            <th style={{...styles.th, width: '20%'}}>Date & Location</th> 
+                            <th style={{...styles.th, width: '15%'}}>Status</th>
+                            {/* <th style={{...styles.th, width: '15%', textAlign: 'center'}}>Actions</th> */}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredAllEvents.map((event) => (
+                            <tr key={event.id} style={styles.tr}>
+                                <td style={{...styles.td, textAlign: 'center'}}>
+                                    <button 
+                                        onClick={() => handleViewDetails(event.id)}
+                                        style={{...styles.iconActionButton, color: COLORS.TEXT_SECONDARY}}
+                                    >
+                                        <FaInfoCircle size={16} />
+                                    </button>
+                                </td>
+                                <td style={styles.td}>{event.title}</td>
+                                <td style={styles.td}>{event.organizerName}</td>
+                                <td style={styles.td}>
+                                    <p style={{margin: '0', fontSize: '12px'}}><FaCalendarAlt size={10}/> {event.eventDate}</p>
+                                    <p style={{margin: '2px 0 0 0', fontSize: '12px'}}><FaMapMarkerAlt size={10}/> {event.location}</p>
+                                </td>
+                                <td style={styles.td}>
+                                    <span style={{
+                                        padding: '4px 8px',
+                                        borderRadius: '4px',
+                                        fontSize: '12px',
+                                        fontWeight: 'bold',
+                                        textTransform: 'capitalize', 
+                                        backgroundColor: event.status === 'approved' ? '#E6F4EA' : (event.status === 'rejected' ? '#FDE7E7' : (event.status === 'published' ? '#E6F4EA' : (event.status === 'pending_approval' ? '#fafad9ff' : '#e6e4e3ff'))),
+                                        color: event.status === 'approved' ? COLORS.SUCCESS_ACCENT : (event.status === 'rejected' ? COLORS.DANGER : (event.status === 'published' ? COLORS.SUCCESS_ACCENT :(event.status === 'pending_approval' ? COLORS.WARNING : COLORS.TEXT_SECONDARY))),
+                                    }}>
+                                        {event.status.replace('_', ' ')}
+                                    </span>
+                                </td>
+                                
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
     };
 
     const fetchPendingEvents = useCallback(async (token: string) => {
@@ -119,7 +311,8 @@ const EventsApproval: React.FC = () => {
             return; 
         }
         fetchPendingEvents(token);
-    }, [refreshKey, fetchPendingEvents]); 
+        fetchAllEvents(token);
+    }, [refreshKey, fetchPendingEvents, fetchAllEvents]); 
 
     const handleApproveReject = (eventId: string, action: 'approve' | 'reject') => {
         const token = localStorage.getItem('accessToken');
@@ -232,16 +425,6 @@ const EventsApproval: React.FC = () => {
         return {};
     }
 
-    const filteredEvents = useMemo(() => {
-        if (!searchTerm) return pendingEvents;
-        const lowerCaseSearchTerm = searchTerm.toLowerCase();
-        return pendingEvents.filter(event => 
-            event.title.toLowerCase().includes(lowerCaseSearchTerm) ||
-            event.organizerName.toLowerCase().includes(lowerCaseSearchTerm) ||
-            event.location.toLowerCase().includes(lowerCaseSearchTerm)
-        );
-    }, [pendingEvents, searchTerm]);
-
     
     const renderEventsApprovalTable = () => {
         if (loading && pendingEvents.length === 0) return <p style={{ textAlign: 'center', padding: '20px', color: COLORS.TEXT_SECONDARY }}>Loading events...</p>;
@@ -270,28 +453,17 @@ const EventsApproval: React.FC = () => {
                 <table style={styles.table}>
                     <thead>
                         <tr>
+                            <th style={{...styles.th, width: '15%', textAlign: 'center'}}>Actions</th>
                             <th style={{...styles.th, width: '35%'}}>Event Title</th>
                             <th style={{...styles.th, width: '15%'}}>Organizer</th>
-                            <th style={{...styles.th, width: '15%'}}>Event Date & Location</th> 
+                            <th style={{...styles.th, width: '20%'}}>Event Date & Location</th> 
                             <th style={{...styles.th, width: '15%'}}>Submitted On</th>
-                            <th style={{...styles.th, width: '20%', textAlign: 'center'}}>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredEvents.map((event) => (
+                            
                             <tr key={event.id} style={styles.tr}>
-                                <td style={styles.td}>{event.title}</td>
-                                <td style={styles.td}>
-                                    <span style={{fontWeight: '500'}}>{event.organizerName}</span>
-                                </td>
-                                <td style={styles.td}>
-                                    <p style={{margin: '0', display: 'flex', alignItems: 'center'}}><FaCalendarAlt size={12} style={{marginRight: '5px', color: COLORS.TEXT_SECONDARY}}/>{event.eventDate}</p>
-                                    <p style={{margin: '5px 0 0 0', display: 'flex', alignItems: 'center'}}><FaMapMarkerAlt size={12} style={{marginRight: '5px', color: COLORS.TEXT_SECONDARY}}/>{event.location}</p>
-                                </td>
-                                <td style={styles.td}>
-                                    <FaClock size={12} style={{marginRight: '5px', color: COLORS.TEXT_SECONDARY}}/>{event.createdAt}
-                                </td>
-                                
                                 <td style={{...styles.td, textAlign: 'center'}}>
                                     <div style={styles.actionButtonContainerVertical}>
                                         
@@ -324,6 +496,19 @@ const EventsApproval: React.FC = () => {
                                         
                                     </div>
                                 </td>
+                                <td style={styles.td}>{event.title}</td>
+                                <td style={styles.td}>
+                                    <span style={{fontWeight: '500'}}>{event.organizerName}</span>
+                                </td>
+                                <td style={styles.td}>
+                                    <p style={{margin: '0', display: 'flex', alignItems: 'center'}}><FaCalendarAlt size={12} style={{marginRight: '5px', color: COLORS.TEXT_SECONDARY}}/>{event.eventDate}</p>
+                                    <p style={{margin: '5px 0 0 0', display: 'flex', alignItems: 'center'}}><FaMapMarkerAlt size={12} style={{marginRight: '5px', color: COLORS.TEXT_SECONDARY}}/>{event.location}</p>
+                                </td>
+                                <td style={styles.td}>
+                                    <FaClock size={12} style={{marginRight: '5px', color: COLORS.TEXT_SECONDARY}}/>{event.createdAt}
+                                </td>
+                                
+                                
                             </tr>
                         ))}
                     </tbody>
@@ -489,7 +674,22 @@ const EventsApproval: React.FC = () => {
                         </button>
                     </div>
 
-                    {renderEventsApprovalTable()}
+                    {/* {renderEventsApprovalTable()} */}
+                    <div style={styles.dataCard}>
+                        <h3 style={{...styles.dataCardTitle, marginBottom: '20px'}}>
+                            <FaClock size={20} style={{marginRight: '10px', color: COLORS.WARNING}}/> 
+                            Pending Approvals ({pendingEvents.length})
+                        </h3>
+                        {renderEventsApprovalTable()}
+                    </div>
+
+                    <div style={{...styles.dataCard, marginTop: '30px'}}>
+                        <h3 style={{...styles.dataCardTitle, marginBottom: '20px'}}>
+                            <FaClipboardList size={20} style={{marginRight: '10px', color: COLORS.PRIMARY}}/> 
+                            Event History ({allEvents.length})
+                        </h3>
+                        {renderAllEventsTable()}
+                    </div>
                 </div>
                 
             </div>
@@ -618,17 +818,17 @@ const styles: DashboardStyles = {
         ...({ ':hover': { backgroundColor: '#E0E0E0' } } as React.CSSProperties),
     },
     approveButton: {
-        padding: '8px 12px', backgroundColor: COLORS.SUCCESS_ACCENT, color: COLORS.WHITE, border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '13px', display: 'inline-flex', alignItems: 'center', transition: 'background-color 0.2s',
+        padding: '8px 8px', backgroundColor: COLORS.SUCCESS_ACCENT, color: COLORS.WHITE, border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '13px', display: 'inline-flex', alignItems: 'center', transition: 'background-color 0.2s',
         marginBottom: '10px', 
         width: '100%', 
-        maxWidth: '120px', 
+        maxWidth: '100px', 
         justifyContent: 'center',
         ...({ ':hover': { backgroundColor: '#2B8C44' } } as React.CSSProperties),
     },
     rejectButton: {
-        padding: '8px 12px', backgroundColor: COLORS.DANGER, color: COLORS.WHITE, border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '13px', display: 'inline-flex', alignItems: 'center', transition: 'background-color 0.2s',
+        padding: '8px 8px', backgroundColor: COLORS.DANGER, color: COLORS.WHITE, border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '13px', display: 'inline-flex', alignItems: 'center', transition: 'background-color 0.2s',
         width: '100%', 
-        maxWidth: '120px', 
+        maxWidth: '100px', 
         justifyContent: 'center',
         ...({ ':hover': { backgroundColor: '#C73327' } } as React.CSSProperties),
     },
