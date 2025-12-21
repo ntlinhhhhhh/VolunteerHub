@@ -117,7 +117,8 @@ const BrowseEvents: React.FC = () => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [showFilterDropdown, setShowFilterDropdown] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string>('');
-    const [categories, setCategories] = useState<string[]>([]);
+    const [filterStartDate, setFilterStartDate] = useState<string>('');
+    const [filterEndDate, setFilterEndDate] = useState<string>('');    const [categories, setCategories] = useState<string[]>([]);
     const [myRegistrations, setMyRegistrations] = useState<string[]>([]);
     const [inAppNotis, setInAppNotis] = useState<InAppNotification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -648,14 +649,38 @@ const BrowseEvents: React.FC = () => {
         });
     };
 
-    const filteredEvents = events.filter(event => {
-        const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            event.categoryName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            event.location.city.toLowerCase().includes(searchQuery.toLowerCase());
+    // const filteredEvents = events.filter(event => {
+    //     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    //         event.categoryName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    //         event.location.city.toLowerCase().includes(searchQuery.toLowerCase());
 
+    //     const matchesCategory = selectedCategory === '' || event.categoryName === selectedCategory;
+
+    //     return matchesSearch && matchesCategory;
+    // });
+    const filteredEvents = events.filter(event => {
+    // 1. Lọc theo Search Text
+        const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            event.categoryName.toLowerCase().includes(searchQuery.toLowerCase());
+
+        // 2. Lọc theo Category
         const matchesCategory = selectedCategory === '' || event.categoryName === selectedCategory;
 
-        return matchesSearch && matchesCategory;
+        // 3. Lọc theo Khoảng thời gian
+        const eDate = new Date(event.schedule.startDate).getTime();
+        const start = filterStartDate ? new Date(filterStartDate).getTime() : null;
+        const end = filterEndDate ? new Date(filterEndDate).getTime() : null;
+
+        let matchesRange = true;
+        if (start && end) {
+            matchesRange = eDate >= start && eDate <= end;
+        } else if (start) {
+            matchesRange = eDate >= start;
+        } else if (end) {
+            matchesRange = eDate <= end;
+        }
+
+        return matchesSearch && matchesCategory && matchesRange;
     });
 
     const isEventRegistered = (eventId: string) => {
@@ -866,6 +891,39 @@ const BrowseEvents: React.FC = () => {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
+                        </div>
+
+                        <div style={styles.filterGroup}>
+                            <div style={styles.datePickerContainer}>
+                                <div style={styles.inputWrapper}>
+                                    <span style={styles.label}>Từ:</span>
+                                    <input 
+                                        type="date" 
+                                        value={filterStartDate}
+                                        onChange={(e) => setFilterStartDate(e.target.value)}
+                                        style={styles.dateInput}
+                                    />
+                                </div>
+                                
+                                <div style={styles.inputWrapper}>
+                                    <span style={styles.label}>Đến:</span>
+                                    <input 
+                                        type="date" 
+                                        value={filterEndDate}
+                                        onChange={(e) => setFilterEndDate(e.target.value)}
+                                        style={styles.dateInput}
+                                    />
+                                </div>
+
+                                {(filterStartDate || filterEndDate) && (
+                                    <button 
+                                        onClick={() => { setFilterStartDate(''); setFilterEndDate(''); }}
+                                        style={styles.clearDateBtn}
+                                    >
+                                        Xóa lọc ngày
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         <div style={{ position: 'relative' }} ref={filterRef}>
@@ -2019,6 +2077,42 @@ const styles: { [key: string]: React.CSSProperties } = {
         // Thêm dòng này để tạo hiệu ứng gây chú ý
         animation: 'pulse 2s infinite',
     },
+    datePickerContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        flexWrap: 'wrap',
+        margin: '10px 0'
+    },
+    inputWrapper: {
+        display: 'flex',
+        alignItems: 'center',
+        backgroundColor: '#F3F4F6',
+        padding: '6px 12px',
+        borderRadius: '8px',
+        border: '1px solid #E5E7EB'
+    },
+    label: {
+        fontSize: '12px',
+        color: '#6B7280',
+        marginRight: '8px',
+        fontWeight: '600'
+    },
+    dateInput: {
+        border: 'none',
+        background: 'transparent',
+        outline: 'none',
+        fontSize: '14px',
+        color: '#1F2937'
+    },
+    clearDateBtn: {
+        fontSize: '12px',
+        color: '#EF4444',
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        textDecoration: 'underline'
+    }
 };
 
 export default BrowseEvents;

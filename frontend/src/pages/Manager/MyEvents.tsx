@@ -5,7 +5,8 @@ import {
     FaChartBar,
     FaFileExcel, // Thêm icon Excel
     FaFileCsv,
-    FaFileCode
+    FaFileCode,
+    FaComments
 } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 import * as XLSX from 'xlsx'; // Import thư viện Excel
@@ -212,14 +213,17 @@ const MyEvents: React.FC = () => {
                 </div>
                 <nav style={{ flex: 1, padding: '20px 12px' }}> 
                     <div onClick={() => navigate("/manager/statistics")} style={styles.navItem}>
-                        <FaChartBar style={{ marginRight: '12px' }} /> Statistics
-                    </div>
-                    <div onClick={() => navigate("/manager/pending-applications")} style={styles.navItem}>
-                        <FaClipboardList style={{ marginRight: '12px' }} /> Pending Applications
-                    </div>
-                    <div onClick={() => navigate("/manager/my-events")} style={{ ...styles.navItem, backgroundColor: 'rgba(26, 115, 232, 0.15)', color: COLORS.PRIMARY }}>
-                        <FaLayerGroup style={{ marginRight: '12px' }} /> My Events
-                    </div>
+                                            <FaChartBar style={{ marginRight: '12px' }} /> Statistics
+                                        </div>
+                                        <div onClick={() => navigate("/manager/pending-applications")} style={styles.navItem}>
+                                            <FaClipboardList style={{ marginRight: '12px' }} /> Pending Applications
+                                        </div>
+                                        <div onClick={() => navigate("/manager/my-events")} style={{ ...styles.navItem , backgroundColor: 'rgba(26, 115, 232, 0.15)', color: COLORS.PRIMARY}}>
+                                            <FaLayerGroup style={{ marginRight: '12px' }} /> My Events
+                                        </div>
+                                        <div onClick={() => navigate("/manager/communication/")} style={{ ...styles.navItem }}>
+                                            <FaComments style={{ marginRight: '12px' }} /> Communications
+                                        </div>
                 </nav>
                 <div style={{ padding: '20px', borderTop: `1px solid ${COLORS.SIDEBAR_BORDER}` }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
