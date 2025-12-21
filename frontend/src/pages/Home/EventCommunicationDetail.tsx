@@ -384,7 +384,6 @@ const EventCommunicationDetail: React.FC = () => {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    // KHÔNG ĐƯỢC để Content-Type: application/json
                 },
                 body: formData
             });
@@ -464,7 +463,10 @@ const EventCommunicationDetail: React.FC = () => {
         }
     };
 
-    const handleUpdatePost = async (postId: string) => {
+    const handleUpdatePost = async (postId: string, e?: React.FormEvent) => {
+        // 1. Chặn refresh trang nếu hàm được gọi từ form hoặc button submit
+        if (e) e.preventDefault();
+
         if (!editContent.trim()) {
             alert('⚠️ Nội dung không được để trống!');
             return;
@@ -472,32 +474,38 @@ const EventCommunicationDetail: React.FC = () => {
 
         try {
             const token = localStorage.getItem('accessToken');
-            const userId = userData?.id || userData?.id || '';
 
+            // Gọi API Put
             const response = await fetch(`${USER_API_URL}/events/${eventId}/posts/${postId}`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    'x-user-id': userId
+                    'Authorization': `Bearer ${token}`, // Quan trọng nhất để Backend lấy user info
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     content: editContent,
-                    images: []
+                    images: [] // Gửi mảng rỗng nếu API UpdatePostDto yêu cầu
                 })
             });
 
             if (response.ok) {
+                const result = await response.json();
+
+                // 2. Cập nhật state local thay vì gọi lại fetchPosts() để tránh giật trang
+                setPosts(prevPosts => prevPosts.map(p =>
+                    p.id === postId ? { ...p, content: editContent } : p
+                ));
+
                 setEditingPost(null);
                 setEditContent('');
-                await fetchPosts();
                 alert('✅ Đã cập nhật bài viết!');
             } else {
-                alert('❌ Không thể cập nhật bài viết!');
+                const error = await response.json();
+                alert(`❌ Lỗi: ${error.message || 'Không thể cập nhật'}`);
             }
         } catch (error) {
             console.error('Error updating post:', error);
-            alert('❌ Có lỗi xảy ra!');
+            alert('❌ Có lỗi xảy ra khi kết nối máy chủ!');
         }
     };
 
@@ -559,22 +567,29 @@ const EventCommunicationDetail: React.FC = () => {
         const content = commentInputs[postId]?.trim();
         if (!content) return;
 
+        // Kiểm tra an toàn dữ liệu người dùng
+        const userId = userData?.id || userData?._id;
+        const userName = userData?.fullName;
+        const avatar = userData?.avatar?.replace(USER_API_URL, '');
+        alert(avatar);
+
+        if (!userId || !userName) {
+            alert('⚠️ Vui lòng đăng nhập lại để bình luận!');
+            return;
+        }
+
         try {
             const token = localStorage.getItem('accessToken');
-            const userId = userData?.id || userData?._id || '';
-            const userName = userData?.fullName || 'User';
-
             const response = await fetch(`${USER_API_URL}/events/${eventId}/posts/${postId}/comments`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
-                    'x-user-id': userId,
-                    'x-user-name': userName
                 },
                 body: JSON.stringify({
                     authorId: userId,
                     authorName: userName,
+                    authorAvatar: avatar,
                     content
                 })
             });
@@ -583,7 +598,8 @@ const EventCommunicationDetail: React.FC = () => {
                 setCommentInputs({ ...commentInputs, [postId]: '' });
                 await fetchPosts();
             } else {
-                alert('❌ Không thể thêm bình luận!');
+                const errorData = await response.json();
+                alert(`❌ Lỗi: ${errorData.message || 'Không thể thêm bình luận'}`);
             }
         } catch (error) {
             console.error('Error adding comment:', error);
@@ -1220,6 +1236,7 @@ const EventCommunicationDetail: React.FC = () => {
                                                             ...styles.sendCommentBtn,
                                                             opacity: commentInputs[post.id]?.trim() ? 1 : 0.5
                                                         }}
+                                                        type='button'
                                                         onClick={() => handleAddComment(post.id)}
                                                         disabled={!commentInputs[post.id]?.trim()}
                                                     >
@@ -1233,7 +1250,7 @@ const EventCommunicationDetail: React.FC = () => {
                                                     {post.comments.map(comment => (
                                                         <div key={comment.id} style={styles.commentItem}>
                                                             <img
-                                                                src={comment.authorAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.authorName)}`}
+                                                                src={`http://localhost:8000/${comment.authorAvatar}` || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.authorName)}`}
                                                                 style={styles.commentAvatar}
                                                                 alt={comment.authorName}
                                                             />

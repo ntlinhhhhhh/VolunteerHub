@@ -70,15 +70,12 @@ export class PostController {
     private normalizePath(path: string): string {
         if (!path) return '';
         
-        // Nếu đã là URL đầy đủ thì giữ nguyên
         if (path.startsWith('http://') || path.startsWith('https://')) {
             return path;
         }
         
-        // Loại bỏ các ký tự lạ ở đầu
         let cleanPath = path.trim();
         
-        // Đảm bảo luôn có dấu / ở đầu
         if (!cleanPath.startsWith('/')) {
             cleanPath = '/' + cleanPath;
         }
@@ -118,7 +115,6 @@ export class PostController {
 
         const result = await this.getPostsUseCase.execute(eventId, limit, skip, sortBy);
 
-        // Chuẩn hóa dữ liệu trước khi trả về
         const normalizedResult = {
             posts: (result.posts || []).map(post => this.normalizePostData(post)),
             pinnedPosts: (result.pinnedPosts || []).map(post => this.normalizePostData(post)),
@@ -352,25 +348,11 @@ export class PostController {
     ) {
         const userId = auth.userId;
         const userName = auth.name || 'User';
-        
-        // Lấy avatar từ user service nếu có
-        let userAvatar = '/uploads/avatars/default.png';
-        try {
-            const userProfile = await firstValueFrom(
-                this.userClient.send('user.findByAuthId', { authId: userId })
-            );
-            if (userProfile?.avatar) {
-                userAvatar = this.normalizePath(userProfile.avatar);
-            }
-        } catch (error) {
-            console.warn('Could not fetch user avatar:', error.message);
-        }
 
         const comment = await this.addCommentUseCase.execute(postId, {
             ...dto,
             authorId: userId,
             authorName: userName,
-            authorAvatar: userAvatar,
         });
 
         return {
