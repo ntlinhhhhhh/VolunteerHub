@@ -30,7 +30,7 @@ export class EmailService {
         this.transporter = nodemailer.createTransport({
             host,
             port,
-            secure: port === 465,
+            secure: port === 465, // 🔑 QUAN TRỌNG
             auth: {
                 user,
                 pass,
@@ -39,10 +39,10 @@ export class EmailService {
             socketTimeout: 20000,
         });
 
-        // Test SMTP connection
+        // ✅ verify ĐÚNG transporter
         this.transporter.verify((error, success) => {
             if (error) {
-                this.logger.error(`❌ SMTP connection failed: ${error.message}`);
+                this.logger.error('❌ SMTP connection failed', error);
             } else {
                 this.logger.log('✅ SMTP server ready to send emails');
             }
