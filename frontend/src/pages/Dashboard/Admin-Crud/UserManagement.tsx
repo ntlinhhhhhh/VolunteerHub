@@ -2,7 +2,9 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
     FaUsers, FaCalendarAlt, FaShieldAlt, FaLock, FaUnlock, FaSearch, 
     FaChevronRight, FaArrowAltCircleLeft, FaInfoCircle, FaUserPlus, 
-    FaSync, FaHouseUser, FaFileExcel 
+    FaSync, FaHouseUser, FaFileExcel, 
+    FaFileCsv,
+    FaFileCode
 } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 import * as XLSX from 'xlsx'; // Import thư viện Excel
@@ -158,6 +160,53 @@ const UserManagement: React.FC = () => {
         return styles.roleUser;
     };
 
+    const exportToCSV = () => {
+        if (filteredUsers.length === 0) {
+            setActionMessage({ type: 'error', text: "No data to export!" });
+            return;
+        }
+
+        const headers = ["Full Name", "Email", "Username", "Role", "Status", "Created At"];
+        const rows = filteredUsers.map(user => [
+            `"${user.fullName || 'N/A'}"`,
+            `"${user.email}"`,
+            `"${user.username}"`,
+            user.role.toUpperCase(),
+            user.status.toUpperCase(),
+            user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'
+        ]);
+
+        const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+        const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `User_List_${new Date().getTime()}.csv`);
+        link.click();
+        
+        setActionMessage({ type: 'success', text: "CSV file exported successfully!" });
+        setTimeout(() => setActionMessage(null), 3000);
+    };
+
+    const exportToJSON = () => {
+        if (filteredUsers.length === 0) {
+            setActionMessage({ type: 'error', text: "No data to export!" });
+            return;
+        }
+
+        const dataStr = JSON.stringify(filteredUsers, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `User_List_${new Date().getTime()}.json`);
+        link.click();
+
+        setActionMessage({ type: 'success', text: "JSON file exported successfully!" });
+        setTimeout(() => setActionMessage(null), 3000);
+    };
+
+
     return (
         <div style={styles.dashboardContainer}>
             <style>{`
@@ -212,9 +261,12 @@ const UserManagement: React.FC = () => {
                             {loading ? 'Refreshing...' : 'Refresh'}
                         </button>
                         
-                        {/* NÚT XUẤT EXCEL MỚI */}
-                        <button style={styles.exportButton} onClick={exportToExcel}>
-                            <FaFileExcel style={{marginRight: '8px'}}/> Export Excel
+                        <button style={styles.csvButton} onClick={exportToCSV}>
+                            <FaFileCsv style={{marginRight: '8px'}}/> CSV
+                        </button>
+
+                        <button style={styles.jsonButton} onClick={exportToJSON}>
+                            <FaFileCode style={{marginRight: '8px'}}/> JSON
                         </button>
 
                         <button style={styles.createButton} onClick={() => setIsCreateModalOpen(true)}>
@@ -295,7 +347,7 @@ const UserManagement: React.FC = () => {
                                                 style={styles.iconActionButton}
                                                 title="View Details"
                                             >
-                                                <FaInfoCircle size={18} color={COLORS.PRIMARY}/> 
+                                                <FaInfoCircle size={18} color={COLORS.TEXT_SECONDARY}/> 
                                             </button>
                                             
                                             <button 

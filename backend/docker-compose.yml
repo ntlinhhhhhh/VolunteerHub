@@ -130,8 +130,7 @@ services:
       - rabbitmq
     restart: unless-stopped
     volumes:
-      - D:/volunteer_hub/volunteerhub/media-storage:/app/uploads
-  
+      - D:/vh/media-storage:/app/uploads
 
   communication-service:
     build:
@@ -150,7 +149,7 @@ services:
       - rabbitmq
     restart: unless-stopped
     volumes:
-      - D:/volunteer_hub/volunteerhub/media-storage:/app/uploads
+      - D:/vh/media-storage:/app/uploads
 
   dashboard-service:
     build:

@@ -3,7 +3,9 @@ import {
     FaPlus, FaUsers, FaSignOutAlt, FaClipboardList, FaCalendarAlt,
     FaMapMarkerAlt, FaEdit, FaEye, FaFilter, FaLayerGroup, FaCheckCircle, FaTimesCircle,
     FaChartBar,
-    FaFileExcel // Thêm icon Excel
+    FaFileExcel, // Thêm icon Excel
+    FaFileCsv,
+    FaFileCode
 } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 import * as XLSX from 'xlsx'; // Import thư viện Excel
@@ -110,6 +112,55 @@ const MyEvents: React.FC = () => {
         // Xuất file
         XLSX.writeFile(workbook, `MyEvents_Export_${new Date().toLocaleDateString()}.xlsx`);
     };
+    // --- XỬ LÝ XUẤT CSV ---
+    const handleExportCSV = () => {
+        if (events.length === 0) {
+            alert("Không có dữ liệu để xuất!");
+            return;
+        }
+
+        // Tiêu đề cột
+        const headers = ["STT", "Ten su kien", "Danh muc", "Dia diem", "Ngay bat dau", "So luong TNV", "Trang thai"];
+        
+        // Chuyển đổi dữ liệu thành các dòng CSV
+        // Lưu ý: Dùng dấu phẩy hoặc chấm phẩy, bỏ dấu tiếng Việt để tránh lỗi font đơn giản trên Excel/Text Editor
+        const csvRows = events.map((event, index) => {
+            const row = [
+                index + 1,
+                `"${event.title}"`, // Bọc trong ngoặc kép để tránh lỗi nếu title có dấu phẩy
+                `"${event.categoryName}"`,
+                `"${event.location.district}, ${event.location.city}"`,
+                new Date(event.schedule.startDate).toLocaleDateString('vi-VN'),
+                `"${event.capacity.currentVolunteers}/${event.capacity.maxVolunteers}"`,
+                event.status.toUpperCase()
+            ];
+            return row.join(",");
+        });
+
+        const csvContent = [headers.join(","), ...csvRows].join("\n");
+        const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' }); // Thêm BOM để hiển thị đúng tiếng Việt
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Events_Export_${new Date().toLocaleDateString()}.csv`);
+        link.click();
+    };
+
+    // --- XỬ LÝ XUẤT JSON ---
+    const handleExportJSON = () => {
+        if (events.length === 0) {
+            alert("Không có dữ liệu để xuất!");
+            return;
+        }
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(events, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", `Events_Export_${new Date().toLocaleDateString()}.json`);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    };
 
     // Hàm xử lý Publish hoặc Cancel
     const handleEventAction = async (eventId: string, action: 'publish' | 'cancel') => {
@@ -189,9 +240,17 @@ const MyEvents: React.FC = () => {
                         <p style={{ margin: '8px 0 0', color: COLORS.TEXT_SECONDARY }}>Manage and track all events you have created.</p>
                     </div>
                     <div style={{ display: 'flex', gap: '12px' }}>
-                        {/* NÚT XUẤT EXCEL MỚI */}
+                        {/* NÚT XUẤT EXCEL MỚI
                         <button onClick={handleExportExcel} style={styles.exportBtn}>
                             <FaFileExcel /> Export Excel
+                        </button> */}
+                        <button onClick={handleExportCSV} style={styles.csvBtn}>
+                            <FaFileCsv /> Export CSV
+                        </button>
+                        
+                        {/* NÚT XUẤT JSON */}
+                        <button onClick={handleExportJSON} style={styles.jsonBtn}>
+                            <FaFileCode /> Export JSON
                         </button>
                         <button onClick={() => navigate("/manager/create-event")} style={styles.createBtn}>
                             <FaPlus /> Create Event
@@ -326,6 +385,31 @@ const styles = {
     createBtn: { padding: '10px 20px', backgroundColor: COLORS.PRIMARY, color: COLORS.WHITE, border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' } as React.CSSProperties,
     exportBtn: { padding: '10px 20px', backgroundColor: COLORS.SUCCESS_ACCENT, color: COLORS.WHITE, border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' } as React.CSSProperties, // Style cho nút Excel
     actionBtn: { width: '32px', height: '32px', borderRadius: '6px', border: 'none', backgroundColor: '#F1F3F4', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: COLORS.TEXT_SECONDARY, padding: 0} as React.CSSProperties,
+    csvBtn: { 
+        padding: '10px 20px', 
+        backgroundColor: '#2ecc71', // Màu Emerald
+        color: COLORS.WHITE, 
+        border: 'none', 
+        borderRadius: '8px', 
+        fontWeight: 'bold', 
+        cursor: 'pointer', 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '8px' 
+    } as React.CSSProperties,
+    
+    jsonBtn: { 
+        padding: '10px 20px', 
+        backgroundColor: '#f39c12', // Màu Orange/Amber
+        color: COLORS.WHITE, 
+        border: 'none', 
+        borderRadius: '8px', 
+        fontWeight: 'bold', 
+        cursor: 'pointer', 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '8px' 
+    } as React.CSSProperties,
 };
 
 export default MyEvents;

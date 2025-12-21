@@ -117,33 +117,53 @@ const EventAttendance: React.FC = () => {
         navigate("/manager/login");
     };
 
-    // --- LOGIC XUẤT EXCEL ---
-    const handleExportExcel = () => {
-        if (volunteers.length === 0) {
-            alert("No data to export");
-            return;
-        }
+    const handleExport = (format: 'csv' | 'json') => {
+    if (volunteers.length === 0) {
+        alert("No data to export");
+        return;
+    }
 
-        // Chuẩn bị dữ liệu để xuất (chỉ lấy những người đã xác nhận tham gia)
-        const exportData = volunteers
+    // Chuẩn bị dữ liệu sạch
+    const exportData = volunteers
             .filter(v => ['confirmed', 'checked_in', 'checked_out', 'completed'].includes(v.status))
             .map((v, index) => ({
                 "STT": index + 1,
-                "Mã Đăng Ký": v.registrationCode,
-                "Họ Tên": v.volunteerName,
-                "Số Điện Thoại": v.volunteerPhone,
-                "Vai Trò": v.roleName,
-                "Trạng Thái": v.status.toUpperCase(),
-                "Giờ Check-in": v.attendance?.checkInTime ? new Date(v.attendance.checkInTime).toLocaleString() : "-",
-                "Giờ Check-out": v.attendance?.checkOutTime ? new Date(v.attendance.checkOutTime).toLocaleString() : "-",
+                "Registration_Code": v.registrationCode,
+                "Full_Name": v.volunteerName,
+                "Phone": v.volunteerPhone,
+                "Role": v.roleName,
+                "Status": v.status.toUpperCase(),
+                "Check_In": v.attendance?.checkInTime ? new Date(v.attendance.checkInTime).toLocaleString() : "-",
+                "Check_Out": v.attendance?.checkOutTime ? new Date(v.attendance.checkOutTime).toLocaleString() : "-",
             }));
 
-        const worksheet = XLSX.utils.json_to_sheet(exportData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
+        const fileName = `Attendance_${eventTitle.replace(/\s+/g, '_')}_${new Date().toLocaleDateString()}`;
 
-        // Xuất file
-        XLSX.writeFile(workbook, `Attendance_${eventTitle.replace(/\s+/g, '_')}_${new Date().toLocaleDateString()}.xlsx`);
+        if (format === 'json') {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", `${fileName}.json`);
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        } else {
+            // Xuất CSV
+            const headers = Object.keys(exportData[0]).join(",");
+            const csvRows = exportData.map(row => 
+                Object.values(row).map(value => `"${value}"`).join(",")
+            );
+            const csvContent = "\uFEFF" + [headers, ...csvRows].join("\n"); // \uFEFF hỗ trợ hiển thị tiếng Việt trong Excel
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `${fileName}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     };
 
     const handleAttendanceAction = async (registrationId: string, action: 'check-in' | 'check-out') => {
@@ -260,8 +280,13 @@ const EventAttendance: React.FC = () => {
                         </div>
                     </div>
                     <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                        <button onClick={handleExportExcel} style={styles.exportBtn}>
-                            <FaFileExcel /> Export Excel
+                        <button onClick={() => handleExport('csv')} style={styles.exportBtn}>
+                            <FaClipboardList /> CSV
+                        </button>
+                        
+                        {/* Nút Xuất JSON */}
+                        <button onClick={() => handleExport('json')} style={{ ...styles.exportBtn, backgroundColor: COLORS.PRIMARY }}>
+                            <FaLayerGroup /> JSON
                         </button>
                         <div style={styles.searchBox}>
                             <FaSearch color={COLORS.TEXT_SECONDARY} />
@@ -408,13 +433,27 @@ const styles = {
     searchBox: { display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: COLORS.WHITE, padding: '10px 20px', borderRadius: '24px', width: '300px', border: `1px solid ${COLORS.BORDER}` } as React.CSSProperties,
     searchInput: { border: 'none', outline: 'none', width: '100%', fontSize: '14px' } as React.CSSProperties,
     attendanceBtn: { border: 'none', color: COLORS.WHITE, padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 'bold' } as React.CSSProperties,
-    exportBtn: { backgroundColor: '#188038', color: COLORS.WHITE, border: 'none', padding: '10px 20px', borderRadius: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 'bold', transition: '0.2s' } as React.CSSProperties,
+    //exportBtn: { backgroundColor: '#188038', color: COLORS.WHITE, border: 'none', padding: '10px 20px', borderRadius: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 'bold', transition: '0.2s' } as React.CSSProperties,
     roleTag: { backgroundColor: COLORS.LIGHT_PRIMARY, color: COLORS.PRIMARY, padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: '500' } as React.CSSProperties,
     badge: { padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase' } as React.CSSProperties,
     timeLabel: { fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' } as React.CSSProperties,
     modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' } as React.CSSProperties,
     modalContent: { backgroundColor: COLORS.WHITE, padding: '30px', borderRadius: '20px', width: '450px', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' } as React.CSSProperties,
     modalTextarea: { width: '100%', padding: '12px', borderRadius: '12px', border: `1px solid ${COLORS.BORDER}`, minHeight: '100px', outline: 'none', fontSize: '14px', boxSizing: 'border-box', fontFamily: 'inherit', resize: 'none' } as React.CSSProperties,
+    exportBtn: { 
+    backgroundColor: '#188038', 
+    color: COLORS.WHITE, 
+    border: 'none', 
+    padding: '8px 16px', // Giảm nhẹ padding
+    borderRadius: '24px', 
+    cursor: 'pointer', 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: '6px', 
+    fontSize: '13px', // Giảm nhẹ font size để vừa 2 nút
+    fontWeight: 'bold', 
+    transition: '0.2s' 
+} as React.CSSProperties,
 };
 
 export default EventAttendance;
