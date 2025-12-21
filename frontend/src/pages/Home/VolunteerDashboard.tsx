@@ -467,138 +467,119 @@ const VolunteerDashboard: React.FC = () => {
                         </div>
                     </div>
                     <div style={styles.headerRight}>
-                        {/* Notification Button */}
-                        <div style={{ position: 'relative' }} ref={notificationRef}>
-                            <button
-                                style={styles.iconBtn}
-                                onClick={() => setShowNotifications(!showNotifications)}
-                            >
-                                <Bell size={20} />
-                                {unreadCount > 0 && (
-                                    <span style={styles.notificationBadge}>{unreadCount}</span>
-                                )}
-                            </button>
+    {/* 1. Khu vực Nút và Popup Thông báo */}
+    <div style={{ position: 'relative' }} ref={notificationRef}>
+        <button
+            style={styles.iconBtn}
+            onClick={() => setShowNotifications(!showNotifications)}
+        >
+            <Bell size={20} fill={unreadCount > 0 ? "#F59E0B" : "none"} />
+            {unreadCount > 0 && (
+                <span style={styles.notificationBadge}>{unreadCount}</span>
+            )}
+        </button>
 
-                            {/* Notification Popup */}
-                            {showNotifications && (
-                                <div style={styles.notificationPopup}>
-                                    <div style={styles.notificationHeader}>
-                                        <div>
-                                            <h3 style={styles.notificationTitle}>
-                                                🔔 Thông báo {unreadCount > 0 && `(${unreadCount})`}
-                                            </h3>
-                                        </div>
+        {/* Popup Thông báo */}
+        {showNotifications && (
+            <div style={styles.notificationPopup}>
+                {/* Header của Popup */}
+                <div style={styles.notificationHeader}>
+                    <h3 style={styles.notificationTitle}>
+                        🔔 Thông báo {unreadCount > 0 && `(${unreadCount})`}
+                    </h3>
+                    <button
+                        style={styles.closeNotificationBtn}
+                        onClick={() => setShowNotifications(false)}
+                    >
+                        <X size={18} />
+                    </button>
+                </div>
+
+                {/* Body của Popup: Danh sách thông báo */}
+                <div style={styles.notificationList}>
+                    {loadingNotifications ? (
+                        <div style={styles.notificationLoading}>
+                            <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} color="#007bff" />
+                            <span>Đang tải...</span>
+                        </div>
+                    ) : (inAppNotis.length === 0 && needConfirmation.length === 0) ? (
+                        <div style={styles.emptyNotifications}>
+                            <div style={styles.emptyIcon}>📂</div>
+                            <p style={styles.emptyNotificationText}>Không có thông báo mới</p>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Danh sách các mục cần XÁC NHẬN (từ needConfirmation) */}
+                            {needConfirmation.map((reg) => (
+                                <div key={`confirm-${reg.id}`} style={{...styles.notificationItem, backgroundColor: '#FFFBEB', borderLeft: '4px solid #F59E0B'}}>
+                                    <div style={styles.notificationIconWrapper}>
+                                        {/* <span style={styles.notificationEmoji}>🔔</span> */}
+                                    </div>
+                                    <div style={styles.notificationContent}>
+                                        <h4 style={styles.notificationSubject}>Yêu cầu xác nhận tham gia</h4>
+                                        <p style={styles.notificationText}>Sự kiện: <strong>{reg.eventTitle}</strong></p>
                                         <button
-                                            style={styles.closeNotificationBtn}
-                                            onClick={() => setShowNotifications(false)}
+                                            style={styles.confirmNotificationBtn}
+                                            onClick={() => handleConfirmRegistration(reg.id)}
+                                            disabled={confirmingRegistrationId === reg.id}
                                         >
-                                            <X size={18} />
+                                            {confirmingRegistrationId === reg.id ? <Loader2 size={14} style={{animation: 'spin 1s linear infinite', backgroundColor: '#F59E0B'}} /> : 'Xác nhận'}
                                         </button>
                                     </div>
+                                </div>
+                            ))}
 
-                                    <div style={styles.notificationList}>
-                                        {loadingNotifications ? (
-                                            <div style={styles.notificationLoading}>
-                                                <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} color="#007bff" />
-                                                <span>Đang tải...</span>
-                                            </div>
-                                        ) : inAppNotis.length === 0 ? (
-                                            <div style={styles.emptyNotifications}>
-                                                <div style={styles.emptyIcon}>📂</div>
-                                                <p style={styles.emptyNotificationText}>Không có thông báo mới</p>
-                                            </div>
-                                        ) : (
-                                            inAppNotis.map((notification) => (
-                                                <div
-                                                    key={notification.id}
-                                                    style={{
-                                                        ...styles.notificationItem,
-                                                        backgroundColor: notification.readAt ? '#FFFFFF' : '#F0F7FF'
-                                                    }}
-                                                    onClick={() => handleNotificationClick(notification)}
-                                                >
-                                                    <div style={styles.notificationIconWrapper}>
-                                                        <span style={styles.notificationEmoji}>
-                                                            {getNotificationIcon(notification.type)}
-                                                        </span>
-                                                    </div>
-                                                    <div style={styles.notificationContent}>
-                                                        <h4 style={styles.notificationSubject}>
-                                                            {notification.subject}
-                                                            {!notification.readAt && (
-                                                                <span style={styles.unreadDot}></span>
-                                                            )}
-                                                        </h4>
-                                                        <p style={styles.notificationText}>
-                                                            {notification.content}
-                                                        </p>
-
-                                                        {notification.data?.eventTitle && (
-                                                            <div style={styles.notificationEventDetails}>
-                                                                <p style={styles.notificationEventTitle}>
-                                                                    📌 {notification.data.eventTitle}
-                                                                </p>
-                                                                {notification.data?.eventDate && (
-                                                                    <p style={styles.notificationEventMeta}>
-                                                                        📅 {new Date(notification.data.eventDate).toLocaleDateString('vi-VN', {
-                                                                            weekday: 'long',
-                                                                            year: 'numeric',
-                                                                            month: 'long',
-                                                                            day: 'numeric'
-                                                                        })}
-                                                                    </p>
-                                                                )}
-                                                                {notification.data?.eventLocation && (
-                                                                    <p style={styles.notificationEventMeta}>
-                                                                        📍 {notification.data.eventLocation}
-                                                                    </p>
-                                                                )}
-                                                            </div>
-                                                        )}
-
-                                                        <span style={styles.notificationTime}>
-                                                            {formatNotificationTime(notification.createdAt)}
-                                                        </span>
-
-                                                        {canConfirmFromNotification(notification) && (
-                                                            <button
-                                                                style={styles.confirmNotificationBtn}
-                                                                onClick={(e) => handleConfirmAttendanceFromNotification(e, notification)}
-                                                                disabled={confirmingRegistrationId === notification.data.registrationId}
-                                                            >
-                                                                {confirmingRegistrationId === notification.data.registrationId ? (
-                                                                    <>
-                                                                        <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
-                                                                        Đang xác nhận...
-                                                                    </>
-                                                                ) : (
-                                                                    <>
-                                                                        <Check size={16} />
-                                                                        Xác nhận tham gia
-                                                                    </>
-                                                                )}
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
+                            {/* Danh sách THÔNG BÁO HỆ THỐNG (từ inAppNotis) */}
+                            {inAppNotis.map((notification) => (
+                                <div
+                                    key={notification.id}
+                                    style={{
+                                        ...styles.notificationItem,
+                                        backgroundColor: notification.readAt ? '#FFFFFF' : '#F0F7FF'
+                                    }}
+                                    onClick={() => handleNotificationClick(notification)}
+                                >
+                                    <div style={styles.notificationIconWrapper}>
+                                        <span style={styles.notificationEmoji}>
+                                            {getNotificationIcon(notification.type)}
+                                        </span>
+                                    </div>
+                                    <div style={styles.notificationContent}>
+                                        <h4 style={styles.notificationSubject}>
+                                            {notification.subject}
+                                            {!notification.readAt && <span style={styles.unreadDot}></span>}
+                                        </h4>
+                                        <p style={styles.notificationText}>{notification.content}</p>
+                                        <span style={styles.notificationTime}>
+                                            {formatNotificationTime(notification.createdAt)}
+                                        </span>
                                     </div>
                                 </div>
-                            )}
-                        </div>
+                            ))}
+                        </>
+                    )}
+                </div>
 
-                        {!isMobile && (
-                            <div style={styles.userProfileMini}>
-                                <span style={styles.miniEmail}>{userData?.email}</span>
-                                <img
-                                    src={userData?.avatar || "https://ui-avatars.com/api/?name=User"}
-                                    style={styles.miniAvatar}
-                                    alt="avatar"
-                                />
-                            </div>
-                        )}
-                    </div>
+                {/* Footer của Popup */}
+                <div style={styles.notificationFooter} onClick={() => navigate('/volunteer/notifications')}>
+                    {/* Xem tất cả */}
+                </div>
+            </div>
+        )}
+    </div>
+
+    {/* 2. Khu vực Profile người dùng (Ngoài chuông thông báo) */}
+    {!isMobile && (
+        <div style={styles.userProfileMini}>
+            <span style={styles.miniEmail}>{userData?.email}</span>
+            <img
+                src={userData?.avatar || "https://ui-avatars.com/api/?name=User"}
+                style={styles.miniAvatar}
+                alt="avatar"
+            />
+        </div>
+    )}
+</div>
                 </header>
 
                 <div style={styles.scrollArea}>
@@ -1226,7 +1207,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         marginBottom: '12px',
     },
     confirmNotificationBtn: {
-        backgroundColor: '#10B981',
+        backgroundColor: '#F59E0B',
         color: 'white',
         border: 'none',
         padding: '10px 18px',
@@ -1523,6 +1504,25 @@ const styles: { [key: string]: React.CSSProperties } = {
         justifyContent: 'center',
         backgroundColor: '#F8FAFC',
         zIndex: 1000
+    },
+    // Thêm vào trong đối tượng styles của bạn
+    noti: {
+        position: 'absolute',
+        top: -2,
+        right: -2,
+        backgroundColor: '#EF4444',
+        color: 'white',
+        fontSize: '10px',
+        fontWeight: 'bold',
+        borderRadius: '50%',
+        width: '18px',
+        height: '18px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        border: '2px solid white',
+        // Thêm dòng này để tạo hiệu ứng gây chú ý
+        animation: 'pulse 2s infinite', 
     },
 };
 
