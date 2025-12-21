@@ -263,9 +263,6 @@ const ManagerDashboard: React.FC = () => {
                     <h1 style={{ fontSize: '22px', margin: 0, display: 'flex', alignItems: 'center', gap: '12px', color: COLORS.DARK_NAVY }}><FaUsers color={COLORS.PRIMARY} /> Manager</h1>
                 </div>
                 <nav style={{ flex: 1, padding: '20px 12px' }}>
-                    {/* <div style={{ ...styles.navItemStyle, backgroundColor: 'rgba(26, 115, 232, 0.15)', color: COLORS.PRIMARY }}>
-                        <FaClipboardList style={{ marginRight: '12px' }} /> Pending Applications
-                    </div> */}
                     <div 
                             onClick={() => navigate("/manager/statistics")} // Giả định path dashboard
                             style={{ ...styles.navItemStyle, marginBottom: '8px', cursor: 'pointer' }}
@@ -287,7 +284,7 @@ const ManagerDashboard: React.FC = () => {
                 </nav>
                 <div style={{ padding: '20px', borderTop: `1px solid ${COLORS.SIDEBAR_BORDER}` }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
-                        <img src={user?.avatar || ''} style={{ width: '35px', height: '35px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${COLORS.SIDEBAR_BORDER}` }} alt="avatar" />
+                        <img src={user?.avatar || ''} style={{ width: '35px', height: '35px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${COLORS.SIDEBAR_BORDER}` }} alt="avatar" onClick={() => navigate('/me/profile')}/>
                         <div>
                             <div style={{ fontSize: '14px', fontWeight: 'bold' }}>{user?.username}</div>
                             <div style={{ fontSize: '11px', color: COLORS.TEXT_SECONDARY }}>Organizer</div>
