@@ -3,8 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { 
     FaUsers, FaSignOutAlt, FaClipboardList, FaLayerGroup, FaChartBar,
     FaArrowLeft, FaSearch, FaSignInAlt, FaSignOutAlt as FaLogOut, FaCheckCircle, 
-    FaClock, FaPhoneAlt, FaFilter 
+    FaClock, FaPhoneAlt, FaFilter, FaStar, FaFileExcel 
 } from 'react-icons/fa';
+import * as XLSX from 'xlsx';
 
 const API_BASE_URL = "http://localhost:8000";
 
@@ -23,7 +24,9 @@ const COLORS = {
     LIGHT_PRIMARY: '#E8F0FE', 
     SIDEBAR_BG: '#FFFFFF', 
     SIDEBAR_TEXT: '#3C4043', 
-    SIDEBAR_BORDER: '#DADCE0', 
+    SIDEBAR_BORDER: '#DADCE0',
+    STAR_EMPTY: '#DADCE0',
+    STAR_ACTIVE: '#FFC107'
 };
 
 const EventAttendance: React.FC = () => {
@@ -34,6 +37,40 @@ const EventAttendance: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [eventTitle, setEventTitle] = useState("");
+
+    // --- STATE CHO RATING ---
+    const [ratingModal, setRatingModal] = useState<{show: boolean, regId: string | null, name: string}>({ 
+        show: false, regId: null, name: "" 
+    });
+    const [ratingData, setRatingData] = useState({ 
+        performance: 5, punctuality: 5, teamwork: 5, comment: "" 
+    });
+
+    // Helper component để vẽ sao
+    const StarRating = ({ value, label, field }: { value: number, label: string, field: string }) => (
+        <div style={{ marginBottom: '18px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                <span style={{ fontWeight: '600', fontSize: '13px', color: COLORS.TEXT_MAIN, textTransform: 'capitalize' }}>{label}</span>
+                <span style={{ fontSize: '12px', color: COLORS.PRIMARY, fontWeight: 'bold' }}>{value}/5</span>
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                    <FaStar
+                        key={star}
+                        size={24}
+                        style={{ 
+                            cursor: 'pointer', 
+                            transition: 'transform 0.1s ease',
+                            color: star <= value ? COLORS.STAR_ACTIVE : COLORS.STAR_EMPTY 
+                        }}
+                        onClick={() => setRatingData({ ...ratingData, [field]: star })}
+                        onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.2)')}
+                        onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                    />
+                ))}
+            </div>
+        </div>
+    );
 
     const fetchUserProfile = useCallback(async () => {
         const token = localStorage.getItem("accessToken");
@@ -58,7 +95,6 @@ const EventAttendance: React.FC = () => {
             });
             const result = await res.json();
             if (result.success) {
-                // Thêm 'completed' vào danh sách status hợp lệ để hiển thị
                 const validStatus = ['accepted', 'confirmed', 'checked_in', 'checked_out', 'completed'];
                 const filtered = result.data.filter((reg: any) => validStatus.includes(reg.status));
                 setVolunteers(filtered);
@@ -81,13 +117,40 @@ const EventAttendance: React.FC = () => {
         navigate("/manager/login");
     };
 
-    // --- LOGIC XỬ LÝ ĐIỂM DANH & HOÀN THÀNH ---
+    // --- LOGIC XUẤT EXCEL ---
+    const handleExportExcel = () => {
+        if (volunteers.length === 0) {
+            alert("No data to export");
+            return;
+        }
+
+        // Chuẩn bị dữ liệu để xuất (chỉ lấy những người đã xác nhận tham gia)
+        const exportData = volunteers
+            .filter(v => ['confirmed', 'checked_in', 'checked_out', 'completed'].includes(v.status))
+            .map((v, index) => ({
+                "STT": index + 1,
+                "Mã Đăng Ký": v.registrationCode,
+                "Họ Tên": v.volunteerName,
+                "Số Điện Thoại": v.volunteerPhone,
+                "Vai Trò": v.roleName,
+                "Trạng Thái": v.status.toUpperCase(),
+                "Giờ Check-in": v.attendance?.checkInTime ? new Date(v.attendance.checkInTime).toLocaleString() : "-",
+                "Giờ Check-out": v.attendance?.checkOutTime ? new Date(v.attendance.checkOutTime).toLocaleString() : "-",
+            }));
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
+
+        // Xuất file
+        XLSX.writeFile(workbook, `Attendance_${eventTitle.replace(/\s+/g, '_')}_${new Date().toLocaleDateString()}.xlsx`);
+    };
+
     const handleAttendanceAction = async (registrationId: string, action: 'check-in' | 'check-out') => {
         const token = localStorage.getItem("accessToken");
         if (!window.confirm(`Confirm ${action} for this volunteer?`)) return;
 
         try {
-            // 1. Thực hiện Check-in hoặc Check-out
             const res = await fetch(`${API_BASE_URL}/registrations/${registrationId}/${action}`, {
                 method: "PUT",
                 headers: { 
@@ -100,8 +163,6 @@ const EventAttendance: React.FC = () => {
 
             if (result.success) {
                 let finalData = result.data;
-
-                // 2. Nếu là Check-out thành công, tự động gọi API Complete
                 if (action === 'check-out') {
                     try {
                         const completeRes = await fetch(`${API_BASE_URL}/registrations/${registrationId}/complete`, {
@@ -113,20 +174,43 @@ const EventAttendance: React.FC = () => {
                         });
                         const completeResult = await completeRes.json();
                         if (completeResult.success) {
-                            finalData = completeResult.data; // Cập nhật data sang trạng thái completed
+                            finalData = completeResult.data;
                         }
                     } catch (err) {
                         console.error("Auto-completion failed:", err);
                     }
                 }
-
-                // Cập nhật State để UI thay đổi ngay lập tức
                 setVolunteers(prev => prev.map(v => v.id === registrationId ? finalData : v));
             } else {
                 alert(result.message);
             }
         } catch (err) { 
             alert("Action failed"); 
+        }
+    };
+
+    const handleRateVolunteer = async () => {
+        const token = localStorage.getItem("accessToken");
+        try {
+            const res = await fetch(`${API_BASE_URL}/registrations/${ratingModal.regId}/rate-volunteer`, {
+                method: "PUT",
+                headers: { 
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(ratingData)
+            });
+            const result = await res.json();
+            if (result.success) {
+                alert("Volunteer rated successfully!");
+                setVolunteers(prev => prev.map(v => v.id === ratingModal.regId ? result.data : v));
+                setRatingModal({ show: false, regId: null, name: "" });
+                setRatingData({ performance: 5, punctuality: 5, teamwork: 5, comment: "" });
+            } else {
+                alert(result.message);
+            }
+        } catch (err) { 
+            alert("Rating failed"); 
         }
     };
 
@@ -175,14 +259,19 @@ const EventAttendance: React.FC = () => {
                             <p style={{ margin: '8px 0 0', color: COLORS.TEXT_SECONDARY }}>{eventTitle || "Loading event info..."}</p>
                         </div>
                     </div>
-                    <div style={styles.searchBox}>
-                        <FaSearch color={COLORS.TEXT_SECONDARY} />
-                        <input 
-                            placeholder="Search volunteer name..." 
-                            style={styles.searchInput}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                        <button onClick={handleExportExcel} style={styles.exportBtn}>
+                            <FaFileExcel /> Export Excel
+                        </button>
+                        <div style={styles.searchBox}>
+                            <FaSearch color={COLORS.TEXT_SECONDARY} />
+                            <input 
+                                placeholder="Search volunteer name..." 
+                                style={styles.searchInput}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
                     </div>
                 </header>
 
@@ -245,8 +334,16 @@ const EventAttendance: React.FC = () => {
                                                 </button>
                                             )}
                                             {vol.status === 'completed' && (
-                                                <div style={{ color: COLORS.SUCCESS_ACCENT, fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '5px' }}>
-                                                    <FaCheckCircle /> Completed
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                                                    <div style={{ color: COLORS.SUCCESS_ACCENT, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px' }}>
+                                                        <FaCheckCircle /> Completed
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => setRatingModal({ show: true, regId: vol.id, name: vol.volunteerName })}
+                                                        style={{ ...styles.attendanceBtn, backgroundColor: COLORS.WARNING, fontSize: '12px', padding: '6px 12px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+                                                    >
+                                                        <FaStar /> Rate Volunteer
+                                                    </button>
                                                 </div>
                                             )}
                                         </td>
@@ -257,6 +354,45 @@ const EventAttendance: React.FC = () => {
                     </div>
                 </div>
             </main>
+
+            {/* --- MODAL RATING VOLUNTEER --- */}
+            {ratingModal.show && (
+                <div style={styles.modalOverlay}>
+                    <div style={styles.modalContent}>
+                        <div style={{ borderBottom: `1px solid ${COLORS.BORDER}`, paddingBottom: '15px', marginBottom: '20px' }}>
+                            <h2 style={{ margin: 0, fontSize: '20px', color: COLORS.DARK_NAVY }}>Chấm điểm tình nguyện viên</h2>
+                            <p style={{ margin: '5px 0 0', color: COLORS.TEXT_SECONDARY, fontSize: '14px' }}>
+                                Đánh giá cho: <strong style={{ color: COLORS.PRIMARY }}>{ratingModal.name}</strong>
+                            </p>
+                        </div>
+                        
+                        <StarRating label="Chất lượng công việc (Performance)" field="performance" value={ratingData.performance} />
+                        <StarRating label="Đúng giờ (Punctuality)" field="punctuality" value={ratingData.punctuality} />
+                        <StarRating label="Làm việc nhóm (Teamwork)" field="teamwork" value={ratingData.teamwork} />
+
+                        <div style={{ marginBottom: '25px' }}>
+                            <label style={{ display: 'block', fontWeight: 'bold', fontSize: '13px', marginBottom: '8px', color: COLORS.TEXT_MAIN }}>Nhận xét thêm</label>
+                            <textarea 
+                                placeholder="Viết vài dòng nhận xét về thái độ hoặc đóng góp..."
+                                style={styles.modalTextarea}
+                                value={ratingData.comment}
+                                onChange={(e) => setRatingData({...ratingData, comment: e.target.value})}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                            <button 
+                                onClick={() => setRatingModal({ show: false, regId: null, name: "" })}
+                                style={{ ...styles.attendanceBtn, backgroundColor: '#f1f3f4', color: COLORS.TEXT_MAIN, boxShadow: 'none' }}
+                            >Đóng</button>
+                            <button 
+                                onClick={handleRateVolunteer}
+                                style={{ ...styles.attendanceBtn, backgroundColor: COLORS.PRIMARY, padding: '10px 24px' }}
+                            >Gửi đánh giá</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -271,10 +407,14 @@ const styles = {
     backBtn: { padding: 0, width: '40px', height: '40px', borderRadius: '50%', border: 'none', backgroundColor: COLORS.WHITE, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' } as React.CSSProperties,
     searchBox: { display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: COLORS.WHITE, padding: '10px 20px', borderRadius: '24px', width: '300px', border: `1px solid ${COLORS.BORDER}` } as React.CSSProperties,
     searchInput: { border: 'none', outline: 'none', width: '100%', fontSize: '14px' } as React.CSSProperties,
-    attendanceBtn: { border: 'none', color: COLORS.WHITE, padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 'bold', float: 'right' } as React.CSSProperties,
+    attendanceBtn: { border: 'none', color: COLORS.WHITE, padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 'bold' } as React.CSSProperties,
+    exportBtn: { backgroundColor: '#188038', color: COLORS.WHITE, border: 'none', padding: '10px 20px', borderRadius: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 'bold', transition: '0.2s' } as React.CSSProperties,
     roleTag: { backgroundColor: COLORS.LIGHT_PRIMARY, color: COLORS.PRIMARY, padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: '500' } as React.CSSProperties,
     badge: { padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase' } as React.CSSProperties,
     timeLabel: { fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' } as React.CSSProperties,
+    modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' } as React.CSSProperties,
+    modalContent: { backgroundColor: COLORS.WHITE, padding: '30px', borderRadius: '20px', width: '450px', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' } as React.CSSProperties,
+    modalTextarea: { width: '100%', padding: '12px', borderRadius: '12px', border: `1px solid ${COLORS.BORDER}`, minHeight: '100px', outline: 'none', fontSize: '14px', boxSizing: 'border-box', fontFamily: 'inherit', resize: 'none' } as React.CSSProperties,
 };
 
 export default EventAttendance;

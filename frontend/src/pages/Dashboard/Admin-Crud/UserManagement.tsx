@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { FaUsers, FaCalendarAlt, FaShieldAlt, FaFilter, FaLock, FaUnlock, FaSearch, FaChevronRight, FaArrowAltCircleLeft, FaInfoCircle, FaUserPlus, FaSync, FaHouseUser } from 'react-icons/fa';
+import { 
+    FaUsers, FaCalendarAlt, FaShieldAlt, FaLock, FaUnlock, FaSearch, 
+    FaChevronRight, FaArrowAltCircleLeft, FaInfoCircle, FaUserPlus, 
+    FaSync, FaHouseUser, FaFileExcel 
+} from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
+import * as XLSX from 'xlsx'; // Import thư viện Excel
 import AdminViewInfo from './AdminViewInfo';
 import CreateManagerModal from './CreateManagerModal';
 
@@ -44,8 +49,8 @@ const UserManagement: React.FC = () => {
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
     const [isViewInfoOpen, setIsViewInfoOpen] = useState(false);
     const [actionMessage, setActionMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
-
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
     const fetchData = useCallback(async () => {
         setLoading(true);
         const token = localStorage.getItem('accessToken');
@@ -71,6 +76,34 @@ const UserManagement: React.FC = () => {
     }, []);
 
     useEffect(() => { fetchData(); }, [fetchData]);
+
+    // LOGIC XUẤT FILE EXCEL
+    const exportToExcel = () => {
+        if (filteredUsers.length === 0) {
+            setActionMessage({ type: 'error', text: "No data to export!" });
+            return;
+        }
+
+        // Chuẩn bị dữ liệu để xuất (định dạng lại các cột cho đẹp)
+        const excelData = filteredUsers.map(user => ({
+            'Full Name': user.fullName || 'N/A',
+            'Email': user.email,
+            'Username': user.username,
+            'Role': user.role.toUpperCase(),
+            'Status': user.status.toUpperCase(),
+            'Created At': user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'
+        }));
+
+        // Tạo worksheet và workbook
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+
+        // Xuất file
+        XLSX.writeFile(workbook, `User_List_${new Date().getTime()}.xlsx`);
+        setActionMessage({ type: 'success', text: "Excel file exported successfully!" });
+        setTimeout(() => setActionMessage(null), 3000);
+    };
 
     const toggleUserStatus = async (userAuthId: string, currentStatus: User['status']) => {
         const token = localStorage.getItem('accessToken');
@@ -178,9 +211,12 @@ const UserManagement: React.FC = () => {
                             <FaSync size={14} style={{ marginRight: '8px' }} className={loading ? 'spin' : ''}/> 
                             {loading ? 'Refreshing...' : 'Refresh'}
                         </button>
-                        {/* <button style={styles.createButton} onClick={() => navigate("/admin/create-user")}>
-                            <FaUserPlus style={{marginRight: '8px'}}/> Add New Manager
-                        </button> */}
+                        
+                        {/* NÚT XUẤT EXCEL MỚI */}
+                        <button style={styles.exportButton} onClick={exportToExcel}>
+                            <FaFileExcel style={{marginRight: '8px'}}/> Export Excel
+                        </button>
+
                         <button style={styles.createButton} onClick={() => setIsCreateModalOpen(true)}>
                             <FaUserPlus style={{marginRight: '8px'}}/> Add New Manager
                         </button>
@@ -269,7 +305,6 @@ const UserManagement: React.FC = () => {
                                                 title={user.status === 'active' ? "Lock User" : "Unlock User"}
                                             >
                                                 {user.status === 'active' ? <FaLock size={14} /> : <FaUnlock size={14} />}
-                                                {/* <span style={{marginLeft: '5px'}}>{user.status === 'active' ? 'Lock' : 'Unlock'}</span> */}
                                             </button>
                                         </td>
                                     </tr>
@@ -312,6 +347,7 @@ const styles: DashboardStyles = {
     mainSubtitle: { fontSize: '15px', color: COLORS.TEXT_SECONDARY, marginBottom: '30px' },
     refreshButton: { padding: '8px 15px', backgroundColor: COLORS.CARD_BG, color: COLORS.TEXT_SECONDARY, border: `1px solid ${COLORS.BORDER}`, borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px', display: 'flex', alignItems: 'center' },
     createButton: { padding: '8px 15px', backgroundColor: COLORS.PRIMARY, color: COLORS.WHITE, border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px', display: 'flex', alignItems: 'center' },
+    exportButton: { padding: '8px 15px', backgroundColor: COLORS.SUCCESS_ACCENT, color: COLORS.WHITE, border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '14px', display: 'flex', alignItems: 'center' },
     actionMessageBar: { padding: '15px', borderRadius: '4px', marginBottom: '20px', fontWeight: '500', fontSize: '15px', textAlign: 'center' },
     dataCard: { backgroundColor: COLORS.CARD_BG, borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', padding: '30px', marginBottom: '30px' },
     tableToolbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' },
