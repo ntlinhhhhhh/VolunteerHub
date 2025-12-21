@@ -362,14 +362,14 @@ const MyEventsCommunication: React.FC = () => {
                 <nav style={styles.navMenu}>
                     <SidebarLink
                         icon={<LayoutDashboard size={20} />}
-                        label="Overview" />
+                        label="Overview" 
+                        onClick={() => navigate('/volunteer/dashboard')}/>
                     <SidebarLink
                         icon={<Search size={20} />}
                         onClick={() => navigate('/volunteer/events')}
                         label="Browse Events" />
                     <SidebarLink
                         icon={<Users size={20} />}
-                        onClick={() => navigate('/volunteer/communication')}
                         label="Communication" active />
                     <SidebarLink
                         icon={<UserCircle size={20} />}

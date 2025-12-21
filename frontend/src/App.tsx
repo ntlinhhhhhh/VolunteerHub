@@ -27,9 +27,7 @@ import MyEventsCommunication from './pages/Home/Communication';
 import ManagerStatistics from './pages/Manager/ManagerStatistics';
 import EventDetails from './pages/Manager/EventDetails';
 import EventAttendance from './pages/Manager/EventAttendance';
-import VoluntterCommunication from './pages/Home/Communication';
 import EventCommunicationDetail from './pages/Home/EventCommunicationDetail';
-import ForumEventDetail from './pages/Home/ForumEventDetail';
 
 
 function App() {
@@ -68,7 +66,6 @@ function App() {
                 <Route path="/volunteer/events" element={< BrowseEvents />} />
                 <Route path="/event/registrations" element={< MyRegistrationsPage />} />
                 <Route path="/event/communication/:eventId" element={< EventCommunicationDetail /> } />
-                <Route path="/volunteer/events/:eventId" element={<ForumEventDetail /> } />
                 <Route path="/volunteer/communication" element={<MyEventsCommunication /> } />
             </Routes>
         </Router>

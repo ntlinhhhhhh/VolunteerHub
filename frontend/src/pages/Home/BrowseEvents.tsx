@@ -235,7 +235,7 @@ const BrowseEvents: React.FC = () => {
 
             if (response.ok) {
                 const result = await response.json();
-                
+
                 let allNotis = [];
                 if (Array.isArray(result)) {
                     allNotis = result;
@@ -272,7 +272,7 @@ const BrowseEvents: React.FC = () => {
             const token = localStorage.getItem('accessToken');
             const response = await fetch(`http://localhost:8000/notifications/${notificationId}/read`, {
                 method: 'PATCH',
-                headers: { 
+                headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
@@ -296,14 +296,12 @@ const BrowseEvents: React.FC = () => {
 
         if (notification.data?.eventId) {
             setShowNotifications(false);
-            // Optionally navigate to event detail
-            // window.location.href = `/events/${notification.data.eventId}`;
         }
     };
 
     const handleConfirmAttendanceFromNotification = async (e: React.MouseEvent, notification: InAppNotification) => {
         e.stopPropagation();
-        
+
         const registrationId = notification.data?.registrationId;
         if (!registrationId) {
             alert('Không tìm thấy thông tin đăng ký!');
@@ -313,10 +311,10 @@ const BrowseEvents: React.FC = () => {
         try {
             setConfirmingRegistrationId(registrationId);
             const token = localStorage.getItem('accessToken');
-            
+
             const response = await fetch(`http://localhost:8000/registrations/${registrationId}/confirm`, {
                 method: 'PUT',
-                headers: { 
+                headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
@@ -530,18 +528,22 @@ const BrowseEvents: React.FC = () => {
                 </div>
 
                 <nav style={styles.navMenu}>
-                    <div style={styles.navItem} onClick={() => navigate('/volunteer/dashboard')}>
-                        <LayoutDashboard size={20} style={styles.navIcon} /> Overview
-                    </div>
-                    <div style={styles.navItemActive}>
-                        <Search size={20} style={styles.navIcon} /> Browse Events
-                    </div>
-                    <div style={styles.navItem}>
-                        <Users size={20} style={styles.navIcon} /> Attendee Insights
-                    </div>
-                    <div style={styles.navItem}>
-                        <UserCircle size={20} style={styles.navIcon} /> My Profile
-                    </div>
+                    <SidebarLink
+                        icon={<LayoutDashboard size={20} />}
+                        label="Overview"
+                        onClick={() => navigate('/volunteer/dashboard')} />
+                    <SidebarLink
+                        icon={<Search size={20} />}
+                        active
+                        label="Browse Events" />
+                    <SidebarLink
+                        icon={<Users size={20} />}
+                        onClick={() => navigate('/volunteer/communication')}
+                        label="Communication" />
+                    <SidebarLink
+                        icon={<UserCircle size={20} />}
+                        onClick={() => navigate('/volunteer/profile')}
+                        label="My Profile" />
                 </nav>
 
                 <div style={styles.sidebarFooter}>
@@ -650,7 +652,7 @@ const BrowseEvents: React.FC = () => {
                                                         <p style={styles.notificationText}>
                                                             {notification.content}
                                                         </p>
-                                                        
+
                                                         {notification.data?.eventTitle && (
                                                             <div style={styles.notificationEventDetails}>
                                                                 <p style={styles.notificationEventTitle}>
@@ -673,7 +675,7 @@ const BrowseEvents: React.FC = () => {
                                                                 )}
                                                             </div>
                                                         )}
-                                                        
+
                                                         <span style={styles.notificationTime}>
                                                             {formatNotificationTime(notification.createdAt)}
                                                         </span>
@@ -749,9 +751,9 @@ const BrowseEvents: React.FC = () => {
                                     <div
                                         className="filter-option"
                                         style={styles.filterOption}
-                                        onClick={() => { 
-                                            setSelectedCategory(''); 
-                                            setShowFilterDropdown(false); 
+                                        onClick={() => {
+                                            setSelectedCategory('');
+                                            setShowFilterDropdown(false);
                                         }}
                                     >
                                         ✨ Tất cả thể loại
@@ -761,9 +763,9 @@ const BrowseEvents: React.FC = () => {
                                             key={cat}
                                             className="filter-option"
                                             style={styles.filterOption}
-                                            onClick={() => { 
-                                                setSelectedCategory(cat); 
-                                                setShowFilterDropdown(false); 
+                                            onClick={() => {
+                                                setSelectedCategory(cat);
+                                                setShowFilterDropdown(false);
                                             }}
                                         >
                                             {cat}
@@ -884,9 +886,9 @@ const BrowseEvents: React.FC = () => {
 
                             <div style={styles.formGroup}>
                                 <label style={styles.formLabel}>Chọn vai trò *</label>
-                                <select 
-                                    style={styles.formSelect} 
-                                    value={selectedRole} 
+                                <select
+                                    style={styles.formSelect}
+                                    value={selectedRole}
                                     onChange={(e) => setSelectedRole(e.target.value)}
                                 >
                                     <option value="">Chọn vai trò...</option>
@@ -974,8 +976,8 @@ const BrowseEvents: React.FC = () => {
                             </div>
 
                             <div style={styles.modalActions}>
-                                <button 
-                                    style={styles.cancelModalBtn} 
+                                <button
+                                    style={styles.cancelModalBtn}
                                     onClick={() => setShowRegisterModal(false)}
                                 >
                                     Hủy
@@ -1014,6 +1016,13 @@ const BrowseEvents: React.FC = () => {
         </div>
     );
 };
+
+const SidebarLink = ({ icon, label, active = false, onClick }: any) => (
+    <div style={active ? styles.navItemActive : styles.navItem} onClick={onClick}>
+        <span style={styles.navIcon}>{icon}</span>
+        <span style={styles.navLabel}>{label}</span>
+    </div>
+);
 
 // Event Card Component
 const EventCard: React.FC<{ event: Event; onClick: () => void; isRegistered: boolean }> = ({ event, onClick, isRegistered }) => {
@@ -1153,51 +1162,51 @@ const styles: { [key: string]: React.CSSProperties } = {
         padding: '8px',
         zIndex: 1000
     },
-    dropdownHeader: { 
-        padding: '8px 12px', 
-        fontSize: '11px', 
-        fontWeight: '800', 
-        color: '#94A3B8', 
-        textTransform: 'uppercase' 
+    dropdownHeader: {
+        padding: '8px 12px',
+        fontSize: '11px',
+        fontWeight: '800',
+        color: '#94A3B8',
+        textTransform: 'uppercase'
     },
-    dropdownItem: { 
-        padding: '10px 12px', 
-        fontSize: '14px', 
-        borderRadius: '10px', 
+    dropdownItem: {
+        padding: '10px 12px',
+        fontSize: '14px',
+        borderRadius: '10px',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center'
     },
-    sidebarAvatar: { 
-        width: '42px', 
-        height: '42px', 
-        borderRadius: '50%', 
-        objectFit: 'cover', 
-        border: '2px solid #FFF' 
+    sidebarAvatar: {
+        width: '42px',
+        height: '42px',
+        borderRadius: '50%',
+        objectFit: 'cover',
+        border: '2px solid #FFF'
     },
     userInfo: { flex: 1, minWidth: 0 },
-    userName: { 
-        fontSize: '14px', 
-        fontWeight: '700', 
-        color: '#1E293B', 
-        margin: 0, 
-        overflow: 'hidden', 
-        textOverflow: 'ellipsis', 
-        whiteSpace: 'nowrap' 
+    userName: {
+        fontSize: '14px',
+        fontWeight: '700',
+        color: '#1E293B',
+        margin: 0,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
     },
-    userEmail: { 
-        fontSize: '12px', 
-        color: '#94A3B8', 
-        margin: 0, 
-        overflow: 'hidden', 
-        textOverflow: 'ellipsis', 
-        whiteSpace: 'nowrap' 
+    userEmail: {
+        fontSize: '12px',
+        color: '#94A3B8',
+        margin: 0,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
     },
-    mainContent: { 
-        flex: 1, 
-        display: 'flex', 
-        flexDirection: 'column', 
-        minWidth: 0 
+    mainContent: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minWidth: 0
     },
     topHeader: {
         height: '80px',
@@ -1408,27 +1417,27 @@ const styles: { [key: string]: React.CSSProperties } = {
         transition: 'all 0.2s',
         marginTop: '8px',
     },
-    userProfileMini: { 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: '12px', 
-        paddingLeft: '20px', 
-        borderLeft: '1px solid #E2E8F0' 
+    userProfileMini: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        paddingLeft: '20px',
+        borderLeft: '1px solid #E2E8F0'
     },
     miniEmail: { fontSize: '14px', color: '#475569', fontWeight: '600' },
-    miniAvatar: { 
-        width: '40px', 
-        height: '40px', 
-        borderRadius: '50%', 
-        objectFit: 'cover', 
-        border: '2px solid #F1F5F9' 
+    miniAvatar: {
+        width: '40px',
+        height: '40px',
+        borderRadius: '50%',
+        objectFit: 'cover',
+        border: '2px solid #F1F5F9'
     },
     scrollArea: { padding: '32px 24px', overflowY: 'auto' },
-    searchSection: { 
-        display: 'flex', 
-        gap: '16px', 
-        marginBottom: '32px', 
-        flexWrap: 'wrap' 
+    searchSection: {
+        display: 'flex',
+        gap: '16px',
+        marginBottom: '32px',
+        flexWrap: 'wrap'
     },
     searchBox: {
         flex: 1,
