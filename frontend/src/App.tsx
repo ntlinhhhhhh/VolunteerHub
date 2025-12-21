@@ -29,6 +29,7 @@ import EventDetails from './pages/Manager/EventDetails';
 import EventAttendance from './pages/Manager/EventAttendance';
 import EventCommunicationDetail from './pages/Home/EventCommunicationDetail';
 import ManagerCommunication from './pages/Manager/ManagerCommunication';
+import DienDan from './pages/Manager/DienDan';
 
 
 function App() {
@@ -58,6 +59,8 @@ function App() {
                 <Route path="/manager/event-details/:id" element={< EventDetails />} />
                 <Route path="/manager/events/:eventId/attendance" element={<EventAttendance />} />
                 <Route path="/manager/communication/:eventId" element={< ManagerCommunication /> } />
+                <Route path="/manager/communication" element={< DienDan /> } />
+
 
 
                 <Route path="/admin/event-approvals" element={<EventsApproval />} />

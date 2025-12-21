@@ -110,6 +110,9 @@ const ManagerStatistics: React.FC = () => {
                     <div onClick={() => navigate("/manager/my-events")} style={styles.navItem}>
                         <FaLayerGroup style={{ marginRight: '12px' }} /> My Events
                     </div>
+                    <div onClick={() => navigate("/manager/communication")} style={styles.navItem}>
+                        <FaLayerGroup style={{ marginRight: '12px' }} /> Communications
+                    </div>
                 </nav>
                 <div style={{ padding: '20px', borderTop: `1px solid ${COLORS.SIDEBAR_BORDER}` }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>

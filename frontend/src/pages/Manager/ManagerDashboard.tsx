@@ -5,7 +5,8 @@ import {
     FaClipboard,
     FaPlus,
     FaLayerGroup,
-    FaChartBar
+    FaChartBar,
+    FaComments
 } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 
@@ -280,6 +281,12 @@ const ManagerDashboard: React.FC = () => {
                             style={{ ...styles.navItemStyle, cursor: 'pointer' }}
                         >
                             <FaLayerGroup style={{ marginRight: '12px' }} /> My Events
+                        </div>
+                        <div 
+                            onClick={() => navigate("/manager/communication")}
+                            style={{ ...styles.navItemStyle, cursor: 'pointer' }}
+                        >
+                            <FaComments style={{ marginRight: '12px' }} /> Communications
                         </div>
                 </nav>
                 <div style={{ padding: '20px', borderTop: `1px solid ${COLORS.SIDEBAR_BORDER}` }}>
