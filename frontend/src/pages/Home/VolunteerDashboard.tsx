@@ -422,7 +422,7 @@ const VolunteerDashboard: React.FC = () => {
                         label="Communication" />
                     <SidebarLink
                         icon={<UserCircle size={20} />}
-                        onClick={() => navigate('/volunteer/profile')}
+                        onClick={() => navigate('/me/profile')}
                         label="My Profile" />
                 </nav>
 

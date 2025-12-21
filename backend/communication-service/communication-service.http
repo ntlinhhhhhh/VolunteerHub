@@ -112,7 +112,7 @@ Content-Type: application/json
 /////////////////////////
 ### Variables
 @baseUrl = http://localhost:8000
-@eventId = 69465ed252660904141075be
+@eventId = 694792d1d51a67685ea6296f
 @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQ2ZTkyNDM4ZGQxNWMzNzYxMzJkNTYiLCJlbWFpbCI6IjMzMzNAZ21haWwuY29tIiwibmFtZSI6IjMzMzMiLCJwaG9uZU51bWJlciI6bnVsbCwicm9sZUlkIjoiNjk0MTQxM2ZhYzE1NmVlNjBlNWY4ODcyIiwicm9sZU5hbWUiOiJ2b2x1bnRlZXIiLCJwZXJtaXNzaW9ucyI6WyJldmVudDpyZWFkIiwicmVnaXN0cmF0aW9uOmNyZWF0ZSIsInJlZ2lzdHJhdGlvbjpyZWFkIiwicmVnaXN0cmF0aW9uOmNhbmNlbCIsInBvc3Q6cmVhZCIsInBvc3Q6Y3JlYXRlIiwicG9zdDp1cGRhdGU6b3duIiwicG9zdDpkZWxldGU6b3duIiwiY29tbWVudDpjcmVhdGUiLCJkYXNoYm9hcmQ6dmlldyJdLCJpYXQiOjE3NjYyNzYzNjQsImV4cCI6MTc2NjI3NzI2NH0.fVYRxCgZMAgUNk-SAn4kSA6xSmdQJGf3AlkgysQRQxU
 @postId = 69472135ba833ef9839ec21a
 @commentId = dbdc9375-682e-4feb-b4e1-de48f8aa9ee4

@@ -126,7 +126,7 @@ const BrowseEvents: React.FC = () => {
     const [confirmingRegistrationId, setConfirmingRegistrationId] = useState<string | null>(null);
 
     const [registrations, setRegistrations] = useState<Registration[]>([]);
-    
+
     const notificationRef = useRef<HTMLDivElement>(null);
     const filterRef = useRef<HTMLDivElement>(null);
 
@@ -148,11 +148,11 @@ const BrowseEvents: React.FC = () => {
     const navigate = useNavigate();
 
     const [statistics, setStatistics] = useState<Statistics>({
-            totalHours: 0,
-            completedEvents: 0,
-            averageRating: 0,
-            rank: 'Newbie'
-        });
+        totalHours: 0,
+        completedEvents: 0,
+        averageRating: 0,
+        rank: 'Newbie'
+    });
     useEffect(() => {
         fetchUserProfile();
         fetchEvents();
@@ -291,7 +291,7 @@ const BrowseEvents: React.FC = () => {
 
             if (response.ok) {
                 const result = await response.json();
-                
+
                 let allNotis = [];
                 if (Array.isArray(result)) {
                     allNotis = result;
@@ -328,7 +328,7 @@ const BrowseEvents: React.FC = () => {
             const token = localStorage.getItem('accessToken');
             const response = await fetch(`http://localhost:8000/notifications/${notificationId}/read`, {
                 method: 'PATCH',
-                headers: { 
+                headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
@@ -352,14 +352,12 @@ const BrowseEvents: React.FC = () => {
 
         if (notification.data?.eventId) {
             setShowNotifications(false);
-            // Optionally navigate to event detail
-            // window.location.href = `/events/${notification.data.eventId}`;
         }
     };
 
     const handleConfirmAttendanceFromNotification = async (e: React.MouseEvent, notification: InAppNotification) => {
         e.stopPropagation();
-        
+
         const registrationId = notification.data?.registrationId;
         if (!registrationId) {
             alert('Không tìm thấy thông tin đăng ký!');
@@ -369,10 +367,10 @@ const BrowseEvents: React.FC = () => {
         try {
             setConfirmingRegistrationId(registrationId);
             const token = localStorage.getItem('accessToken');
-            
+
             const response = await fetch(`http://localhost:8000/registrations/${registrationId}/confirm`, {
                 method: 'PUT',
-                headers: { 
+                headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
@@ -636,7 +634,7 @@ const BrowseEvents: React.FC = () => {
     };
 
 
-    
+
 
     const handleLogout = () => {
         localStorage.removeItem('accessToken');
@@ -708,18 +706,22 @@ const BrowseEvents: React.FC = () => {
                 </div>
 
                 <nav style={styles.navMenu}>
-                    <div style={styles.navItem} onClick={() => navigate('/volunteer/dashboard')}>
-                        <LayoutDashboard size={20} style={styles.navIcon} /> Overview
-                    </div>
-                    <div style={styles.navItemActive}>
-                        <Search size={20} style={styles.navIcon} /> Browse Events
-                    </div>
-                    <div style={styles.navItem}>
-                        <Users size={20} style={styles.navIcon} /> Attendee Insights
-                    </div>
-                    <div style={styles.navItem}>
-                        <UserCircle size={20} style={styles.navIcon} /> My Profile
-                    </div>
+                    <SidebarLink
+                        icon={<LayoutDashboard size={20} />}
+                        label="Overview"
+                        onClick={() => navigate('/volunteer/dashboard')} />
+                    <SidebarLink
+                        icon={<Search size={20} />}
+                        active
+                        label="Browse Events" />
+                    <SidebarLink
+                        icon={<Users size={20} />}
+                        onClick={() => navigate('/volunteer/communication')}
+                        label="Communication" />
+                    <SidebarLink
+                        icon={<UserCircle size={20} />}
+                        onClick={() => navigate('/me/profile')}
+                        label="My Profile" />
                 </nav>
 
                 <div style={styles.sidebarFooter}>
@@ -762,120 +764,119 @@ const BrowseEvents: React.FC = () => {
                             <p style={styles.headerSub}>Discover volunteering opportunities you love</p>
                         </div>
                     </div>
-<div style={styles.headerRight}>
-    {/* 1. Khu vực Nút và Popup Thông báo */}
-    <div style={{ position: 'relative' }} ref={notificationRef}>
-        <button
-            style={styles.iconBtn}
-            onClick={() => setShowNotifications(!showNotifications)}
-        >
-            <Bell size={20} fill={unreadCount > 0 ? "#F59E0B" : "none"} />
-            {unreadCount > 0 && (
-                <span style={styles.notificationBadge}>{unreadCount}</span>
-            )}
-        </button>
+                    <div style={styles.headerRight}>
+                        {/* 1. Khu vực Nút và Popup Thông báo */}
+                        <div style={{ position: 'relative' }} ref={notificationRef}>
+                            <button
+                                style={styles.iconBtn}
+                                onClick={() => setShowNotifications(!showNotifications)}
+                            >
+                                <Bell size={20} fill={unreadCount > 0 ? "#F59E0B" : "none"} />
+                                {unreadCount > 0 && (
+                                    <span style={styles.notificationBadge}>{unreadCount}</span>
+                                )}
+                            </button>
 
-        {/* Popup Thông báo */}
-        {showNotifications && (
-            <div style={styles.notificationPopup}>
-                {/* Header của Popup */}
-                <div style={styles.notificationHeader}>
-                    <h3 style={styles.notificationTitle}>
-                        🔔 Thông báo {unreadCount > 0 && `(${unreadCount})`}
-                    </h3>
-                    <button
-                        style={styles.closeNotificationBtn}
-                        onClick={() => setShowNotifications(false)}
-                    >
-                        <X size={18} />
-                    </button>
-                </div>
-
-                {/* Body của Popup: Danh sách thông báo */}
-                <div style={styles.notificationList}>
-                    {loadingNotifications ? (
-                        <div style={styles.notificationLoading}>
-                            <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} color="#007bff" />
-                            <span>Đang tải...</span>
-                        </div>
-                    ) : (inAppNotis.length === 0 && needConfirmation.length === 0) ? (
-                        <div style={styles.emptyNotifications}>
-                            <div style={styles.emptyIcon}>📂</div>
-                            <p style={styles.emptyNotificationText}>Không có thông báo mới</p>
-                        </div>
-                    ) : (
-                        <>
-                            {/* Danh sách các mục cần XÁC NHẬN (từ needConfirmation) */}
-                            {needConfirmation.map((reg) => (
-                                <div key={`confirm-${reg.id}`} style={{...styles.notificationItem, backgroundColor: '#FFFBEB', borderLeft: '4px solid #F59E0B'}}>
-                                    <div style={styles.notificationIconWrapper}>
-                                        {/* <span style={styles.notificationEmoji}>🔔</span> */}
-                                    </div>
-                                    <div style={styles.notificationContent}>
-                                        <h4 style={styles.notificationSubject}>Yêu cầu xác nhận tham gia</h4>
-                                        <p style={styles.notificationText}>Sự kiện: <strong>{reg.eventTitle}</strong></p>
+                            {/* Popup Thông báo */}
+                            {showNotifications && (
+                                <div style={styles.notificationPopup}>
+                                    {/* Header của Popup */}
+                                    <div style={styles.notificationHeader}>
+                                        <h3 style={styles.notificationTitle}>
+                                            🔔 Thông báo {unreadCount > 0 && `(${unreadCount})`}
+                                        </h3>
                                         <button
-                                            style={styles.confirmNotificationBtn}
-                                            onClick={() => handleConfirmRegistration(reg.id)}
-                                            disabled={confirmingRegistrationId === reg.id}
+                                            style={styles.closeNotificationBtn}
+                                            onClick={() => setShowNotifications(false)}
                                         >
-                                            {confirmingRegistrationId === reg.id ? <Loader2 size={14} style={{animation: 'spin 1s linear infinite', backgroundColor: '#F59E0B'}} /> : 'Xác nhận'}
+                                            <X size={18} />
                                         </button>
                                     </div>
-                                </div>
-                            ))}
 
-                            {/* Danh sách THÔNG BÁO HỆ THỐNG (từ inAppNotis) */}
-                            {inAppNotis.map((notification) => (
-                                <div
-                                    key={notification.id}
-                                    style={{
-                                        ...styles.notificationItem,
-                                        backgroundColor: notification.readAt ? '#FFFFFF' : '#F0F7FF'
-                                    }}
-                                    onClick={() => handleNotificationClick(notification)}
-                                >
-                                    <div style={styles.notificationIconWrapper}>
-                                        <span style={styles.notificationEmoji}>
-                                            {getNotificationIcon(notification.type)}
-                                        </span>
+                                    {/* Body của Popup: Danh sách thông báo */}
+                                    <div style={styles.notificationList}>
+                                        {loadingNotifications ? (
+                                            <div style={styles.notificationLoading}>
+                                                <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} color="#007bff" />
+                                                <span>Đang tải...</span>
+                                            </div>
+                                        ) : (inAppNotis.length === 0 && needConfirmation.length === 0) ? (
+                                            <div style={styles.emptyNotifications}>
+                                                <div style={styles.emptyIcon}>📂</div>
+                                                <p style={styles.emptyNotificationText}>Không có thông báo mới</p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                {/* Danh sách các mục cần XÁC NHẬN (từ needConfirmation) */}
+                                                {needConfirmation.map((reg) => (
+                                                    <div key={`confirm-${reg.id}`} style={{ ...styles.notificationItem, backgroundColor: '#FFFBEB', borderLeft: '4px solid #F59E0B' }}>
+                                                        <div style={styles.notificationIconWrapper}>
+                                                            {/* <span style={styles.notificationEmoji}>🔔</span> */}
+                                                        </div>
+                                                        <div style={styles.notificationContent}>
+                                                            <h4 style={styles.notificationSubject}>Yêu cầu xác nhận tham gia</h4>
+                                                            <p style={styles.notificationText}>Sự kiện: <strong>{reg.eventTitle}</strong></p>
+                                                            <button
+                                                                style={styles.confirmNotificationBtn}
+                                                                onClick={() => handleConfirmRegistration(reg.id)}
+                                                                disabled={confirmingRegistrationId === reg.id}
+                                                            >
+                                                                {confirmingRegistrationId === reg.id ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', backgroundColor: '#F59E0B' }} /> : 'Xác nhận'}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {/* Danh sách THÔNG BÁO HỆ THỐNG (từ inAppNotis) */}
+                                                {inAppNotis.map((notification) => (
+                                                    <div
+                                                        key={notification.id}
+                                                        style={{
+                                                            ...styles.notificationItem,
+                                                            backgroundColor: notification.readAt ? '#FFFFFF' : '#F0F7FF'
+                                                        }}
+                                                        onClick={() => handleNotificationClick(notification)}
+                                                    >
+                                                        <div style={styles.notificationIconWrapper}>
+                                                            <span style={styles.notificationEmoji}>
+                                                                {getNotificationIcon(notification.type)}
+                                                            </span>
+                                                        </div>
+                                                        <div style={styles.notificationContent}>
+                                                            <h4 style={styles.notificationSubject}>
+                                                                {notification.subject}
+                                                                {!notification.readAt && <span style={styles.unreadDot}></span>}
+                                                            </h4>
+                                                            <p style={styles.notificationText}>{notification.content}</p>
+                                                            <span style={styles.notificationTime}>
+                                                                {formatNotificationTime(notification.createdAt)}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </>
+                                        )}
                                     </div>
-                                    <div style={styles.notificationContent}>
-                                        <h4 style={styles.notificationSubject}>
-                                            {notification.subject}
-                                            {!notification.readAt && <span style={styles.unreadDot}></span>}
-                                        </h4>
-                                        <p style={styles.notificationText}>{notification.content}</p>
-                                        <span style={styles.notificationTime}>
-                                            {formatNotificationTime(notification.createdAt)}
-                                        </span>
+
+                                    {/* Footer của Popup */}
+                                    <div style={styles.notificationFooter} onClick={() => navigate('/volunteer/notifications')}>
+                                        {/* Xem tất cả */}
                                     </div>
                                 </div>
-                            ))}
-                        </>
-                    )}
-                </div>
+                            )}
+                        </div>
 
-                {/* Footer của Popup */}
-                <div style={styles.notificationFooter} onClick={() => navigate('/volunteer/notifications')}>
-                    {/* Xem tất cả */}
-                </div>
-            </div>
-        )}
-    </div>
-
-    {/* 2. Khu vực Profile người dùng (Ngoài chuông thông báo) */}
-    {!isMobile && (
-        <div style={styles.userProfileMini}>
-            <span style={styles.miniEmail}>{userData?.email}</span>
-            <img
-                src={userData?.avatar || "https://ui-avatars.com/api/?name=User"}
-                style={styles.miniAvatar}
-                alt="avatar"
-            />
-        </div>
-    )}
-</div>
+                        {/* 2. Khu vực Profile người dùng (Ngoài chuông thông báo) */}
+                        {!isMobile && (
+                            <div style={styles.userProfileMini}>
+                                <span style={styles.miniEmail}>{userData?.email}</span>
+                                <img
+                                    src={userData?.avatar || "https://ui-avatars.com/api/?name=User"}
+                                    style={styles.miniAvatar}
+                                    alt="avatar"
+                                />
+                            </div>
+                        )}
+                    </div>
                 </header>
 
                 <div style={styles.scrollArea}>
@@ -941,9 +942,9 @@ const BrowseEvents: React.FC = () => {
                                     <div
                                         className="filter-option"
                                         style={styles.filterOption}
-                                        onClick={() => { 
-                                            setSelectedCategory(''); 
-                                            setShowFilterDropdown(false); 
+                                        onClick={() => {
+                                            setSelectedCategory('');
+                                            setShowFilterDropdown(false);
                                         }}
                                     >
                                         ✨ Tất cả thể loại
@@ -953,9 +954,9 @@ const BrowseEvents: React.FC = () => {
                                             key={cat}
                                             className="filter-option"
                                             style={styles.filterOption}
-                                            onClick={() => { 
-                                                setSelectedCategory(cat); 
-                                                setShowFilterDropdown(false); 
+                                            onClick={() => {
+                                                setSelectedCategory(cat);
+                                                setShowFilterDropdown(false);
                                             }}
                                         >
                                             {cat}
@@ -1076,9 +1077,9 @@ const BrowseEvents: React.FC = () => {
 
                             <div style={styles.formGroup}>
                                 <label style={styles.formLabel}>Chọn vai trò *</label>
-                                <select 
-                                    style={styles.formSelect} 
-                                    value={selectedRole} 
+                                <select
+                                    style={styles.formSelect}
+                                    value={selectedRole}
                                     onChange={(e) => setSelectedRole(e.target.value)}
                                 >
                                     <option value="">Chọn vai trò...</option>
@@ -1166,8 +1167,8 @@ const BrowseEvents: React.FC = () => {
                             </div>
 
                             <div style={styles.modalActions}>
-                                <button 
-                                    style={styles.cancelModalBtn} 
+                                <button
+                                    style={styles.cancelModalBtn}
                                     onClick={() => setShowRegisterModal(false)}
                                 >
                                     Hủy
@@ -1196,16 +1197,37 @@ const BrowseEvents: React.FC = () => {
             )}
 
             <style>{`
+                div::-webkit-scrollbar {
+                    width: 6px; /* Độ rộng thanh cuộn */
+                }
+
+                div::-webkit-scrollbar-track {
+                    background: transparent; /* Nền của thanh cuộn */
+                }
+
+                div::-webkit-scrollbar-thumb {
+                    background-color: #CBD5E1; /* Màu của thanh cuộn */
+                    border-radius: 20px;       /* Bo tròn thanh cuộn */
+                    border: transparent;
+                }
+
+                div::-webkit-scrollbar-thumb:hover {
+                    background-color: #94A3B8; /* Màu khi di chuột vào */
+                }
+
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                 * { box-sizing: border-box; }
-                .filter-option:hover {
-                    background-color: #F1F5F9 !important;
-                    color: #007bff !important;
-                }
-            `}</style>
-        </div>
+                        `}</style>
+                    </div>
     );
 };
+
+const SidebarLink = ({ icon, label, active = false, onClick }: any) => (
+    <div style={active ? styles.navItemActive : styles.navItem} onClick={onClick}>
+        <span style={styles.navIcon}>{icon}</span>
+        <span style={styles.navLabel}>{label}</span>
+    </div>
+);
 
 // Event Card Component
 const EventCard: React.FC<{ event: Event; onClick: () => void; isRegistered: boolean }> = ({ event, onClick, isRegistered }) => {
@@ -1345,51 +1367,51 @@ const styles: { [key: string]: React.CSSProperties } = {
         padding: '8px',
         zIndex: 1000
     },
-    dropdownHeader: { 
-        padding: '8px 12px', 
-        fontSize: '11px', 
-        fontWeight: '800', 
-        color: '#94A3B8', 
-        textTransform: 'uppercase' 
+    dropdownHeader: {
+        padding: '8px 12px',
+        fontSize: '11px',
+        fontWeight: '800',
+        color: '#94A3B8',
+        textTransform: 'uppercase'
     },
-    dropdownItem: { 
-        padding: '10px 12px', 
-        fontSize: '14px', 
-        borderRadius: '10px', 
+    dropdownItem: {
+        padding: '10px 12px',
+        fontSize: '14px',
+        borderRadius: '10px',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center'
     },
-    sidebarAvatar: { 
-        width: '42px', 
-        height: '42px', 
-        borderRadius: '50%', 
-        objectFit: 'cover', 
-        border: '2px solid #FFF' 
+    sidebarAvatar: {
+        width: '42px',
+        height: '42px',
+        borderRadius: '50%',
+        objectFit: 'cover',
+        border: '2px solid #FFF'
     },
     userInfo: { flex: 1, minWidth: 0 },
-    userName: { 
-        fontSize: '14px', 
-        fontWeight: '700', 
-        color: '#1E293B', 
-        margin: 0, 
-        overflow: 'hidden', 
-        textOverflow: 'ellipsis', 
-        whiteSpace: 'nowrap' 
+    userName: {
+        fontSize: '14px',
+        fontWeight: '700',
+        color: '#1E293B',
+        margin: 0,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
     },
-    userEmail: { 
-        fontSize: '12px', 
-        color: '#94A3B8', 
-        margin: 0, 
-        overflow: 'hidden', 
-        textOverflow: 'ellipsis', 
-        whiteSpace: 'nowrap' 
+    userEmail: {
+        fontSize: '12px',
+        color: '#94A3B8',
+        margin: 0,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
     },
-    mainContent: { 
-        flex: 1, 
-        display: 'flex', 
-        flexDirection: 'column', 
-        minWidth: 0 
+    mainContent: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minWidth: 0
     },
     topHeader: {
         height: '80px',
@@ -1600,27 +1622,27 @@ const styles: { [key: string]: React.CSSProperties } = {
         transition: 'all 0.2s',
         marginTop: '8px',
     },
-    userProfileMini: { 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: '12px', 
-        paddingLeft: '20px', 
-        borderLeft: '1px solid #E2E8F0' 
+    userProfileMini: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        paddingLeft: '20px',
+        borderLeft: '1px solid #E2E8F0'
     },
     miniEmail: { fontSize: '14px', color: '#475569', fontWeight: '600' },
-    miniAvatar: { 
-        width: '40px', 
-        height: '40px', 
-        borderRadius: '50%', 
-        objectFit: 'cover', 
-        border: '2px solid #F1F5F9' 
+    miniAvatar: {
+        width: '40px',
+        height: '40px',
+        borderRadius: '50%',
+        objectFit: 'cover',
+        border: '2px solid #F1F5F9'
     },
     scrollArea: { padding: '32px 24px', overflowY: 'auto' },
-    searchSection: { 
-        display: 'flex', 
-        gap: '16px', 
-        marginBottom: '32px', 
-        flexWrap: 'wrap' 
+    searchSection: {
+        display: 'flex',
+        gap: '16px',
+        marginBottom: '32px',
+        flexWrap: 'wrap'
     },
     searchBox: {
         flex: 1,
@@ -1811,10 +1833,12 @@ const styles: { [key: string]: React.CSSProperties } = {
         borderRadius: '24px',
         maxWidth: '800px',
         width: '100%',
-        maxHeight: '90vh',
         overflowY: 'auto',
         position: 'relative',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
+        boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+        scrollbarWidth: 'thin',
+        scrollbarColor: '#CBD5E1 transparent',
+        maxHeight: '85vh'
     },
     modalClose: {
         position: 'absolute',
@@ -2051,7 +2075,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         justifyContent: 'center',
         border: '2px solid white',
         // Thêm dòng này để tạo hiệu ứng gây chú ý
-        animation: 'pulse 2s infinite', 
+        animation: 'pulse 2s infinite',
     },
     datePickerContainer: {
         display: 'flex',

@@ -4,6 +4,7 @@ import {
     Edit2, Save, X, User, Loader2,
     LayoutDashboard, Search, Users, UserCircle, Bell, Menu, ChevronLeft
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Profile: React.FC = () => {
     const [isEditing, setIsEditing] = useState(false);
@@ -14,6 +15,7 @@ const Profile: React.FC = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const navigate = useNavigate();
 
     const [userData, setUserData] = useState<any>(null);
     const [formData, setFormData] = useState({
@@ -204,10 +206,24 @@ const Profile: React.FC = () => {
                 </div>
 
                 <nav style={styles.navMenu}>
-                    <SidebarLink icon={<LayoutDashboard size={20} />} label="Overview" />
-                    <SidebarLink icon={<Search size={20} />} label="Browse Events" />
-                    <SidebarLink icon={<Users size={20} />} label="Attendee Insights" />
-                    <SidebarLink icon={<UserCircle size={20} />} label="My Profile" active />
+                    <SidebarLink
+                        icon={<LayoutDashboard size={20} />}
+                        label="Overview"
+                        onClick={() => navigate('/volunteer/dashboard')}
+                    />
+                    <SidebarLink
+                        icon={<Search size={20} />}
+                        label="Browse Events"
+                        onClick={() => navigate('/volunteer/events')}
+                    />
+                    <SidebarLink
+                        icon={<Users size={20} />}
+                        label="Communication"
+                        onClick={() => navigate('/volunteer/communication')}
+                    />
+                    <SidebarLink
+                        icon={<UserCircle size={20} />}
+                        label="My Profile" active />
                 </nav>
 
                 <div style={styles.sidebarFooter}>
@@ -422,8 +438,8 @@ const Profile: React.FC = () => {
 };
 
 // --- Sub-Components ---
-const SidebarLink = ({ icon, label, active = false }: any) => (
-    <div style={active ? styles.navItemActive : styles.navItem}>
+const SidebarLink = ({ icon, label, active = false, onClick }: any) => (
+    <div style={active ? styles.navItemActive : styles.navItem} onClick={onClick}>
         <span style={styles.navIcon}>{icon}</span>
         <span style={styles.navLabel}>{label}</span>
     </div>

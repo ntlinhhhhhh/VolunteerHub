@@ -85,33 +85,6 @@ const EditEvent: React.FC = () => {
         setFormData({ ...formData, roles: newRoles });
     };
 
-    // const handleSubmit = async (e: React.FormEvent) => {
-    //     e.preventDefault();
-    //     setLoading(true);
-    //     const token = localStorage.getItem("accessToken");
-
-    //     // XỬ LÝ PAYLOAD: Loại bỏ categoryId và currentVolunteers
-    //     const { categoryId, capacity, ...restPayload } = formData;
-    //     const { currentVolunteers, ...cleanCapacity } = capacity;
-        
-    //     const finalPayload = {
-    //         ...restPayload,
-    //         capacity: cleanCapacity
-    //     };
-
-    //     try {
-    //         const res = await fetch(`${API_BASE_URL}/events/${id}`, {
-    //             method: "PUT",
-    //             headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-    //             body: JSON.stringify(finalPayload)
-    //         });
-    //         const result = await res.json();
-    //         if (res.ok && result.success) {
-    //             alert("Cập nhật thành công!");
-    //             navigate("/manager/my-events");
-    //         } else { alert(result.message || "Có lỗi xảy ra"); }
-    //     } catch (err) { alert("Lỗi kết nối"); } finally { setLoading(false); }
-    // };
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
